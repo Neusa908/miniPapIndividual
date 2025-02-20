@@ -1,0 +1,304 @@
+/* ==================== MUDA PARA TODOS OS STYLES ==================== */
+a {
+    text-decoration: none;
+}
+
+
+
+
+/* ==================== STYLE INDEX ==================== */
+body.index {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+}
+
+.header-index {
+    background: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    color: white;
+    text-align: center;
+    padding: 15px 20px;
+    position: relative;
+}
+
+.header-index h1 {
+    font-size: 2rem;
+}
+
+.header-index p {
+    font-size: 1rem;
+    margin: 5px 0 10px;
+}
+
+.login-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 10px;
+    /* Reduzi o tamanho do botão */
+    font-size: 0.9rem;
+    /* Diminuí o tamanho do texto */
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    /* Permite que o botão se ajuste ao texto */
+    height: auto;
+    /* Mantém a altura ajustável */
+    display: inline-block;
+    /* Evita que o botão ocupe 100% do espaço disponível */
+}
+
+.login-button:hover {
+    background-color: #0056b3;
+}
+
+nav {
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+}
+
+nav a {
+    color: white;
+    padding: 15px 20px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+    background-color: #555;
+}
+
+.main-index {
+    padding: 20px;
+    margin: 20px;
+    background: url('img/verduras.png') no-repeat center center;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    /* Mantém a imagem fixa no scroll */
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    /* permite ajustar o tamanho*/
+    min-height: 40px;
+    /* Garante que a imagem tenha espaço suficiente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 0px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+
+
+
+/* ==================== STYLE LOGIN ==================== */
+body.login {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: linear-gradient(to bottom, rgb(61, 160, 57), rgb(24, 43, 14));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.box-login {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    color: white;
+    width: 300px;
+}
+
+.img-login {
+    border-radius: 50px;
+    width: 100px;
+    box-shadow: 0px 0px 20px #ccc;
+}
+
+.title-login {
+    color: #129218;
+}
+
+
+
+.box-login input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+
+.button-login {
+    background-color: #129218;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.button-login:hover {
+    background-color: #003d80;
+}
+
+
+
+
+/* ==================== STYLE REGISTAR ==================== */
+/* Fundo com gradiente */
+body.registar {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, rgb(61, 160, 57), rgb(24, 43, 14));
+    height: 100vh;
+    /* Garante que o body ocupe toda a altura da tela */
+    margin: 0;
+    /* Remove a margem padrão do body */
+    display: flex;
+    justify-content: center;
+    /* Centraliza o conteúdo horizontalmente */
+    align-items: center;
+    /* Centraliza o conteúdo verticalmente */
+
+}
+
+/* Estilos para o container do formulário */
+.form-container {
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Fundo escuro */
+    padding: 1px;
+    /*tamanho da caixa preta de fundo*/
+    border-radius: 20px;
+    /* Borda arredondada */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    /* Limita a largura máxima do container */
+    text-align: center;
+    color: white;
+}
+
+/* Título */
+h1 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+/* Labels */
+label {
+    display: block;
+    color: white;
+    font-weight: bold;
+    margin: 10px 0 5px;
+    text-align: left;
+}
+
+/* Inputs */
+input {
+    width: 80%;
+    padding: 5.5px;
+    margin-bottom: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+
+}
+
+/*labels*/
+label {
+    margin-left: 10%;
+}
+
+/* Botão */
+button.registar {
+    color: white;
+    width: 50%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #0056b3;
+}
+
+button.registar:hover {
+    background-color: #0056b3;
+}
+
+
+
+
+/* ==================== STYLE confirmarRegisto ==================== */
+.confirmar-body {
+    background-image: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    color: white;
+    text-align: center;
+    padding: 50px;
+    height: 75vh;
+    /* Garante que a altura ocupe toda a tela */
+    display: flex;
+    /* Usado para centralizar o conteúdo */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /* Organiza os elementos na vertical */
+}
+
+.confirmar-body a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 10px;
+    /* Dá espaçamento entre os links */
+}
+
+.confirmar-body a:hover {
+    text-decoration: underline;
+}
+
+
+
+
+/* ==================== STYLE CONEXAO ==================== */
+body.conexao {
+    background-image: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    color: white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    /* Centraliza horizontalmente */
+    align-items: center;
+    /* Centraliza verticalmente */
+    height: 100vh;
+    /* Faz o body ocupar a tela inteira */
+    margin: 0;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
