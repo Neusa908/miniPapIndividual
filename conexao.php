@@ -1,27 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-pt">
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "root";
+$dbname = "mercado_bom_preco";
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/style.css">
+// Cria a conexão
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-    <title>conexão</title>
-</head>
-
-<body class="conexao">
-    <?php
-$localhost = "localhost";  // O servidor do banco de dados
-$username = "root";         // O nome de usuário do banco de dados
-$password = "root";         // A senha do banco de dados
-$dbname = "mercado_bom_preco";  // O nome do banco de dados
-
-// Criar a conexão com o uso do MySQLi
-$conecta = new mysqli($localhost, $username, $password, $dbname);
-
-
-//verificar algum erro
-$sql = mysqli_query($conecta, "SELECT * FROM usuarios" );
-
-echo "Existem " .mysqli_num_rows($sql). " registos.";
+// Verifica a conexão
+if ($conn->connect_error) {
+    die("Erro na conexão: " . $conn->connect_error);
+}
 ?>

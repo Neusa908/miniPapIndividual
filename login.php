@@ -1,57 +1,71 @@
 <?php
-include('logar.php');
+session_start();
+require_once 'conexao.php';
 
-if(isset($_POST['email']) || isset($_POST['senha'])) {
-    if(strlen($_POST['email']) == 0) {
-        echo "Preencha seu e-mail";
-    } else if(strlen($_POST['senha']) == 0) {
-        echo "Preencha sua senha";
-    } else {
-        $email = $mysqli->real_escape_string($_POST['email']);
-        $senha = $mysqli->real_escape_string($_POST['senha']);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST["username"]);
+    $password = $_POST["password"];
 
-        $sql_code = "SELECT * FROM usuarios WHERE email = '$email' AND senha = '$senha'";
-        $sql_query = $mysqli->query($sql_code) or die("Falha na execução do código SQL: " . $mysqli->error);
+    $username = filter_var($username, FILTER_SANITIZE_STRING);
 
-        $quantidade = $sql_query->num_rows;
+    $sql = "SELECT id, nome, senha, tipo FROM usuarios WHERE (email = ? OR nome = ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $username, $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        if($quantidade == 1) {
-            $usuario = $sql_query->fetch_assoc();
+    if ($result->num_rows == 1) {
+        $usuario = $result->fetch_assoc();
 
-            if(!isset($_SESSION)){
-                session_start();
-            }
+        if (password_verify($password, $usuario['senha'])) {
+            $_SESSION['usuario_id'] = $usuario['id'];
+            $_SESSION['usuario_nome'] = $usuario['nome'];
+            $_SESSION['tipo'] = $usuario['tipo'];
 
-        $_SESSION['id'] = $usuario['id'];
-        $_SESSION['nome'] = $usuario['nome'];
-
-        header("Location: index.php");
-
+            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($usuario['nome']) . "!";
+            $_SESSION['mensagem_sucesso'] = true;
+            $redirect = $usuario['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
+            header("Location: $redirect");
+            exit();
         } else {
-            echo "Falha ao logar! E-mail ou senha incorretos";
+            $_SESSION['mensagem'] = "Palavra-passe incorreta!";
         }
+    } else {
+        $_SESSION['mensagem'] = "Nome de utilizador ou email não registado!";
     }
-}
 
+    $stmt->close();
+}
 ?>
 
-
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-PT">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
-    <title>Login</title>
 </head>
 
 <body class="login">
     <div class="box-login">
-        <img class="img-login" src="img/user.png" alt="">
-        <h1 class="title-login">LOGIN</h1>
-        <form action="index.php" method="POST">
-            <!-- o formulário -->
+        <h1>LOGIN</h1>
+
+        <?php if (isset($_SESSION['mensagem'])): ?>
+        <div id="mensagem"
+            class="<?php echo isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem'; ?>">
+            <?php echo htmlspecialchars($_SESSION['mensagem']); ?>
+        </div>
+        <script>
+        setTimeout(() => {
+            document.getElementById('mensagem').style.display = 'none';
+        }, 2000);
+        </script>
+        <?php unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']); ?>
+        <?php endif; ?>
+
+        <form action="login.php" method="POST">
             <input type="text" name="username" placeholder="Nome de utilizador ou email" required>
             <br>
             <input type="password" name="password" placeholder="Palavra-passe" required>
@@ -60,8 +74,10 @@ if(isset($_POST['email']) || isset($_POST['senha'])) {
         </form>
         <div class="link">
             <br>Não tem uma conta? <a href="registar.php"> Crie uma agora!</a>
+            <br>Voltar para a página <a href="index.php"> principal!</a>
         </div>
     </div>
 </body>
 
 </html>
+<?php $conn->close(); ?>
