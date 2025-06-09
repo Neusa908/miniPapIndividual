@@ -8,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $username = filter_var($username, FILTER_SANITIZE_STRING);
 
-    $sql = "SELECT id, nome, senha, tipo FROM usuarios WHERE (email = ? OR nome = ?)";
+    $sql = "SELECT id, nome, apelido, senha, tipo, foto_perfil FROM usuarios WHERE (email = ? OR apelido = ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $username, $username);
     $stmt->execute();
@@ -19,10 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($password, $usuario['senha'])) {
             $_SESSION['usuario_id'] = $usuario['id'];
-            $_SESSION['usuario_nome'] = $usuario['nome'];
+            $_SESSION['usuario_nome'] = $usuario['apelido'] ?? $usuario['nome']; // Usa apelido se disponível
             $_SESSION['tipo'] = $usuario['tipo'];
+            $_SESSION['foto_perfil'] = $usuario['foto_perfil'] ?? null; // Armazena a foto na sessão
 
-            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($usuario['nome']) . "!";
+            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['usuario_nome']) . "!";
             $_SESSION['mensagem_sucesso'] = true;
             $redirect = $usuario['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
             header("Location: $redirect");
@@ -72,9 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <br>
             <button type="submit" class="button-login">Entrar</button>
         </form>
-        <div class="link">
-            <br>Não tem uma conta? <a href="registar.php"> Crie uma agora!</a>
-            <br>Voltar para a página <a href="index.php"> principal!</a>
+        <div>
+            <br>Não tem uma conta? <a href="registar.php" class="link-login"> Crie uma agora!</a>
+            <br>Voltar para a página <a href="index.php" class="link-login"> principal!</a>
         </div>
     </div>
 </body>

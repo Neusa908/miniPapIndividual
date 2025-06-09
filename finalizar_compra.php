@@ -11,6 +11,19 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $usuario_id = $_SESSION['usuario_id'];
 
+// Obtém o saldo do usuário
+$sql = "SELECT saldo FROM usuarios WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $usuario_id);
+$stmt->execute();
+$stmt->bind_result($saldo);
+$stmt->fetch();
+$stmt->close();
+
+if ($saldo === null) {
+    $saldo = 0.00; // Caso o saldo não esteja definido
+}
+
 // Obtém itens do carrinho
 $sql = "SELECT c.id, c.quantidade, p.id AS produto_id, p.nome, p.preco, p.descricao, p.quantidade_estoque 
         FROM carrinho c 
@@ -40,8 +53,18 @@ if ($total_com_desconto < 0) {
     $total_com_desconto = 0;
 }
 
-// Processa a finalização da compra
+// Processa a finalização da compra e pagamento
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) {
+    $tipo_pagamento = $_POST['tipo_pagamento'] ?? 'saldo';
+    $detalhes_pagamento = $_POST['detalhes_pagamento'] ?? '';
+
+    // Verifica se o saldo é suficiente
+    if ($saldo < $total_com_desconto) {
+        $_SESSION['mensagem'] = "Saldo insuficiente. Recarregue seu saldo ou reduza os itens.";
+        header("Location: finalizar_compra.php");
+        exit();
+    }
+
     // Inicia uma transação para garantir consistência
     $conn->begin_transaction();
 
@@ -55,15 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
 
         // Insere os itens do pedido na tabela itens_pedido e atualiza o estoque
         foreach ($itens_carrinho as $item) {
-            // Insere na tabela itens_pedido
             $sql = "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) 
                     VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("iiid", $pedido_id, $item['produto_id'], $item['quantidade'], $item['preco']);
             $stmt->execute();
 
-            // Atualiza o estoque do produto
-            $nova_quantidade = $item[' disadvantidade_estoque'] - $item['quantidade'];
+            $nova_quantidade = $item['quantidade_estoque'] - $item['quantidade'];
             if ($nova_quantidade < 0) {
                 throw new Exception("Estoque insuficiente para o produto: " . $item['nome']);
             }
@@ -72,6 +93,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
             $stmt->bind_param("ii", $nova_quantidade, $item['produto_id']);
             $stmt->execute();
         }
+
+        // Atualiza o saldo do usuário
+        $novo_saldo = $saldo - $total_com_desconto;
+        $sql = "UPDATE usuarios SET saldo = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("di", $novo_saldo, $usuario_id);
+        $stmt->execute();
+
+        // Registra o pagamento na tabela pagamentos
+        $sql = "INSERT INTO pagamentos (usuario_id, tipo, detalhes, data_cadastro) VALUES (?, ?, ?, NOW())";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iss", $usuario_id, $tipo_pagamento, $detalhes_pagamento);
+        $stmt->execute();
+
+        // Atualiza o status do pedido para "pago"
+        $sql = "UPDATE pedidos SET status = 'pago' WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $pedido_id);
+        $stmt->execute();
 
         // Limpa o carrinho
         $sql = "DELETE FROM carrinho WHERE usuario_id = ?";
@@ -92,14 +132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
 
         // Confirma a transação
         $conn->commit();
-        unset($_SESSION['cupom']); // Limpa o cupom
+        unset($_SESSION['cupom']);
 
         $_SESSION['mensagem'] = "Compra finalizada com sucesso! Pedido ID: $pedido_id";
         $_SESSION['mensagem_sucesso'] = true;
         header("Location: index.php");
         exit();
     } catch (Exception $e) {
-        // Reverte a transação em caso de erro
         $conn->rollback();
         $_SESSION['mensagem'] = "Erro ao finalizar compra: " . $e->getMessage();
         header("Location: finalizar_compra.php");
@@ -169,10 +208,19 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
             <p><strong>Desconto (Cupom):</strong> -€<?php echo number_format($desconto, 2, ',', '.'); ?></p>
             <?php endif; ?>
             <p><strong>Total:</strong> €<?php echo number_format($total_com_desconto, 2, ',', '.'); ?></p>
+            <p><strong>Seu Saldo:</strong> €<?php echo number_format($saldo, 2, ',', '.'); ?></p>
         </div>
+
+        <?php if ($saldo >= $total_com_desconto): ?>
+        <h2>Pagamento com Saldo Virtual</h2>
         <form method="POST">
-            <button type="submit" name="confirmar_compra" class="btn-confirmar">Confirmar Compra</button>
+            <input type="hidden" name="tipo_pagamento" value="saldo">
+            <input type="hidden" name="detalhes_pagamento" value="Pagamento com saldo virtual">
+            <button type="submit" name="confirmar_compra" class="btn-confirmar">Confirmar Pagamento com Saldo</button>
         </form>
+        <?php else: ?>
+        <p class="mensagem">Saldo insuficiente. Recarregue seu saldo ou remova itens do carrinho.</p>
+        <?php endif; ?>
         <div class="link">
             <a href="carrinho.php" class="btn">Voltar ao Carrinho</a>
             <br><a href="index.php">Voltar para a página principal</a>

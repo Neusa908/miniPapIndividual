@@ -33,8 +33,6 @@ $result_produtos = $conn->query($sql_produtos);
 <body>
     <div class="admin-container">
         <h2 class="admin-title">Lista de Produtos</h2>
-
-        <!-- Lista de Produtos -->
         <div class="section product-list-section">
             <h3 class="section-title">Produtos Cadastrados</h3>
             <div class="product-items">

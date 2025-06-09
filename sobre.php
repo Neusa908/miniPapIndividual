@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style2.css">
 </head>
 
-<body>
+<body class="sobre">
     <h1>Sobre a criadora da página</h1>
     <p>Esta página foi feita pela estudante de programação<br> <b>Neusa Baldé</b>, da escola Secundária Ferreira
         dias.<br>

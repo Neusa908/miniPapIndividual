@@ -35,8 +35,8 @@ if (!$admin_edit) {
     exit();
 }
 
-// Extrai a parte editável do email (antes de admin@mercadobompreco.com)
-$email_parts = explode('admin@mercadobompreco.com', $admin_edit['email']);
+// Extrai a parte editável do email (antes de @mercadobompreco.com)
+$email_parts = explode('@mercadobompreco.com', $admin_edit['email']);
 $email_prefix = $email_parts[0] ?? '';
 
 // Processa a edição do administrador
@@ -44,8 +44,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
     $novo_nome = trim($_POST['nome']);
     $email_prefix = trim($_POST['email_prefix']);
     $novo_telefone = trim($_POST['telefone']);
-    $novo_email = $email_prefix . '@mercadobompreco.com';
     $nova_senha = $_POST['senha'];
+    $novo_email = $email_prefix . '@mercadobompreco.com'; // Reconstruct the email
 
     // Validações
     if (empty($novo_nome)) {

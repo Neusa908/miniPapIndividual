@@ -2,19 +2,11 @@
 session_start();
 require_once 'conexao.php';
 
-// Verifica se há mensagem para exibir
-$mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
-$mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem';
-unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
-
-// Obtém todas as categorias para o dropdown
 $sql_categorias = "SELECT id, nome FROM categorias ORDER BY nome";
 $result_categorias = $conn->query($sql_categorias);
 
-// Verifica se uma categoria foi selecionada
 $categoria_id = isset($_GET['categoria_id']) ? (int)$_GET['categoria_id'] : 0;
 
-// Obtém os produtos com base na categoria selecionada
 $sql = "SELECT p.id, p.nome, p.preco, p.descricao, p.quantidade_estoque, p.imagem 
         FROM produtos p 
         LEFT JOIN categorias c ON p.categoria_id = c.id";
@@ -23,7 +15,6 @@ if ($categoria_id > 0) {
 }
 $sql .= " LIMIT ?, ?";
 
-// Configuração de paginação
 $produtos_por_pagina = 3;
 $offset = 0;
 $total_paginas = 1;
@@ -41,7 +32,6 @@ if ($result_categorias->num_rows > 0) {
     $offset = ($pagina_atual - 1) * $produtos_por_pagina;
 }
 
-// Prepara e executa a query com paginação
 $stmt = $conn->prepare($sql);
 if ($categoria_id > 0) {
     $stmt->bind_param("iii", $categoria_id, $offset, $produtos_por_pagina);
@@ -62,28 +52,29 @@ $result = $stmt->get_result();
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body>
-    <div class="box-container">
-        <h1 class="products-title">Produtos</h1>
-
-        <?php if ($mensagem): ?>
-        <div id="mensagem" class="<?php echo $mensagem_classe; ?>">
-            <?php echo htmlspecialchars($mensagem); ?>
+<body class="produtos">
+    <header class="header-produtos">
+        <div class="header-content">
+            <div class="title-section">
+                <h1>Produtos</h1>
+                <p>Preços bons!</p>
+            </div>
+            <?php if (isset($_SESSION['usuario_id'])): ?>
+            <button class="login-button" onclick="window.location.href='logout.php'">Logout</button>
+            <a href="favoritos.php" class="favoritos-link">Meus Favoritos</a>
+            <?php else: ?>
+            <button class="login-button" onclick="window.location.href='login.php'">Login</button>
+            <?php endif; ?>
         </div>
-        <script>
-        setTimeout(() => {
-            document.getElementById('mensagem').style.display = 'none';
-        }, 2000);
-        </script>
-        <?php endif; ?>
+    </header>
 
-        <!-- Filtro de Categorias -->
+    <div class="box-container">
         <div class="filtro-categorias">
             <form method="GET" action="produtos.php" class="filtro-form">
                 <select name="categoria_id" class="filtro-select" onchange="this.form.submit()">
                     <option value="0">Todas as Categorias</option>
                     <?php 
-                    $result_categorias->data_seek(0); // Reset do ponteiro
+                    $result_categorias->data_seek(0);
                     while ($categoria = $result_categorias->fetch_assoc()): 
                     ?>
                     <option value="<?php echo $categoria['id']; ?>"
@@ -100,8 +91,9 @@ $result = $stmt->get_result();
                 <a href="?pagina=<?php echo max(1, $pagina_atual - 1); ?>&categoria_id=<?php echo $categoria_id; ?>"
                     class="pagination-arrow <?php echo $pagina_atual == 1 ? 'disabled' : ''; ?>">
                     < <span class="pagination-info"><?php echo "$pagina_atual / $total_paginas"; ?></span>
-                        <a href="?pagina=<?php echo min($total_paginas, $pagina_atual + 1); ?>&categoria_id=<?php echo $categoria_id; ?>"
-                            class="pagination-arrow <?php echo $pagina_atual == $total_paginas ? 'disabled' : ''; ?>">></a>
+                </a>
+                <a href="?pagina=<?php echo min($total_paginas, $pagina_atual + 1); ?>&categoria_id=<?php echo $categoria_id; ?>"
+                    class="pagination-arrow <?php echo $pagina_atual == $total_paginas ? 'disabled' : ''; ?>">></a>
             </div>
         </div>
 
@@ -117,6 +109,7 @@ $result = $stmt->get_result();
                     <p class="produto-descricao"><?php echo htmlspecialchars($produto['descricao']); ?></p>
                     <span class="preco">€<?php echo number_format($produto['preco'], 2, ',', '.'); ?></span>
                     <p class="produto-estoque">Em estoque: <?php echo $produto['quantidade_estoque']; ?> Unidades</p>
+
                     <?php if (isset($_SESSION['usuario_id'])): ?>
                     <form method="POST" action="carrinho.php" class="produto-form">
                         <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
@@ -129,8 +122,25 @@ $result = $stmt->get_result();
                         </div>
                         <button class="produto-button" type="submit" name="adicionar_carrinho">Adicionar</button>
                     </form>
+                    <form method="POST" action="favoritos_adicionar.php" class="favorito-form">
+                        <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
+                        <button class="favorito-button" type="submit" name="adicionar_favorito">
+                            <?php
+                                        $usuario_id = $_SESSION['usuario_id'];
+                                        $produto_id = $produto['id'];
+                                        $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE usuario_id = ? AND produto_id = ?");
+                                        $stmt_fav->bind_param("ii", $usuario_id, $produto_id);
+                                        $stmt_fav->execute();
+                                        $is_favorito = $stmt_fav->get_result()->num_rows > 0;
+                                        $stmt_fav->close();
+                                        echo $is_favorito ? '🌟' : '⭐';
+                                        ?>
+                        </button>
+                    </form>
+                    <a href="comentarios.php?produto_id=<?php echo $produto['id']; ?>"
+                        class="btn btn-cancel">Ver/Comentar</a>
                     <?php else: ?>
-                    <p class="erro">Faça login para adicionar ao carrinho.</p>
+                    <p class="erro">Faça login para adicionar ao carrinho ou favoritar.</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -140,10 +150,15 @@ $result = $stmt->get_result();
             <?php endif; ?>
         </div>
     </div>
+
     <footer>
         <p>© 2024-2025 Mercado Bom Preço, onde o preço é bom!</p>
     </footer>
 </body>
 
 </html>
-<?php $stmt->close(); $conn->close(); ?>
+
+<?php 
+$stmt->close(); 
+$conn->close(); 
+?>

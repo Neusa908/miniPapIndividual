@@ -1,5 +1,5 @@
 <?php
-session_start(); // Inicia a sessão para usar tokens CSRF e mensagens de erro
+session_start();
 require 'conexao.php';
 
 // Gerar token CSRF se não existir
@@ -11,6 +11,7 @@ if (empty($_SESSION['csrf_token'])) {
 $mensagem_erro = '';
 $dados_form = [
     'nome' => '',
+    'apelido' => '',
     'email' => '',
     'telefone' => '',
     'morada' => ''
@@ -23,6 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Sanitiza e valida os dados de entrada
         $nome = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_STRING));
+        $apelido = trim(filter_input(INPUT_POST, 'apelido', FILTER_SANITIZE_STRING));
         $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
         $senha = $_POST["password"];
         $confirmar_senha = $_POST["confirm-password"];
@@ -31,6 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Preserva os dados do formulário em caso de erro
         $dados_form['nome'] = $nome;
+        $dados_form['apelido'] = $apelido;
         $dados_form['email'] = $email;
         $dados_form['telefone'] = $telefone;
         $dados_form['morada'] = $morada;
@@ -40,16 +43,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Validação do Nome
         if (empty($nome)) {
-            $erros[] = "O nome é obrigatório.";
+            $erros[] = "O nome completo é obrigatório.";
+        }
+
+        // Validação do Apelido (Nome de Usuário)
+        if (empty($apelido)) {
+            $erros[] = "O nome de usuário é obrigatório.";
         } else {
-            // Verifica se o nome já existe
-            $sql = "SELECT id FROM usuarios WHERE nome = ?";
+            // Verifica se o apelido já existe
+            $sql = "SELECT id FROM usuarios WHERE apelido = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $nome);
+            $stmt->bind_param("s", $apelido);
             $stmt->execute();
             $stmt->store_result();
             if ($stmt->num_rows > 0) {
-                $erros[] = "Este nome de utilizador já está registado.";
+                $erros[] = "Este nome de usuário já está registado.";
             }
             $stmt->close();
         }
@@ -73,10 +81,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Validação da Senha
         if (empty($senha)) {
             $erros[] = "A senha é obrigatória.";
-        } elseif (strlen($senha) < 8) {
-            $erros[] = "A senha deve ter pelo menos 8 caracteres.";
-        } elseif ($senha !== $confirmar_senha) {
-            $erros[] = "As senhas não coincidem.";
+        } else {
+            if (strlen($senha) < 8) {
+                $erros[] = "A senha deve ter pelo menos 8 caracteres.";
+            }
+            if (!preg_match("/[A-Z]/", $senha)) {
+                $erros[] = "A senha deve conter pelo menos uma letra maiúscula.";
+            }
+            if (!preg_match("/[a-z]/", $senha)) {
+                $erros[] = "A senha deve conter pelo menos uma letra minúscula.";
+            }
+            if (!preg_match("/[0-9]/", $senha)) {
+                $erros[] = "A senha deve conter pelo menos um número.";
+            }
+            if (!preg_match("/[!@#$%^&*(),.?\":{}|<>]/", $senha)) {
+                $erros[] = "A senha deve conter pelo menos um caractere especial (ex.: !@#$%).";
+            }
+            if ($senha !== $confirmar_senha) {
+                $erros[] = "As senhas não coincidem.";
+            }
         }
 
         // Validação do Telefone
@@ -97,15 +120,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
             // Insere o novo utilizador
-            $sql = "INSERT INTO usuarios (nome, email, senha, telefone, morada, tipo) VALUES (?, ?, ?, ?, ?, 'cliente')";
+            $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, tipo) VALUES (?, ?, ?, ?, ?, ?, 'cliente')";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssss", $nome, $email, $senha_hash, $telefone, $morada);
+            $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada);
 
             if ($stmt->execute()) {
                 // Registra a ação na tabela logs
                 $usuario_id = $stmt->insert_id;
                 $acao = "Novo usuário registrado";
-                $detalhes = "Usuário $nome ($email) foi registrado.";
+                $detalhes = "Usuário $apelido ($email) foi registrado.";
                 $sql_log = "INSERT INTO logs (usuario_id, acao, detalhes, data_log) VALUES (?, ?, ?, NOW())";
                 $stmt_log = $conn->prepare($sql_log);
                 $stmt_log->bind_param("iss", $usuario_id, $acao, $detalhes);
@@ -142,14 +165,19 @@ $conn->close();
 <body class="registar">
     <div class="form-container">
         <?php if ($mensagem_erro): ?>
-        <p class="error-message"><?php echo $mensagem_erro; ?></p>
+        <p class="error-message">
+            <?php echo $mensagem_erro; ?>
+        </p>
         <?php endif; ?>
         <form action="registar.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <h1>Criar Conta</h1>
-            <label for="username">Nome de Utilizador</label>
-            <input type="text" id="username" name="nome" placeholder="Digite o seu nome de utilizador"
+            <label for="nome">Nome Completo</label>
+            <input type="text" id="nome" name="nome" placeholder="Digite o seu nome completo"
                 value="<?php echo htmlspecialchars($dados_form['nome']); ?>" required>
+            <label for="apelido">Nome de Usuário</label>
+            <input type="text" id="apelido" name="apelido" placeholder="Digite o seu nome de usuário"
+                value="<?php echo htmlspecialchars($dados_form['apelido']); ?>" required>
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Digite o seu email"
                 value="<?php echo htmlspecialchars($dados_form['email']); ?>" required>

@@ -11,21 +11,38 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $usuario_id = $_SESSION['usuario_id'];
 
-// Inicializa mensagem para feedback
 $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem-erro';
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
-// Inicializa variáveis para o cupom
 $desconto = 0;
 $cupom_mensagem = '';
 $cupom_mensagem_classe = '';
 
-// Processa a aplicação do cupom
+if (isset($_GET['limpar_carrinho'])) {
+    $sql = "DELETE FROM carrinho WHERE usuario_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $usuario_id);
+    if ($stmt->execute()) {
+        if ($stmt->affected_rows > 0) {
+            unset($_SESSION['cupom']); 
+            $cupom_mensagem = "Carrinho limpo com sucesso.";
+            $cupom_mensagem_classe = 'mensagem-sucesso';
+        } else {
+            $cupom_mensagem = "O carrinho já está vazio.";
+            $cupom_mensagem_classe = 'mensagem-erro';
+        }
+    } else {
+        $cupom_mensagem = "Erro ao limpar o carrinho.";
+        $cupom_mensagem_classe = 'mensagem-erro';
+    }
+    header("Location: carrinho.php");
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupom'])) {
     $codigo = trim($_POST['promo_code']);
 
-    // Verifica se o código do cupom existe e está válido
     $sql = "SELECT desconto FROM promocoes WHERE codigo = ? AND ativa = 1 AND data_inicio <= NOW() AND data_fim >= NOW()";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $codigo);
@@ -50,12 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupom'])) {
     exit();
 }
 
-// Recupera o desconto da sessão, se aplicado
 if (isset($_SESSION['cupom'])) {
     $desconto = $_SESSION['cupom']['desconto'];
 }
 
-// Adicionar item ao carrinho
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])) {
     $produto_id = intval($_POST['produto_id']);
     $quantidade = intval($_POST['quantidade']);
@@ -99,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])
     exit();
 }
 
-// Remover item do carrinho
+// Remove itens do carrinho
 if (isset($_GET['remover'])) {
     $item_id = intval($_GET['remover']);
     if ($item_id > 0) {
@@ -141,7 +156,7 @@ if ($conn) {
     $stmt->execute();
     $carrinho = $stmt->get_result();
 
-    // Calcula o subtotal enquanto coleta os itens
+    // Calcula o subtotal
     while ($item = $carrinho->fetch_assoc()) {
         $total_item = $item['preco'] * $item['quantidade'];
         $total_carrinho += $total_item;
@@ -267,6 +282,8 @@ if ($total_com_desconto < 0) {
         </div>
         <div class="checkout-container">
             <a href="produtos.php" class="checkout-btn continue-shopping">Continuar a Comprar</a>
+            <a href="carrinho.php?limpar_carrinho=1" class="checkout-btn"
+                onclick="return confirm('Tem certeza que deseja limpar o carrinho?');">Limpar Carrinho</a>
             <a href="finalizar_compra.php" class="checkout-btn">Finalizar Compra</a>
         </div>
     </div>
@@ -277,46 +294,52 @@ if ($total_com_desconto < 0) {
     <script>
     function atualizarQuantidade(itemId, produtoId, currentQuantidade, acao) {
         const novaQuantidade = acao === 'aumentar' ? currentQuantidade + 1 : currentQuantidade - 1;
+        if (novaQuantidade < 1) return;
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'atualizar_carrinho.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                const mensagemDiv = document.getElementById('cupom-mensagem');
-                mensagemDiv.innerHTML = response.mensagem;
-                mensagemDiv.className = response.classe;
-                mensagemDiv.style.display = 'block';
-                setTimeout(() => {
-                    mensagemDiv.style.display = 'none';
-                }, 3000);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    const mensagemDiv = document.getElementById('cupom-mensagem');
+                    mensagemDiv.innerHTML = response.mensagem;
+                    mensagemDiv.className = response.classe;
+                    mensagemDiv.style.display = 'block';
+                    setTimeout(() => {
+                        mensagemDiv.style.display = 'none';
+                    }, 3000);
 
-                if (response.sucesso) {
-                    // Atualiza a quantidade na interface
-                    const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
-                    const quantityDisplay = row.querySelector('.quantity-display');
-                    quantityDisplay.value = response.nova_quantidade;
+                    if (response.sucesso) {
+                        const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+                        const quantityDisplay = row.querySelector('.quantity-display');
+                        quantityDisplay.value = response.nova_quantidade;
 
-                    // Atualiza o subtotal da linha
-                    const subtotalCell = row.querySelector('.subtotal-cell');
-                    subtotalCell.textContent = `€${response.subtotal_linha.toFixed(2).replace('.', ',')}`;
-                    subtotalCell.dataset.subtotal = response.subtotal_linha;
+                        const subtotalCell = row.querySelector('.subtotal-cell');
+                        subtotalCell.textContent = `€${response.subtotal_linha.toFixed(2).replace('.', ',')}`;
+                        subtotalCell.dataset.subtotal = response.subtotal_linha;
 
-                    // Atualiza os totais gerais
-                    const subtotalValue = document.querySelector('.subtotal-value');
-                    const totalValue = document.querySelector('.total-value');
-                    subtotalValue.dataset.totalCarrinho = response.total_carrinho;
-                    subtotalValue.innerHTML = `<b>€${response.total_carrinho.toFixed(2).replace('.', ',')}</b>`;
-                    totalValue.dataset.totalComDesconto = response.total_com_desconto;
-                    totalValue.innerHTML = `<b>€${response.total_com_desconto.toFixed(2).replace('.', ',')}</b>`;
+                        const subtotalValue = document.querySelector('.subtotal-value');
+                        const totalValue = document.querySelector('.total-value');
+                        subtotalValue.dataset.totalCarrinho = response.total_carrinho;
+                        subtotalValue.innerHTML = `<b>€${response.total_carrinho.toFixed(2).replace('.', ',')}</b>`;
+                        totalValue.dataset.totalComDesconto = response.total_com_desconto;
+                        totalValue.innerHTML =
+                            `<b>€${response.total_com_desconto.toFixed(2).replace('.', ',')}</b>`;
 
-                    // Atualiza os atributos onclick dos botões para a nova quantidade
-                    const minusBtn = row.querySelector('.quantity-btn.minus');
-                    const plusBtn = row.querySelector('.quantity-btn.plus');
-                    minusBtn.setAttribute('onclick',
-                        `atualizarQuantidade(${itemId}, ${produtoId}, ${response.nova_quantidade}, 'diminuir')`);
-                    plusBtn.setAttribute('onclick',
-                        `atualizarQuantidade(${itemId}, ${produtoId}, ${response.nova_quantidade}, 'aumentar')`);
+                        const minusBtn = row.querySelector('.quantity-btn.minus');
+                        const plusBtn = row.querySelector('.quantity-btn.plus');
+                        minusBtn.setAttribute('onclick',
+                            `atualizarQuantidade(${itemId}, ${produtoId}, ${response.nova_quantidade}, 'diminuir')`
+                        );
+                        plusBtn.setAttribute('onclick',
+                            `atualizarQuantidade(${itemId}, ${produtoId}, ${response.nova_quantidade}, 'aumentar')`
+                        );
+                    } else {
+                        alert('Erro: ' + response.mensagem);
+                    }
+                } else {
+                    alert('Erro na requisição AJAX. Status: ' + xhr.status);
                 }
             }
         };

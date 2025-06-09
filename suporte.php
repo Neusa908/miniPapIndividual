@@ -1,16 +1,20 @@
 <?php
-// Habilita exibição de erros para depuração
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Inicia a sessão apenas se ainda não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Busca o email do usuário logado, se aplicável
+
+if (!isset($_SESSION['usuario_id'])) {
+    $_SESSION['mensagem'] = "É necessário estar registado para enviar um suporte.";
+    header("Location: login.php");
+    exit();
+}
+
 $email_usuario = '';
 if (isset($_SESSION['usuario_id'])) {
     $usuario_id = $_SESSION['usuario_id'];
@@ -25,20 +29,16 @@ if (isset($_SESSION['usuario_id'])) {
     $stmt->close();
 }
 
-// Verifica se o formulário foi enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
     $mensagem = trim($_POST['mensagem']);
-    $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null; // Pega o ID do usuário logado, se houver
-
-    // Validação básica
+    $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null; 
     if (empty($nome) || empty($email) || empty($mensagem)) {
         echo "<script>alert('Por favor, preencha todos os campos!');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "<script>alert('Por favor, insira um email válido!');</script>";
     } else {
-        // Se o usuário está logado, verifica se o email existe na tabela usuarios
         if ($usuario_id) {
             $sql = "SELECT id FROM usuarios WHERE email = ? AND id = ?";
             $stmt = $conn->prepare($sql);
@@ -54,7 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
         }
 
-        // Insere os dados na tabela suporte
         $sql = "INSERT INTO suporte (usuario_id, email, mensagem, data_envio, status) VALUES (?, ?, ?, NOW(), 'pendente')";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iss", $usuario_id, $email, $mensagem);
@@ -69,7 +68,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Fecha a conexão com o banco de dados no final
 $conn->close();
 ?>
 

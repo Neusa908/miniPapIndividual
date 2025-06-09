@@ -11,9 +11,8 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['t
     exit();
 }
 
-// Busca os dados do admin logado
 $usuario_id = $_SESSION['usuario_id'];
-$sql_usuario = "SELECT nome, email, telefone, foto_perfil FROM usuarios WHERE id = ?";
+$sql_usuario = "SELECT nome, apelido, email, telefone, foto_perfil FROM usuarios WHERE id = ?";
 $stmt_usuario = $conn->prepare($sql_usuario);
 $stmt_usuario->bind_param("i", $usuario_id);
 $stmt_usuario->execute();
@@ -21,26 +20,44 @@ $result_usuario = $stmt_usuario->get_result();
 $admin = $result_usuario->fetch_assoc();
 $stmt_usuario->close();
 
-// Extrai a parte editável do email (antes de admin@mercadobompreco.com)
-$email_parts = explode('@mercadobompreco.com', $admin['email']);
-$email_prefix = $email_parts[0] ?? '';
+if (!$admin) {
+    echo "<script>alert('Usuário não encontrado!'); window.location.href='index.php';</script>";
+    exit();
+}
 
-// Se foto_perfil for nulo, usa uma imagem padrão
 $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
+
+function sanitizeEmailPrefix($text) {
+    $text = strtolower(trim($text));
+    $text = iconv('UTF-8', 'ASCII//TRANSLIT', $text);
+    $text = preg_replace('/[^a-z0-9]/', '', $text);
+    return $text;
+}
+
+function getFullName($nome, $apelido) {
+    $full_name = trim($nome);
+    if (!empty($apelido)) {
+        $full_name .= ' ' . trim($apelido);
+    }
+    return $full_name;
+}
 
 // Processa a edição do perfil
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
     $novo_nome = trim($_POST['nome']);
-    $email_prefix = trim($_POST['email_prefix']);
+    $novo_apelido = trim($_POST['apelido']);
     $novo_telefone = trim($_POST['telefone']);
+
+    // Gera o novo prefixo de email usando apenas o nome
+    $email_prefix = sanitizeEmailPrefix($novo_nome);
     $novo_email = $email_prefix . '@mercadobompreco.com';
 
     // Validações
     if (empty($novo_nome)) {
         echo "<script>alert('O nome não pode estar vazio!');</script>";
     } elseif (empty($email_prefix)) {
-        echo "<script>alert('A parte inicial do email não pode estar vazia!');</script>";
-    } elseif (!preg_match('/^[0-9\s+]+$/', $novo_telefone) && !empty($novo_telefone)) {
+        echo "<script>alert('O nome fornecido não pode gerar um email válido! Use letras e números.'); window.location.href='admin_perfil.php';</script>";
+    } elseif (!empty($novo_telefone) && !preg_match('/^[0-9\s+]+$/', $novo_telefone)) {
         echo "<script>alert('O telefone deve conter apenas números, espaços ou o símbolo +!');</script>";
     } else {
         // Verifica se o email já existe (exceto para o próprio usuário)
@@ -50,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
-            echo "<script>alert('Este email já está registrado por outro usuário!');</script>";
+            echo "<script>alert('Este email já está registrado por outro usuário! Tente um nome diferente.'); window.location.href='admin_perfil.php';</script>";
         } else {
             // Processa o upload da foto de perfil, se fornecida
             $foto_perfil = $admin['foto_perfil'];
@@ -62,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
                 $file_tmp = $_FILES['foto_perfil']['tmp_name'];
 
                 if (in_array($file_type, $allowed_types) && $file_size <= $max_size) {
-                    $file_name = 'perfil_' . $usuario_id . '_' . time() . '.' . pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
+                    $file_name = 'perfil_' . $usuario_id . '_' . substr(md5(time()), 0, 8) . '.' . pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
                     $upload_dir = 'img/perfil/';
                     $upload_path = $upload_dir . $file_name;
 
@@ -77,25 +94,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
                             unlink($admin['foto_perfil']);
                         }
                     } else {
-                        echo "<script>alert('Erro ao fazer upload da foto. Tente novamente.');</script>";
+                        echo "<script>alert('Erro ao fazer upload da foto. Tente novamente.'); window.location.href='admin_perfil.php';</script>";
                     }
                 } else {
-                    echo "<script>alert('A foto deve ser um arquivo JPEG, PNG ou GIF e ter no máximo 2MB!');</script>";
+                    echo "<script>alert('A foto deve ser um arquivo JPEG, PNG ou GIF e ter no máximo 2MB!'); window.location.href='admin_perfil.php';</script>";
                 }
             }
 
             // Atualiza os dados no banco
-            $sql = "UPDATE usuarios SET nome = ?, email = ?, telefone = ?, foto_perfil = ? WHERE id = ?";
+            $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ?, foto_perfil = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssi", $novo_nome, $novo_email, $novo_telefone, $foto_perfil, $usuario_id);
+            $telefone_final = $novo_telefone ?: $admin['telefone'];
+            $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $telefone_final, $foto_perfil, $usuario_id);
+
+            // Debug: Log variables to check their values
+            error_log("Debug: nome=$novo_nome, apelido=$novo_apelido, email=$novo_email, telefone=$telefone_final, foto_perfil=$foto_perfil, usuario_id=$usuario_id");
+
             if ($stmt->execute()) {
-                $_SESSION['usuario_nome'] = $novo_nome; // Atualiza o nome na sessão
+                // Atualiza a sessão com o nome completo
+                $_SESSION['usuario_nome'] = getFullName($novo_nome, $novo_apelido);
                 echo "<script>alert('Perfil atualizado com sucesso!'); window.location.href='admin_perfil.php';</script>";
             } else {
-                echo "<script>alert('Erro ao atualizar o perfil. Tente novamente.');</script>";
+                echo "<script>alert('Erro ao atualizar o perfil: " . addslashes($stmt->error) . "'); window.location.href='admin_perfil.php';</script>";
             }
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -114,30 +137,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
     <div class="admin-perfil-container">
         <h1>Editar Perfil</h1>
         <form method="POST" action="admin_perfil.php" enctype="multipart/form-data">
-            <!-- Foto de Perfil -->
+
             <div class="foto-perfil">
                 <img src="<?php echo htmlspecialchars($admin['foto_perfil']); ?>" alt="Foto do Admin">
                 <label for="foto_perfil">Alterar Foto:</label>
                 <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*">
             </div>
 
-            <!-- Nome -->
             <label for="nome">Nome:</label>
             <input type="text" name="nome" value="<?php echo htmlspecialchars($admin['nome']); ?>" required>
 
-            <!-- Email -->
-            <label for="email_prefix">Email:</label>
-            <div class="email-field">
-                <input type="text" name="email_prefix" value="<?php echo htmlspecialchars($email_prefix); ?>" required>
-                <span class="email-suffix">@mercadobompreco.com</span>
-            </div>
+            <label for="apelido">Apelido:</label>
+            <input type="text" name="apelido" value="<?php echo htmlspecialchars($admin['apelido'] ?? ''); ?>">
 
-            <!-- Telefone -->
+            <label for="email">Email:</label>
+            <input type="text" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" disabled>
+
             <label for="telefone">Número de Contato:</label>
             <input type="text" name="telefone" value="<?php echo htmlspecialchars($admin['telefone'] ?? ''); ?>"
                 placeholder="Ex: +351 912 345 678">
 
-            <!-- Botões -->
             <button type="submit" name="editar_perfil">Salvar Alterações</button>
             <a href="admin_panel.php" class="cancel-button">Voltar</a>
         </form>
