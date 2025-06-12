@@ -14,7 +14,8 @@ $dados_form = [
     'apelido' => '',
     'email' => '',
     'telefone' => '',
-    'morada' => ''
+    'morada' => '',
+    'cidade' => ''
 ];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -30,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $confirmar_senha = $_POST["confirm-password"];
         $telefone = trim(filter_input(INPUT_POST, 'telefone', FILTER_SANITIZE_STRING));
         $morada = trim(filter_input(INPUT_POST, 'morada', FILTER_SANITIZE_STRING));
+        $cidade = trim(filter_input(INPUT_POST, 'cidade', FILTER_SANITIZE_STRING));
 
         // Preserva os dados do formulário em caso de erro
         $dados_form['nome'] = $nome;
@@ -37,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dados_form['email'] = $email;
         $dados_form['telefone'] = $telefone;
         $dados_form['morada'] = $morada;
+        $dados_form['cidade'] = $cidade;
 
         // Validações
         $erros = [];
@@ -46,11 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $erros[] = "O nome completo é obrigatório.";
         }
 
-        // Validação do Apelido (Nome de Usuário)
+        // Validação do Apelido
         if (empty($apelido)) {
             $erros[] = "O nome de usuário é obrigatório.";
         } else {
-            // Verifica se o apelido já existe
             $sql = "SELECT id FROM usuarios WHERE apelido = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $apelido);
@@ -66,7 +68,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erros[] = "Por favor, insira um email válido.";
         } else {
-            // Verifica se o email já existe
             $sql = "SELECT id FROM usuarios WHERE email = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $email);
@@ -114,32 +115,82 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $erros[] = "A morada é obrigatória.";
         }
 
-        // Se não houver erros, prossegue com o registro
+        // Validação da Cidade
+        if (empty($cidade)) {
+            $erros[] = "A cidade é obrigatória.";
+        }
+
         if (empty($erros)) {
-            // Hash da senha para segurança
-            $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+            // Inicia transação para garantir consistência
+            $conn->begin_transaction();
 
-            // Insere o novo utilizador
-            $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, tipo) VALUES (?, ?, ?, ?, ?, ?, 'cliente')";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada);
+            try {
+                // Hash da senha
+                $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-            if ($stmt->execute()) {
+                // Insere o novo usuário
+                $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, cidade, tipo, saldo) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'cliente', 300.00)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("sssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada, $cidade);
+                $stmt->execute();
+                $novo_usuario_id = $conn->insert_id;
+
+                // Insere endereço na tabela enderecos
+                $nome_endereco = "Endereço Principal";
+                $rua = $morada; // Usa a morada como rua
+                $estado = "Não especificado"; // Valor padrão para estado
+                $codigo_postal = "1000-123"; // Valor padrão para código postal
+                $padrao = 1; // Define como endereço padrão
+
+                $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, cidade, estado, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("issssii", $novo_usuario_id, $nome_endereco, $rua, $cidade, $estado, $codigo_postal, $padrao);
+                if (!$stmt->execute()) {
+                    throw new Exception("Erro ao inserir endereço: " . $conn->error);
+                }
+
                 // Registra a ação na tabela logs
-                $usuario_id = $stmt->insert_id;
                 $acao = "Novo usuário registrado";
                 $detalhes = "Usuário $apelido ($email) foi registrado.";
                 $sql_log = "INSERT INTO logs (usuario_id, acao, detalhes, data_log) VALUES (?, ?, ?, NOW())";
                 $stmt_log = $conn->prepare($sql_log);
-                $stmt_log->bind_param("iss", $usuario_id, $acao, $detalhes);
+                $stmt_log->bind_param("iss", $novo_usuario_id, $acao, $detalhes);
                 $stmt_log->execute();
                 $stmt_log->close();
+
+                // Registra notificação para TODOS os administradores
+                $mensagem_notif = "Novo cadastro: Usuário $apelido (ID $novo_usuario_id) registrado em " . date('d/m/Y H:i');
+                
+                // Busca todos os administradores
+                $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
+                $result_admins = $conn->query($sql_admins);
+                
+                if ($result_admins->num_rows > 0) {
+                    $stmt_notif = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
+                    while ($admin = $result_admins->fetch_assoc()) {
+                        $admin_id = $admin['id'];
+                        $stmt_notif->bind_param("si", $mensagem_notif, $admin_id);
+                        if ($stmt_notif->execute()) {
+                            error_log("Notificação criada com sucesso para admin_id $admin_id: $mensagem_notif");
+                        } else {
+                            error_log("Erro ao criar notificação para admin_id $admin_id: " . $conn->error);
+                        }
+                    }
+                    $stmt_notif->close();
+                } else {
+                    error_log("Nenhum administrador encontrado para notificar.");
+                }
+
+                // Confirma transação
+                $conn->commit();
 
                 // Redireciona para o login com mensagem de sucesso
                 echo "<script>alert('Registo concluído com sucesso!'); window.location.href='login.php';</script>";
                 exit;
-            } else {
-                $mensagem_erro = "Erro ao registar. Tente novamente.";
+            } catch (Exception $e) {
+                $conn->rollback();
+                $mensagem_erro = "Erro ao registar: " . $e->getMessage();
             }
             $stmt->close();
         } else {
@@ -177,7 +228,7 @@ $conn->close();
                 value="<?php echo htmlspecialchars($dados_form['nome']); ?>" required>
             <label for="apelido">Nome de Usuário</label>
             <input type="text" id="apelido" name="apelido" placeholder="Digite o seu nome de usuário"
-                value="<?php echo htmlspecialchars($dados_form['apelido']); ?>" required>
+                value="<?php echo htmlspecialchars($dados_form['apelido']); ?>">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Digite o seu email"
                 value="<?php echo htmlspecialchars($dados_form['email']); ?>" required>
@@ -192,6 +243,10 @@ $conn->close();
             <label for="morada">Morada</label>
             <input type="text" id="morada" name="morada" placeholder="Coloque a sua morada"
                 value="<?php echo htmlspecialchars($dados_form['morada']); ?>" required>
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" name="cidade" placeholder="Digite a sua cidade"
+                value="<?php echo htmlspecialchars($dados_form['cidade']); ?>" required>
+
             <button type="submit" class="registar"><b>Criar Conta</b></button>
             <div class="link">
                 Já tem uma conta? <a href="login.php">Inicie sessão agora!</a>

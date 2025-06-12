@@ -21,8 +21,16 @@ $stmt->fetch();
 $stmt->close();
 
 if ($saldo === null) {
-    $saldo = 0.00; // Caso o saldo não esteja definido
+    $saldo = 0.00;
 }
+
+// Obtém endereços do usuário
+$sql = "SELECT id, nome_endereco, rua, numero, bairro, cidade, estado, cep FROM enderecos WHERE usuario_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $usuario_id);
+$stmt->execute();
+$enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Obtém itens do carrinho
 $sql = "SELECT c.id, c.quantidade, p.id AS produto_id, p.nome, p.preco, p.descricao, p.quantidade_estoque 
@@ -42,21 +50,45 @@ while ($item = $carrinho->fetch_assoc()) {
     $total_carrinho += $total_item;
     $itens_carrinho[] = $item;
 }
+$stmt->close();
+
+// Calcula frete com base no endereço selecionado
+$frete = 0;
+$cidade_entrega = '';
+if (isset($_POST['endereco_id']) && is_numeric($_POST['endereco_id'])) {
+    $endereco_id = $_POST['endereco_id'];
+    $sql = "SELECT cidade FROM enderecos WHERE id = ? AND usuario_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $endereco_id, $usuario_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($endereco = $result->fetch_assoc()) {
+        $cidade_entrega = $endereco['cidade'];
+        $sql = "SELECT valor_frete FROM fretes WHERE cidade = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $cidade_entrega);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $frete = $result->fetch_assoc()['valor_frete'] ?? 10.00; // Frete padrão se cidade não encontrada
+    }
+    $stmt->close();
+}
 
 // Aplica o desconto do cupom, se existir
 $desconto = 0;
 if (isset($_SESSION['cupom'])) {
     $desconto = $_SESSION['cupom']['desconto'];
 }
-$total_com_desconto = $total_carrinho - $desconto;
+$total_com_desconto = $total_carrinho - $desconto + $frete;
 if ($total_com_desconto < 0) {
     $total_com_desconto = 0;
 }
 
 // Processa a finalização da compra e pagamento
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) && isset($_POST['endereco_id'])) {
     $tipo_pagamento = $_POST['tipo_pagamento'] ?? 'saldo';
     $detalhes_pagamento = $_POST['detalhes_pagamento'] ?? '';
+    $endereco_id = $_POST['endereco_id'];
 
     // Verifica se o saldo é suficiente
     if ($saldo < $total_com_desconto) {
@@ -65,16 +97,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
         exit();
     }
 
-    // Inicia uma transação para garantir consistência
+    // Inicia uma transação
     $conn->begin_transaction();
 
     try {
         // Insere o pedido na tabela pedidos
-        $sql = "INSERT INTO pedidos (usuario_id, status, total) VALUES (?, 'pendente', ?)";
+        $sql = "INSERT INTO pedidos (usuario_id, status, total, cidade_entrega) VALUES (?, 'pendente', ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("id", $usuario_id, $total_com_desconto);
+        $stmt->bind_param("ids", $usuario_id, $total_com_desconto, $cidade_entrega);
         $stmt->execute();
         $pedido_id = $conn->insert_id;
+        $stmt->close();
+
+        // Insere na tabela entregas
+        $sql = "INSERT INTO entregas (pedido_id, endereco_id, status_entrega) VALUES (?, ?, 'preparando')";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $pedido_id, $endereco_id);
+        $stmt->execute();
+        $stmt->close();
 
         // Insere os itens do pedido na tabela itens_pedido e atualiza o estoque
         foreach ($itens_carrinho as $item) {
@@ -92,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $nova_quantidade, $item['produto_id']);
             $stmt->execute();
+            $stmt->close();
         }
 
         // Atualiza o saldo do usuário
@@ -100,35 +141,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra'])) 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("di", $novo_saldo, $usuario_id);
         $stmt->execute();
+        $stmt->close();
 
         // Registra o pagamento na tabela pagamentos
         $sql = "INSERT INTO pagamentos (usuario_id, tipo, detalhes, data_cadastro) VALUES (?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iss", $usuario_id, $tipo_pagamento, $detalhes_pagamento);
         $stmt->execute();
+        $stmt->close();
 
         // Atualiza o status do pedido para "pago"
         $sql = "UPDATE pedidos SET status = 'pago' WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $pedido_id);
         $stmt->execute();
+        $stmt->close();
 
         // Limpa o carrinho
         $sql = "DELETE FROM carrinho WHERE usuario_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $usuario_id);
         $stmt->execute();
+        $stmt->close();
 
         // Registra log da compra
         $sql = "INSERT INTO logs (usuario_id, acao, detalhes, data_log) 
                 VALUES (?, 'Compra finalizada', ?, NOW())";
-        $detalhes = "Usuário ID $usuario_id finalizou o pedido ID $pedido_id com total €" . number_format($total_com_desconto, 2, ',', '.');
+        $detalhes = "Usuário ID $usuario_id finalizou o pedido ID $pedido_id com total €" . number_format($total_com_desconto, 2, ',', '.') . " (Frete: €" . number_format($frete, 2, ',', '.') . ")";
         if (isset($_SESSION['cupom'])) {
             $detalhes .= " (Cupom: {$_SESSION['cupom']['codigo']}, Desconto: €" . number_format($desconto, 2, ',', '.') . ")";
         }
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("is", $usuario_id, $detalhes);
         $stmt->execute();
+        $stmt->close();
 
         // Confirma a transação
         $conn->commit();
@@ -207,19 +253,36 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
             <?php if ($desconto > 0): ?>
             <p><strong>Desconto (Cupom):</strong> -€<?php echo number_format($desconto, 2, ',', '.'); ?></p>
             <?php endif; ?>
+            <p><strong>Frete:</strong> €<?php echo number_format($frete, 2, ',', '.'); ?></p>
             <p><strong>Total:</strong> €<?php echo number_format($total_com_desconto, 2, ',', '.'); ?></p>
             <p><strong>Seu Saldo:</strong> €<?php echo number_format($saldo, 2, ',', '.'); ?></p>
         </div>
 
-        <?php if ($saldo >= $total_com_desconto): ?>
-        <h2>Pagamento com Saldo Virtual</h2>
+        <h2>Selecionar Endereço de Entrega</h2>
+        <?php if (!empty($enderecos)): ?>
         <form method="POST">
+            <select name="endereco_id" required>
+                <option value="">Selecione um endereço</option>
+                <?php foreach ($enderecos as $endereco): ?>
+                <option value="<?php echo $endereco['id']; ?>">
+                    <?php echo htmlspecialchars($endereco['nome_endereco'] . ' - ' . $endereco['rua'] . ', ' . $endereco['bairro'] . ', ' . $endereco['cidade']); ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+            <a href="adicionar_endereco.php" class="btn">Adicionar Novo Endereço</a>
+            <p></p>
+            <?php if ($saldo >= $total_com_desconto): ?>
+            <h2>Pagamento com Saldo Virtual</h2>
             <input type="hidden" name="tipo_pagamento" value="saldo">
             <input type="hidden" name="detalhes_pagamento" value="Pagamento com saldo virtual">
             <button type="submit" name="confirmar_compra" class="btn-confirmar">Confirmar Pagamento com Saldo</button>
+            <?php else: ?>
+            <p class="mensagem">Saldo insuficiente. Recarregue seu saldo ou remova itens do carrinho.</p>
+            <?php endif; ?>
         </form>
         <?php else: ?>
-        <p class="mensagem">Saldo insuficiente. Recarregue seu saldo ou remova itens do carrinho.</p>
+        <p>Você não tem endereços cadastrados.</p>
+        <a href="adicionar_endereco.php" class="btn">Adicionar Endereço</a>
         <?php endif; ?>
         <div class="link">
             <a href="carrinho.php" class="btn">Voltar ao Carrinho</a>

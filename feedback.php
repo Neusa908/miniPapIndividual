@@ -1,15 +1,11 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'conexao.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit();
-}
-
-
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
-    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    echo "<script>alert('Faça login para acessar esta página.'); window.location.href='login.php';</script>";
     exit();
 }
 
@@ -29,24 +25,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("INSERT INTO feedback_site (usuario_id, avaliacao, comentario) VALUES (?, ?, ?)");
         $stmt->bind_param("iis", $usuario_id, $avaliacao, $comentario);
         if ($stmt->execute()) {
-            $success_message = "Feedback enviado com sucesso!";
+            $_SESSION['success_message'] = "Feedback enviado com sucesso!";
+            header("Location: feedback.php");
+            exit();
         } else {
-            $error_message = "Erro ao enviar feedback. Tente novamente.";
+            $_SESSION['error_message'] = "Erro ao enviar feedback. Tente novamente.";
+            header("Location: feedback.php");
+            exit();
         }
     } else {
-        $error_message = "Por favor, preencha a avaliação (1 a 5) e o comentário.";
+        $_SESSION['error_message'] = "Por favor, preencha a avaliação (1 a 5) e o comentário.";
+        header("Location: feedback.php");
+        exit();
     }
 }
 
+// Exibir mensagens da sessão e limpá-las
+$success_message = $_SESSION['success_message'] ?? null;
+$error_message = $_SESSION['error_message'] ?? null;
+unset($_SESSION['success_message']);
+unset($_SESSION['error_message']);
+
 // Buscar feedback existente
 $stmt = $conn->prepare("
-    SELECT f.comentario, f.avaliacao, f.data_feedback, u.nome 
+    SELECT f.id, f.comentario, f.avaliacao, f.data_feedback, f.usuario_id, u.nome 
     FROM feedback_site f 
     JOIN usuarios u ON f.usuario_id = u.id 
     ORDER BY f.data_feedback DESC
 ");
 $stmt->execute();
 $feedbacks = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Buscar respostas para cada feedback
+foreach ($feedbacks as &$feedback) {
+    $stmt = $conn->prepare("
+        SELECT r.resposta, r.data_resposta, u.nome AS admin_nome
+        FROM respostas_feedback r
+        JOIN usuarios u ON r.admin_id = u.id
+        WHERE r.feedback_id = ?
+        ORDER BY r.data_resposta ASC
+    ");
+    $stmt->bind_param("i", $feedback['id']);
+    $stmt->execute();
+    $feedback['respostas'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -57,11 +79,22 @@ $feedbacks = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feedback - Mercado Bom Preço</title>
     <link rel="stylesheet" href="css/style.css">
+
+    <script>
+    setTimeout(() => {
+        const message = document.querySelector('.success-message, .error-message');
+        if (message) message.style.display = 'none';
+    }, 2000); // Desaparece após 2 segundos
+    </script>
+
 </head>
 
-<body>
-    <div class="container">
-        <h1 class="page-title">O que achou do nosso site?</h1>
+<body class="feedback-body">
+    <div class="container-feedback">
+        <header class="feedback-header">
+            <h1 class="page-title-feedback">O que achou do nosso site?</h1>
+            <a href="index.php" class="back-link-feedback">Voltar</a>
+        </header>
 
         <!-- Mensagens de feedback -->
         <?php if (isset($success_message)): ?>
@@ -87,7 +120,7 @@ $feedbacks = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 <label for="comentario" class="form-label">Comentário:</label>
                 <textarea id="comentario" name="comentario" class="form-textarea" required></textarea>
             </div>
-            <button type="submit" class="submit-button">Enviar Feedback</button>
+            <button type="submit" class="submit-button-feedback">Enviar Feedback</button>
         </form>
 
         <!-- Lista de feedback -->
@@ -97,10 +130,28 @@ $feedbacks = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <?php else: ?>
             <?php foreach ($feedbacks as $feedback): ?>
             <div class="feedback-item">
-                <p class="feedback-author"><?php echo htmlspecialchars($feedback['nome']); ?></p>
+                <p class="feedback-author">
+                    <a href="verPerfil.php?id=<?php echo $feedback['usuario_id']; ?>" class="author-link">
+                        <?php echo htmlspecialchars($feedback['nome']); ?>
+                    </a>
+                </p>
                 <p class="feedback-rating">Avaliação: <?php echo htmlspecialchars($feedback['avaliacao']); ?>/5</p>
                 <p class="feedback-text"><?php echo htmlspecialchars($feedback['comentario']); ?></p>
                 <p class="feedback-date"><?php echo date('d/m/Y H:i', strtotime($feedback['data_feedback'])); ?></p>
+                <!-- Exibir respostas -->
+                <?php if (!empty($feedback['respostas'])): ?>
+                <div class="responses-list">
+                    <?php foreach ($feedback['respostas'] as $resposta): ?>
+                    <div class="response-item">
+                        <p class="response-author">Respondido por
+                            <?php echo htmlspecialchars($resposta['admin_nome']); ?></p>
+                        <p class="response-text"><?php echo htmlspecialchars($resposta['resposta']); ?></p>
+                        <p class="response-date"><?php echo date('d/m/Y H:i', strtotime($resposta['data_resposta'])); ?>
+                        </p>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
             <?php endif; ?>

@@ -51,6 +51,7 @@ $result = $stmt->get_result();
     <title>Produtos - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
+<?php include_once 'header.php'; ?>
 
 <body class="produtos">
     <header class="header-produtos">
@@ -60,12 +61,10 @@ $result = $stmt->get_result();
                 <p>Preços bons!</p>
             </div>
             <?php if (isset($_SESSION['usuario_id'])): ?>
-            <button class="login-button" onclick="window.location.href='logout.php'">Logout</button>
+
             <a href="favoritos.php" class="favoritos-link">Meus Favoritos</a>
             <?php else: ?>
-            <button class="login-button" onclick="window.location.href='login.php'">Login</button>
-            <?php endif; ?>
-        </div>
+            < <?php endif; ?> </div>
     </header>
 
     <div class="box-container">

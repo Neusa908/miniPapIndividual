@@ -8,7 +8,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-
 if (!isset($_SESSION['usuario_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para enviar um suporte.";
     header("Location: login.php");
@@ -59,10 +58,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("iss", $usuario_id, $email, $mensagem);
 
         if ($stmt->execute()) {
-            echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='index.php';</script>";
-        } else {
-            echo "<script>alert('Erro ao enviar a mensagem. Tente novamente.');</script>";
+    // Inserir notificação para o cliente
+    $nova_suporte_id = $conn->insert_id;
+    $mensagem_notif_cliente = "Sua mensagem de suporte (ID $nova_suporte_id) foi enviada em " . date('d/m/Y H:i');
+    $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, usuario_id) VALUES (?, ?)");
+    $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $usuario_id);
+    $stmt_notif_cliente->execute();
+    $stmt_notif_cliente->close();
+
+    // Inserir notificação para todos os administradores
+    $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $usuario_id) recebida em " . date('d/m/Y H:i');
+    $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
+    $result_admins = $conn->query($sql_admins);
+    
+    if ($result_admins->num_rows > 0) {
+        $stmt_notif_admin = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
+        while ($admin = $result_admins->fetch_assoc()) {
+            $admin_id = $admin['id'];
+            $stmt_notif_admin->bind_param("si", $mensagem_notif_admin, $admin_id);
+            if (!$stmt_notif_admin->execute()) {
+                error_log("Erro ao criar notificação para admin_id $admin_id: " . $conn->error);
+            }
         }
+        $stmt_notif_admin->close();
+    } else {
+        error_log("Nenhum administrador encontrado para notificar.");
+    }
+
+    echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='index.php';</script>";
+} else {
+    echo "<script>alert('Erro ao enviar a mensagem. Tente novamente.');</script>";
+}
 
         $stmt->close();
     }

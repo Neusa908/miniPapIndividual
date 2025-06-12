@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
-                <a href="admin_usuarios.php" class="nav-item">Gerenciar Usuários</a>
+                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar</a>
+                <a href="admin_usuarios.php" class="nav-item">⬅️ Usuários</a>
             </nav>
         </div>
         <div class="main-content">

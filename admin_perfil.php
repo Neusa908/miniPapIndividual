@@ -158,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
                 placeholder="Ex: +351 912 345 678">
 
             <button type="submit" name="editar_perfil">Salvar Alterações</button>
-            <a href="admin_panel.php" class="cancel-button">Voltar</a>
+            <a href="admin_panel.php" class="cancel-button-admin-perfil">Voltar</a>
         </form>
     </div>
 </body>
