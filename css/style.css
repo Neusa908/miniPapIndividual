@@ -10,7 +10,7 @@ a {
     padding: 15px;
     background-color: rgba(255, 255, 255, 1);
     border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,10 +22,10 @@ a {
 }
 
 .add-admin-title h1 {
-    color: #1a3c34;
+    color: #000000;
     font-size: 22px;
     font-weight: bold;
-    border-bottom: 2px solid #1a3c34;
+    border-bottom: 2px solid #000000;
     padding-bottom: 4px;
 }
 
@@ -55,7 +55,7 @@ a {
     color: black;
     margin-bottom: 10px;
     font-size: 16px;
-    border-bottom: 1px solid #1a3c34;
+    border-bottom: 1px solid #000000;
     padding-bottom: 4px;
 }
 
@@ -145,7 +145,7 @@ a {
 }
 
 .add-admin-edit:hover {
-    background-color: #2980b9;
+    background-color: #0c293c;
 }
 
 .add-admin-delete {
@@ -154,12 +154,12 @@ a {
 }
 
 .add-admin-delete:hover {
-    background-color: #c0392b;
+    background-color: #42100b;
 }
 
 .add-admin-empty {
     text-align: center;
-    color: #666;
+    color: #000000;
     font-style: italic;
     font-size: 13px;
 }
@@ -246,7 +246,7 @@ a {
 .desc-container h2 {
     margin: 0 0 20px;
     font-size: 24px;
-    color: #333;
+    color: #000000;
 }
 
 .desc-form {
@@ -256,7 +256,7 @@ a {
 .desc-form label {
     display: block;
     margin: 10px 0 5px;
-    color: #333;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -515,12 +515,12 @@ a {
 
 .feedback-text {
     margin: 10px 0;
-    color: #555;
+    color: #000000;
 }
 
 .feedback-date {
     font-size: 12px;
-    color: #999;
+    color: #000000;
 }
 
 .feedback-actions {
@@ -736,7 +736,7 @@ a {
 
 .notification-date {
     font-size: 12px;
-    color: #666;
+    color: #000000;
     margin-left: 10px;
 }
 
@@ -752,14 +752,14 @@ a {
 
 .no-notifications {
     text-align: center;
-    color: #666;
+    color: #000000;
 }
 
 .config-container {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
     max-width: 500px;
     margin: 0 auto;
 }
@@ -771,13 +771,13 @@ a {
 
 .config-form label {
     margin: 10px 0 5px;
-    color: #333;
+    color: #000000;
 }
 
 .config-form input,
 .config-form select {
     padding: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
     border-radius: 5px;
     margin-bottom: 10px;
 }
@@ -792,7 +792,7 @@ a {
 }
 
 .config-save-btn36:hover {
-    background-color: #27ae60;
+    background-color: #0c4122;
 }
 
 /* Usuários */
@@ -817,7 +817,7 @@ a {
 
 .users-table th {
     background-color: #f4f4f9;
-    color: #333;
+    color: #000000;
 }
 
 .user-row:hover {
@@ -844,7 +844,7 @@ a {
 
 .no-users {
     text-align: center;
-    color: #666;
+    color: #000000;
 }
 
 .notification-action {
@@ -1117,7 +1117,7 @@ a {
 }
 
 .sidebar-nav a.nav-item:hover {
-    background-color: #34495e;
+    background-color: #06335f;
 }
 
 .sidebar-nav a.nav-item .icon {
@@ -1187,7 +1187,7 @@ a {
 
 
 
-/* ==================== STYLE ADMIN_PERFIL ==================== */
+/* ==================== STYLE ADMIN PERFIL ==================== */
 .admin-perfil-body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-image: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
@@ -1200,51 +1200,18 @@ a {
 
 .admin-perfil-container {
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 10px;
+    padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
     max-width: 400px;
     width: 100%;
     text-align: center;
     box-sizing: border-box;
 }
 
-.cancel-button-admin-perfil {
-    display: inline-block;
-    margin-top: 10px;
-    color: #e74c3c;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.cancel-button-admin-perfil:hover {
-    text-decoration: underline;
-}
-
-.admin-perfil-container .email-field {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.admin-perfil-container .email-field .email-suffix {
-    background-color: #e9ecef;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-left: none;
-    border-radius: 0 5px 5px 0;
-    font-size: 14px;
-    color: #666;
-}
-
-.admin-perfil-container .email-field input {
-    flex-grow: 1;
-    border-radius: 5px 0 0 5px;
-    border-right: none;
-}
-
 .admin-perfil-container .foto-perfil {
     margin-bottom: 20px;
+    position: relative;
 }
 
 .admin-perfil-container .foto-perfil img {
@@ -1253,6 +1220,7 @@ a {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #2ecc71;
+    /* Linha verde redonda */
     margin-bottom: 10px;
 }
 
@@ -1291,10 +1259,33 @@ a {
 
 .admin-perfil-container label {
     display: block;
-    color: #333;
+    color: #000000;
     font-weight: bold;
     margin: 10px 0 5px;
     text-align: left;
+}
+
+.admin-perfil-container .mensagem {
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.admin-perfil-container p {
+    font-size: 14px;
+    margin: 5px 0;
+    text-align: center;
+}
+
+.admin-perfil-container a {
+    display: block;
+    margin-top: 10px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.admin-perfil-container a:hover {
+    text-decoration: underline;
 }
 
 @media (max-width: 600px) {
@@ -1303,13 +1294,9 @@ a {
         max-width: 90%;
     }
 
-    .admin-perfil-container .email-field .email-suffix {
-        font-size: 12px;
-    }
-
     .admin-perfil-container .foto-perfil img {
-        width: 80px;
-        height: 80px;
+        width: 50px;
+        height: 50px;
     }
 
     .admin-perfil-container button {
@@ -1328,72 +1315,109 @@ a {
 
 
 
+
+
+
+
 /* ==================== STYLE ADMIN_PRODUTOS ==================== */
+/* Estilos gerais */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image: url('img/mercado.jpeg');
-    background-size: cover;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
-    padding-bottom: 60px;
+    padding: 0;
 }
 
-.box-container {
-    background-color: transparent;
-    padding: 20px;
+/* Container principal */
+.admin-container {
+    max-width: 800px;
+    margin: 2px auto;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Títulos */
+.admin-title {
+    color: #000000;
     text-align: center;
-    color: black;
-    width: 90%;
-    max-width: 1200px;
-    margin: 20px auto;
-}
-
-.mensagem {
-    background-color: #d32f2f;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
     margin-bottom: 20px;
-    text-align: center;
 }
 
-.mensagem-sucesso {
+.section-subtitle {
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+/* Seção do formulário */
+.add-product-section {
+    margin-bottom: 30px;
+}
+
+/* Formulário */
+.product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-input,
+.form-select {
+    padding: 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-button {
+    padding: 10px;
     background-color: #2ecc71;
-}
-
-.btn {
-    background-color: #e0e0e0;
-    color: black;
-    padding: 10px 20px;
+    color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
+    font-size: 16px;
 }
 
-.btn:hover {
-    background-color: #c0c0c0;
+.form-button:hover {
+    background-color: #196338;
 }
 
-.link a {
-    color: #2ecc71;
-    text-decoration: none;
-}
-
-.link a:hover {
-    text-decoration: underline;
-}
-
-footer {
+/* Links de navegação */
+.nav-links {
     text-align: center;
-    color: white;
-    padding: 20px;
-    background-color: black;
-    width: 100%;
+    margin-top: 20px;
+}
+
+.nav-link {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.nav-link:hover {
+    background-color: #11354d;
+}
+
+/* Rodapé */
+.footer {
+    text-align: center;
+    padding: 1px;
+    background-color: #000000;
+    color: #fff;
     position: fixed;
+    width: 100%;
     bottom: 0;
-    left: 0;
-    right: 0;
 }
 
 
@@ -1446,7 +1470,16 @@ footer {
 
 .no-reports {
     text-align: center;
-    color: #666;
+    color: #000000;
+}
+
+.nav-relatorios {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
 }
 
 
@@ -1457,24 +1490,86 @@ footer {
 
 
 /* ==================== STYLE ADMIN_SUPORTE ==================== */
+/* Estilos gerais para a página */
+.admin-panel-body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+    /* Adiciona rolagem geral se necessário */
+}
+
+.admin-panel-wrapper {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    /* Garante altura total da viewport */
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    position: fixed;
+    height: 100vh;
+    padding-top: 20px;
+    z-index: 1;
+    /* Garante que a sidebar fique atrás do conteúdo */
+}
+
+.sidebar-header h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 10px 15px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar-nav a:hover {
+    background-color: #555;
+}
+
+/* Conteúdo principal */
+.main-content {
+    margin-left: 250px;
+    /* Ajusta para a largura da sidebar */
+    padding: 20px;
+    width: calc(100% - 250px);
+    box-sizing: border-box;
+    min-height: 100vh;
+    /* Garante altura mínima */
+    overflow-y: auto;
+    /* Adiciona rolagem vertical se o conteúdo exceder */
+}
+
+/* Container de suporte */
 .suporte-container {
-    /* mw para tudo aparecer*/
-    max-width: 1100px;
-    margin: 5px auto;
-    padding: 5px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-    min-height: 10vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 0;
+    /* Remove altura mínima fixa */
+    max-height: calc(100vh - 100px);
+    /* Limita a altura ao viewport menos margem */
+    overflow-y: auto;
+    /* Adiciona rolagem vertical ao container */
 }
 
 .suporte-container h2 {
     color: black;
     text-align: center;
-    margin-bottom: 0px;
+    margin-bottom: 10px;
     font-size: 20px;
     padding-bottom: 10px;
 }
@@ -1485,6 +1580,8 @@ footer {
     gap: 15px;
     width: 100%;
     justify-content: center;
+    padding-bottom: 20px;
+    /* Espaço extra na base */
 }
 
 .suporte-item {
@@ -1492,13 +1589,16 @@ footer {
     background-color: #fff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    min-height: 200px;
-    max-height: 350px;
+    min-height: 250px;
+    /* Aumenta a altura mínima */
+    max-height: none;
+    /* Remove limite de altura */
     overflow-y: auto;
+    /* Rolagem interna se necessário */
 }
 
 .suporte-item p {
@@ -1524,11 +1624,12 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex-grow: 1;
 }
 
 .suporte-resposta-form textarea {
     width: 100%;
-    height: 60px;
+    height: 80px;
     padding: 5px;
     font-size: 12px;
     box-sizing: border-box;
@@ -1545,6 +1646,7 @@ footer {
     border-radius: 5px;
     cursor: pointer;
     font-size: 12px;
+    align-self: flex-end;
 }
 
 .suporte-resposta-form button:hover {
@@ -1585,14 +1687,27 @@ footer {
 }
 
 @media (max-width: 600px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 10px;
+    }
+
     .suporte-container {
         margin: 10px;
         padding: 15px;
-        max-width: 100%;
+        max-height: calc(100vh - 50px);
+        /* Ajuste para telas menores */
     }
 
     .suporte-container h2 {
-        font-size: 20px;
+        font-size: 18px;
     }
 
     .suporte-items {
@@ -1602,8 +1717,7 @@ footer {
 
     .suporte-item {
         flex: 1 1 100%;
-        min-height: auto;
-        max-height: 300px;
+        min-height: 200px;
     }
 
     .suporte-item p {
@@ -1612,7 +1726,7 @@ footer {
 
     .suporte-resposta-form textarea {
         font-size: 11px;
-        height: 50px;
+        height: 60px;
     }
 
     .suporte-resposta-form button,
@@ -2529,8 +2643,194 @@ body.carteira {
 }
 
 .no-comments {
-    color: #555;
+    color: #000000;
     font-style: italic;
+}
+
+
+
+
+
+
+
+
+
+/* ==================== STYLE CONFIGURACOES ==================== */
+.configuracoes-body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.configuracoes-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+    max-width: 550px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.configuracoes-container button {
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.configuracoes-container button:hover {
+    background-color: #27ae60;
+}
+
+.configuracoes-container h1,
+.configuracoes-container h2 {
+    color: #2ecc71;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.configuracoes-container h3 {
+    color: #2ecc71;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.configuracoes-container input[type="text"],
+.configuracoes-container input[type="email"],
+.configuracoes-container input[type="tel"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.configuracoes-container label {
+    display: block;
+    color: #000000;
+    font-weight: bold;
+    margin: 10px 0 5px;
+    text-align: left;
+}
+
+.configuracoes-container .mensagem {
+    color: #e74c3c;
+    margin-bottom: 15px;
+}
+
+.configuracoes-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.configuracoes-container th,
+.configuracoes-container td {
+    padding: 10px;
+    border: 1px solid #000000;
+    text-align: left;
+}
+
+.configuracoes-container th {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.configuracoes-container .btn {
+    display: inline-block;
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.configuracoes-container .btn:hover {
+    background-color: #092515;
+}
+
+.configuracoes-container a {
+    display: block;
+    margin-top: 10px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.configuracoes-container a:hover {
+    text-decoration: underline;
+}
+
+.btn-cancelar {
+    background-color: #e74c3c !important;
+    color: white !important;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.btn-cancelar:hover {
+    background-color: #a81a08 !important;
+}
+
+.btn-voltar {
+    color: #3498db !important;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.btn-voltar:hover {
+    color: #153d58 !important;
+}
+
+.btn-voltar:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .configuracoes-container {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .configuracoes-container h1,
+    .configuracoes-container h2 {
+        font-size: 20px;
+    }
+
+    .configuracoes-container h3 {
+        font-size: 18px;
+    }
+
+    .configuracoes-container input[type="text"],
+    .configuracoes-container input[type="email"],
+    .configuracoes-container input[type="tel"] {
+        font-size: 12px;
+    }
+
+    .configuracoes-container button,
+    .btn-cancelar {
+        font-size: 14px;
+    }
 }
 
 
@@ -2544,7 +2844,13 @@ body.carteira {
 
 
 
-/* ==================== STYLE DESC ==================== */
+
+
+
+
+
+
+/* ==================== STYLE DESCRIÇÃO DO CLIENTE ==================== */
 .profile-body {
     background-color: #f4f4f4;
 }
@@ -2659,8 +2965,136 @@ body.carteira {
 
 
 
+/* ==================== STYLE editar admin ==================== */
+
+.adEditar {
+    font-family: Arial, sans-serif;
+    background-color: #48c24c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Container principal */
+.adEditar-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+}
+
+/* Título */
+.adEditar-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+/* Formulário */
+.adEditar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Labels */
+.adEditar-label {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Campos de entrada */
+.adEditar-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+/* Campo de email com sufixo */
+.adEditar-email-field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.adEditar-email-suffix {
+    font-weight: bold;
+    color: #000000;
+}
+
+/* Botão de submit */
+.adEditar-submit {
+    background-color: #48c24c;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.adEditar-submit:hover {
+    background-color: #1f5022;
+}
 
 
+
+.adEditar-cancel:hover {
+    text-decoration: underline;
+}
+
+.adEditar-reset {
+    background-color: #d9534f;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+
+}
+
+
+/* Link de cancelar */
+.adEditar-cancel {
+    text-align: center;
+    color: #d9534f;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.adEditar-cancel {
+    background-color: #2d86c2;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 1px;
+}
+
+.adEditar-reset {
+    background-color: #df0b0b;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 1px;
+}
 
 /* ==================== STYLE FAVORITOS ==================== */
 
@@ -3042,6 +3476,9 @@ footer {
     }
 }
 
+.finalizarCompra {
+    color: #0056b3;
+}
 
 
 
@@ -3463,105 +3900,169 @@ body.login {
 
 
 
+
+
+
+
+
 /* ==================== STYLE PERFIL DO CLIENTE ==================== */
-body.perfil {
-    font-family: Arial, sans-serif;
-    background-color: #1a7526;
-    color: #000000;
+.client-perfil-body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    min-height: 105vh;
     margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.mensagem {
-    color: #00ff00;
-    font-weight: bold;
+.client-perfil-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.client-perfil-title {
+    color: #2ecc71;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.client-perfil-message {
+    color: #e74c3c;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+/* ... (outros estilos permanecem iguais) ... */
+
+.client-perfil-photo-section {
+    margin-bottom: 20px;
+    position: relative;
+    text-align: center;
+}
+
+.client-perfil-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2ecc71;
+    margin-bottom: 10px;
+}
+
+.client-perfil-photo-form {
+    display: flex;
+    justify-content: center;
+    /* Centraliza o botão horizontalmente */
+    margin-top: 5px;
+}
+
+.client-perfil-photo-remove {
+    background-color: #e74c3c;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
     font-size: 12px;
+}
+
+.client-perfil-photo-remove:hover {
+    background-color: #601a12;
+}
+
+.client-perfil-no-photo {
+    font-size: 14px;
+    color: #000000;
+    margin-bottom: 10px;
+}
+
+.client-perfil-name,
+.client-perfil-username {
+    font-size: 14px;
     margin: 5px 0;
     text-align: center;
 }
 
-.perfil-container {
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 55px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-    max-width: 400px;
-    width: 100%;
-    color: white;
-    margin: 3% auto;
-    box-sizing: border-box;
-    max-height: 100vh;
+.client-perfil-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.perfil-container button {
-    color: white;
-    width: 100%;
-    max-width: 150px;
-    padding: 6px;
-    border: none;
-    border-radius: 5px;
-    font-size: 12px;
-    cursor: pointer;
-    background-color: #0056b3;
-    margin: 5px auto;
+.client-perfil-label {
     display: block;
-}
-
-.perfil-container button:hover {
-    background-color: #003d80;
-}
-
-.perfil-container h1 {
-    font-size: 20px;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.perfil-container .foto-perfil-container {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 10px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid #fff;
-}
-
-.perfil-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-}
-
-.perfil-container label {
-    display: block;
-    margin: 5px 0 2px;
-    font-size: 12px;
+    color: #000000;
+    font-weight: bold;
+    margin: 10px 0 5px;
     text-align: left;
 }
 
-.perfil-container p {
-    font-size: 12px;
-    margin: 5px 0;
-    text-align: center;
+.client-perfil-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
 }
 
-
-.perfil-container {
-    width: 95%;
+.client-perfil-submit {
+    background-color: #2ecc71;
+    color: white;
     padding: 10px;
-    max-height: 85vh;
-    max-width: 280px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
 }
 
-.perfil-container button {
-    max-width: 120px;
-    font-size: 11px;
+.client-perfil-submit:hover {
+    background-color: #27ae60;
 }
 
-.perfil-container h1 {
-    font-size: 18px;
+.client-perfil-link {
+    display: block;
+    margin-top: 10px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.client-perfil-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .client-perfil-container {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    .client-perfil-photo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .client-perfil-title {
+        font-size: 20px;
+    }
+
+    .client-perfil-input {
+        font-size: 12px;
+    }
+
+    .client-perfil-submit {
+        font-size: 14px;
+    }
 }
 
 

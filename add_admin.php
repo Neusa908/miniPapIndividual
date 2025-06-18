@@ -28,10 +28,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
     $telefone = trim($_POST['telefone']);
     $tipo = 'admin';
 
+    // Debug para verificar os valores
+    error_log("Debug: nome=$nome, apelido=$apelido, email=$email, telefone=$telefone, tipo=$tipo");
+
     if (empty($nome) || empty($email) || empty($senha) || empty($telefone) || empty($apelido)) {
         echo "<script>alert('Por favor, preencha todos os campos obrigatórios!');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "<script>alert('Por favor, insira um email válido!');</script>";
+    } elseif ($nome === $apelido) {
+        echo "<script>alert('O apelido não pode ser igual ao nome. Insira um apelido diferente!');</script>";
     } else {
         $email = strtolower(trim($email));
         $domain = '@mercadobompreco.com';
@@ -53,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
 
                 $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, tipo) VALUES (?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssss", $nome, $email, $senha_hash, $telefone, $tipo);
+                $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $tipo);
                 if ($stmt->execute()) {
                     echo "<script>alert('Administrador adicionado com sucesso!'); window.location.href='add_admin.php';</script>";
                 } else {
@@ -71,6 +76,14 @@ if (isset($_GET['delete_admin'])) {
     if ($admin_id == $usuario_id) {
         echo "<script>alert('Você não pode excluir sua própria conta!'); window.location.href='add_admin.php';</script>";
     } else {
+        // Deletar notificações associadas ao administrador
+        $sql_notificacoes = "DELETE FROM notificacoes WHERE admin_id = ?";
+        $stmt_notificacoes = $conn->prepare($sql_notificacoes);
+        $stmt_notificacoes->bind_param("i", $admin_id);
+        $stmt_notificacoes->execute();
+        $stmt_notificacoes->close();
+
+        // Deletar o administrador
         $sql = "DELETE FROM usuarios WHERE id = ? AND tipo = 'admin'";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $admin_id);
@@ -98,6 +111,9 @@ $result_admins = $conn->query($sql_admins);
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/add_admin.css">
 </head>
+
+
+<!--Menu na foto de perfil-->
 
 <body class="support-body">
     <div class="add-admin-container">
@@ -143,12 +159,13 @@ $result_admins = $conn->query($sql_admins);
                     <div class="add-admin-item">
                         <div class="add-admin-info">
                             <p><strong>Nome:</strong> <?php echo htmlspecialchars($row['nome']); ?></p>
+                            <p><strong>Apelido:</strong> <?php echo htmlspecialchars($row['apelido']); ?></p>
                             <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?></p>
                         </div>
                         <div class="add-admin-actions">
                             <a href="editar_admin.php?id=<?php echo $row['id']; ?>" class="add-admin-edit">Editar</a>
                             <a href="add_admin.php?delete_admin=<?php echo $row['id']; ?>" class="add-admin-delete"
-                                onclick="return confirm('Tem certeza que deseja excluir este administrador?');">Excluir</a>
+                                onclick="return confirm('Tem certeza que deseja excluir este administrador?');">Deletar</a>
                         </div>
                     </div>
                     <?php endwhile; ?>

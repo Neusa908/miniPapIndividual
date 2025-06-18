@@ -26,7 +26,7 @@ $sql_visitas = "SELECT COUNT(*) as total_visitas, COUNT(DISTINCT usuario_id) as 
 $result_visitas = $conn->query($sql_visitas);
 $visitas = $result_visitas->fetch_assoc();
 
-//  visitas recentes
+// visitas recentes
 $sql_visitas_recentes = "SELECT v.pagina, v.data_visita, u.nome FROM visitas v LEFT JOIN usuarios u ON v.usuario_id = u.id ORDER BY v.data_visita DESC LIMIT 10";
 $result_visitas_recentes = $conn->query($sql_visitas_recentes);
 
@@ -34,6 +34,11 @@ $result_visitas_recentes = $conn->query($sql_visitas_recentes);
 $sql_usuarios = "SELECT COUNT(*) as total_usuarios FROM usuarios WHERE tipo = 'cliente'";
 $result_usuarios = $conn->query($sql_usuarios);
 $usuarios = $result_usuarios->fetch_assoc();
+
+// Usuários novos (últimos 30 dias)
+$sql_usuarios_novos = "SELECT COUNT(*) as total_usuarios_novos FROM usuarios WHERE tipo = 'cliente' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+$result_usuarios_novos = $conn->query($sql_usuarios_novos);
+$usuarios_novos = $result_usuarios_novos->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +58,7 @@ $usuarios = $result_usuarios->fetch_assoc();
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
+                <a href="admin_panel.php" class="nav-relatorios"><span class="icon">⬅️</span> Voltar ao Painel</a>
             </nav>
         </div>
         <div class="main-content">
@@ -94,35 +99,16 @@ $usuarios = $result_usuarios->fetch_assoc();
                 <p class="users-table">Nenhuma venda recente encontrada.</p>
                 <?php endif; ?>
 
-                <h2>Resumo de Visitas (Últimos 30 Dias)</h2>
+                <h2>Resumo de Visitas</h2>
                 <p class="users-table">Total de Visitas: <?php echo $visitas['total_visitas'] ?? 0; ?></p>
-                <h2>Visitas Recentes</h2>
-                <?php if ($result_visitas_recentes->num_rows > 0): ?>
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>Página</th>
-                            <th>Usuário</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = $result_visitas_recentes->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($row['pagina']); ?></td>
-                            <td><?php echo $row['nome'] ? htmlspecialchars($row['nome']) : 'Não registado'; ?></td>
-                            <td><?php echo date('d/m/Y H:i:s', strtotime($row['data_visita'])); ?></td>
-                        </tr>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-                <?php else: ?>
-                <p class="users-table">Nenhuma visita recente encontrada.</p>
-                <?php endif; ?>
+
 
                 <h2>Usuários Ativos</h2>
                 <p class="users-table">Total de Usuários: <?php echo $usuarios['total_usuarios'] ?? 0; ?></p>
+
+                <h2>Usuários Novos</h2>
+                <p class="users-table">Total de Usuários Novos:
+                    <?php echo $usuarios_novos['total_usuarios_novos'] ?? 0; ?></p>
             </div>
         </div>
     </div>

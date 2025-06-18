@@ -69,7 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
         if ($stmt->num_rows > 0) {
             echo "<script>alert('Este email já está registrado por outro usuário! Tente um nome diferente.'); window.location.href='admin_perfil.php';</script>";
         } else {
-            // Processa o upload da foto de perfil, se fornecida
+
+            // Upload da foto de perfil, se fornecida
             $foto_perfil = $admin['foto_perfil'];
             if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] == 0) {
                 $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];

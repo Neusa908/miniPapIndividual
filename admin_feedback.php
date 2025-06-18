@@ -134,14 +134,15 @@ foreach ($feedbacks as &$feedback) {
                         </p>
                         <div class="feedback-actions">
                             <a href="admin_feedback.php?delete_id=<?php echo $feedback['id']; ?>" class="delete-button"
-                                onclick="return confirm('Tem certeza que deseja excluir este feedback?');">Excluir</a>
+                                onclick="return confirm('Tem certeza que deseja deletar este feedback?');">Deletar</a>
                             <form method="POST" class="response-form">
                                 <input type="hidden" name="feedback_id" value="<?php echo $feedback['id']; ?>">
                                 <textarea name="resposta" class="response-textarea"
-                                    placeholder="Escreva sua resposta..." required></textarea>
+                                    placeholder="Escreva a sua resposta..." required></textarea>
                                 <button type="submit" class="submit-response-button">Responder</button>
                             </form>
                         </div>
+
                         <!-- Exibe as respostas -->
                         <?php if (!empty($feedback['respostas'])): ?>
                         <div class="responses-list">

@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id']) || isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'admin') {
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
@@ -27,13 +27,8 @@ if (isset($_GET['delete_id'])) {
     $stmt->close();
 }
 
-// Consultar notificações de mensagens respondidas
-$sql_notificacoes = "SELECT n.id, n.mensagem, n.data_criacao, n.lida, 
-                    SUBSTRING_INDEX(SUBSTRING_INDEX(n.mensagem, '(ID ', -1), ')', 1) AS suporte_id 
-                    FROM notificacoes n 
-                    WHERE n.usuario_id = ? 
-                    AND n.mensagem LIKE '%foi respondida%' 
-                    ORDER BY n.data_criacao DESC";
+// Consultar notificações para o cliente
+$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida FROM notificacoes WHERE usuario_id = ? ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
 $stmt_notificacoes->bind_param("i", $usuario_id);
 $stmt_notificacoes->execute();
@@ -58,16 +53,20 @@ $result_notificacoes = $stmt_notificacoes->get_result();
             <?php while ($notificacao = $result_notificacoes->fetch_assoc()): ?>
             <li
                 class="notification-item <?php echo $notificacao['lida'] ? 'notification-read' : 'notification-unread'; ?>">
-                <p class="notification-message"><?php echo htmlspecialchars($notificacao['mensagem']); ?></p>
+                <p class="notification-message">
+                    <?php
+                    $mensagem = htmlspecialchars($notificacao['mensagem']);
+                    // Remove a parte com (ID X) da mensagem para o cliente
+                    $mensagem = preg_replace('/\(ID \d+\)/', '', $mensagem);
+                    echo trim($mensagem);
+                    ?>
+                </p>
                 <span
                     class="notification-date"><?php echo date('d/m/Y H:i', strtotime($notificacao['data_criacao'])); ?></span>
                 <?php if (!$notificacao['lida']): ?>
                 <a href="marcar_lida.php?id=<?php echo $notificacao['id']; ?>" class="notification-action">Marcar como
                     lida</a>
-                <?php endif; ?>
-                <?php if ($notificacao['suporte_id']): ?>
-                <a href="histo_suporte.php?suporte_id=<?php echo htmlspecialchars($notificacao['suporte_id']); ?>"
-                    class="notificacao-ver">Ver</a>
+                <a href="resposta_suporte.php" class="notificacao-ver">Ver</a>
                 <?php endif; ?>
                 <a href="?delete_id=<?php echo $notificacao['id']; ?>" class="notification-action delete"
                     onclick="return confirm('Tem certeza que deseja excluir esta notificação?');">Excluir</a>

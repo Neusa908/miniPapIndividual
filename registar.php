@@ -49,20 +49,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $erros[] = "O nome completo é obrigatório.";
         }
 
-        // Validação do Apelido
-        if (empty($apelido)) {
-            $erros[] = "O nome de usuário é obrigatório.";
-        } else {
-            $sql = "SELECT id FROM usuarios WHERE apelido = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $apelido);
-            $stmt->execute();
-            $stmt->store_result();
-            if ($stmt->num_rows > 0) {
-                $erros[] = "Este nome de usuário já está registado.";
-            }
-            $stmt->close();
-        }
+// Validação do Apelido
+if (!empty($apelido)) {
+    $sql = "SELECT id FROM usuarios WHERE apelido = ? AND id != ?";
+    $stmt = $conn->prepare($sql);
+    $apelido_param = $apelido;
+    $usuario_id_param = $usuario_id ?? 0;
+    $stmt->bind_param("si", $apelido_param, $usuario_id_param); // Usa 0 se $usuario_id não estiver definido
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows > 0) {
+        $erros[] = "Este nome de usuário já está registado.";
+    }
+    $stmt->close();
+} elseif (empty($apelido)) {
+    // Usa o nome completo como apelido padrão se não fornecido
+    $apelido = $nome; // Pode ajustar para pegar só primeira palavra ou primeira + última
+}
 
         // Validação do Email
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -129,26 +131,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
                 // Insere o novo usuário
-                $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, cidade, tipo, saldo) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, 'cliente', 300.00)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada, $cidade);
-                $stmt->execute();
+$sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, cidade, tipo, saldo) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'cliente', 300.00)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada, $cidade);
+$stmt->execute();
                 $novo_usuario_id = $conn->insert_id;
 
-                // Insere endereço na tabela enderecos
-                $nome_endereco = "Endereço Principal";
-                $rua = $morada; // Usa a morada como rua
-                $estado = "Não especificado"; // Valor padrão para estado
-                $codigo_postal = "1000-123"; // Valor padrão para código postal
-                $padrao = 1; // Define como endereço padrão
 
-                $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, cidade, estado, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("issssii", $novo_usuario_id, $nome_endereco, $rua, $cidade, $estado, $codigo_postal, $padrao);
-                if (!$stmt->execute()) {
-                    throw new Exception("Erro ao inserir endereço: " . $conn->error);
-                }
+
+$sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("issssii", $novo_usuario_id, $nome_endereco, $rua, $cidade, $distrito, $codigo_postal, $padrao);
+if (!$stmt->execute()) {
+    throw new Exception("Erro ao inserir endereço: " . $conn->error);
+}
 
                 // Registra a ação na tabela logs
                 $acao = "Novo usuário registrado";

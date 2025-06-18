@@ -9,10 +9,6 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
-    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
-    exit();
-}
 
 $perfil_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['usuario_id'];
 $usuario_id = $_SESSION['usuario_id'];

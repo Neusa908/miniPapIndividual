@@ -21,7 +21,7 @@ $admin_id = $_GET['id'];
 $usuario_id = $_SESSION['usuario_id'];
 
 // Busca os dados do administrador a ser editado
-$sql = "SELECT nome, email, telefone FROM usuarios WHERE id = ? AND tipo = 'admin'";
+$sql = "SELECT nome, apelido, email, telefone FROM usuarios WHERE id = ? AND tipo = 'admin'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();
@@ -42,6 +42,7 @@ $email_prefix = $email_parts[0] ?? '';
 // Processa a edição do administrador
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
     $novo_nome = trim($_POST['nome']);
+    $novo_apelido = trim($_POST['apelido']);
     $email_prefix = trim($_POST['email_prefix']);
     $novo_telefone = trim($_POST['telefone']);
     $nova_senha = $_POST['senha'];
@@ -70,14 +71,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
             if (!empty($nova_senha)) {
                 // Se uma nova senha foi fornecida, faz o hash
                 $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
-                $sql = "UPDATE usuarios SET nome = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
+                $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssssi", $novo_nome, $novo_email, $novo_telefone, $senha_hash, $admin_id);
+                $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $senha_hash, $admin_id);
             } else {
                 // Se não houver nova senha, atualiza apenas os outros campos
-                $sql = "UPDATE usuarios SET nome = ?, email = ?, telefone = ? WHERE id = ?";
+                $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssi", $novo_nome, $novo_email, $novo_telefone, $admin_id);
+                $stmt->bind_param("ssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $admin_id);
             }
 
             if ($stmt->execute()) {
@@ -101,39 +102,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body class="admin-perfil-body">
-    <div class="admin-perfil-container">
-        <h1>Editar Administrador</h1>
-        <form method="POST" action="editar_admin.php?id=<?php echo $admin_id; ?>">
+<body class="adEditar">
+    <div class="adEditar-container">
+        <h1 class="adEditar-title">Editar Administrador</h1>
+        <form method="POST" action="editar_admin.php?id=<?php echo $admin_id; ?>" class="adEditar-form">
             <!-- Nome -->
-            <label for="nome">Nome:</label>
-            <input type="text" name="nome" value="<?php echo htmlspecialchars($admin_edit['nome']); ?>" required>
+            <label for="nome" class="adEditar-label">Nome:</label>
+            <input type="text" name="nome" value="<?php echo htmlspecialchars($admin_edit['nome']); ?>" required
+                class="adEditar-input">
+
+            <!-- Apelido -->
+            <label for="apelido" class="adEditar-label">Apelido:</label>
+            <input type="text" name="apelido" value="<?php echo htmlspecialchars($admin_edit['apelido'] ?? ''); ?>"
+                class="adEditar-input" placeholder="Opcional">
 
             <!-- Email -->
-            <label for="email_prefix">Email:</label>
-            <div class="email-field">
-                <input type="text" name="email_prefix" value="<?php echo htmlspecialchars($email_prefix); ?>" required>
-                <span class="email-suffix">@mercadobompreco.com</span>
+            <label for="email_prefix" class="adEditar-label">Email:</label>
+            <div class="adEditar-email-field">
+                <input type="text" name="email_prefix" value="<?php echo htmlspecialchars($email_prefix); ?>" required
+                    class="adEditar-input">
+                <span class="adEditar-email-suffix">@mercadobompreco.com</span>
             </div>
 
             <!-- Telefone -->
-            <label for="telefone">Número de Contato:</label>
+            <label for="telefone" class="adEditar-label">Número de Contato:</label>
             <input type="text" name="telefone" value="<?php echo htmlspecialchars($admin_edit['telefone']); ?>" required
-                placeholder="Ex: +351 912 345 678">
+                class="adEditar-input" placeholder="Ex: +351 912 345 678">
 
             <!-- Senha -->
-            <label for="senha">Nova Senha (opcional):</label>
-            <input type="password" name="senha" placeholder="Deixe em branco para não alterar">
+            <label for="senha" class="adEditar-label">Nova Senha (opcional):</label>
+            <input type="password" name="senha" placeholder="Deixe em branco para não alterar" class="adEditar-input">
 
             <!-- Botões -->
-            <button type="submit" name="editar_admin">Salvar Alterações</button>
-            <a href="add_admin.php" class="cancel-button">Cancelar</a>
+            <button type="submit" name="editar_admin" class="adEditar-submit">Salvar Alterações</button>
+            <button type="reset" class="adEditar-reset">Cancelar</button>
+            <a href="add_admin.php" class="adEditar-cancel">Voltar</a>
         </form>
     </div>
 </body>
 
 </html>
-
-<?php
-$conn->close();
-?>

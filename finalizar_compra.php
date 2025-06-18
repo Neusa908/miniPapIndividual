@@ -25,8 +25,7 @@ if ($saldo === null) {
 }
 
 // Obtém endereços do usuário
-$sql = "SELECT id, nome_endereco, rua, numero, bairro, cidade, estado, cep FROM enderecos WHERE usuario_id = ?";
-$stmt = $conn->prepare($sql);
+$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal FROM enderecos WHERE usuario_id = ?";$stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
 $enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -116,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
         $stmt->execute();
         $stmt->close();
 
-        // Insere os itens do pedido na tabela itens_pedido e atualiza o estoque
         foreach ($itens_carrinho as $item) {
             $sql = "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) 
                     VALUES (?, ?, ?, ?)";
@@ -282,7 +280,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
         </form>
         <?php else: ?>
         <p>Você não tem endereços cadastrados.</p>
-        <a href="adicionar_endereco.php" class="btn">Adicionar Endereço</a>
+        <a href="configuracoes.php" class="btn">Adicionar Endereço</a>
         <?php endif; ?>
         <div class="link">
             <a href="carrinho.php" class="btn">Voltar ao Carrinho</a>
@@ -292,7 +290,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
         <p>O seu carrinho está vazio.</p>
         <div class="link">
             <a href="produtos.php" class="btn">Continuar Compras</a>
-            <br><a href="index.php">Voltar para a página principal</a>
+            <br><a href="index.php" class="finalizarCompra">Voltar para a página principal</a>
         </div>
         <?php endif; ?>
     </div>

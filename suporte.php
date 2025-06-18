@@ -15,15 +15,18 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 $email_usuario = '';
+$nome_usuario = '';
 if (isset($_SESSION['usuario_id'])) {
     $usuario_id = $_SESSION['usuario_id'];
-    $sql = "SELECT email FROM usuarios WHERE id = ?";
+    $sql = "SELECT email, nome FROM usuarios WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $usuario_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
-        $email_usuario = $result->fetch_assoc()['email'];
+        $user_data = $result->fetch_assoc();
+        $email_usuario = $user_data['email'];
+        $nome_usuario = $user_data['nome'];
     }
     $stmt->close();
 }
@@ -32,63 +35,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
     $mensagem = trim($_POST['mensagem']);
-    $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null; 
+    $usuario_id = $_SESSION['usuario_id'];
+
     if (empty($nome) || empty($email) || empty($mensagem)) {
         echo "<script>alert('Por favor, preencha todos os campos!');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "<script>alert('Por favor, insira um email válido!');</script>";
+    } elseif ($email !== $email_usuario || $nome !== $nome_usuario) {
+        echo "<script>alert('O nome ou email não correspondem à sua conta. Use os dados associados à sua conta.');</script>";
     } else {
-        if ($usuario_id) {
-            $sql = "SELECT id FROM usuarios WHERE email = ? AND id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("si", $email, $usuario_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($result->num_rows === 0) {
-                echo "<script>alert('O email fornecido não corresponde à sua conta ou não está registado.< Use o email associado à sua conta.'); window.location.href='suporte.php';</script>";
-                $stmt->close();
-                $conn->close();
-                exit(); 
-            }
-            $stmt->close();
-        }
-
         $sql = "INSERT INTO suporte (usuario_id, email, mensagem, data_envio, status) VALUES (?, ?, ?, NOW(), 'pendente')";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iss", $usuario_id, $email, $mensagem);
 
         if ($stmt->execute()) {
-    // Inserir notificação para o cliente
-    $nova_suporte_id = $conn->insert_id;
-    $mensagem_notif_cliente = "Sua mensagem de suporte (ID $nova_suporte_id) foi enviada em " . date('d/m/Y H:i');
-    $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, usuario_id) VALUES (?, ?)");
-    $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $usuario_id);
-    $stmt_notif_cliente->execute();
-    $stmt_notif_cliente->close();
+            // Inserir notificação para o cliente sem ID
+            $mensagem_notif_cliente = "Sua mensagem de suporte foi enviada em " . date('d/m/Y H:i');
+            $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, usuario_id) VALUES (?, ?)");
+            $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $usuario_id);
+            $stmt_notif_cliente->execute();
+            $stmt_notif_cliente->close();
 
-    // Inserir notificação para todos os administradores
-    $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $usuario_id) recebida em " . date('d/m/Y H:i');
-    $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
-    $result_admins = $conn->query($sql_admins);
-    
-    if ($result_admins->num_rows > 0) {
-        $stmt_notif_admin = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
-        while ($admin = $result_admins->fetch_assoc()) {
-            $admin_id = $admin['id'];
-            $stmt_notif_admin->bind_param("si", $mensagem_notif_admin, $admin_id);
-            if (!$stmt_notif_admin->execute()) {
-                error_log("Erro ao criar notificação para admin_id $admin_id: " . $conn->error);
+            // Inserir notificação para todos os administradores
+            $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $usuario_id) recebida em " . date('d/m/Y H:i');
+            $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
+            $result_admins = $conn->query($sql_admins);
+            
+            if ($result_admins->num_rows > 0) {
+                $stmt_notif_admin = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
+                while ($admin = $result_admins->fetch_assoc()) {
+                    $admin_id = $admin['id'];
+                    $stmt_notif_admin->bind_param("si", $mensagem_notif_admin, $admin_id);
+                    if (!$stmt_notif_admin->execute()) {
+                        error_log("Erro ao criar notificação para admin_id $admin_id: " . $conn->error);
+                    }
+                }
+                $stmt_notif_admin->close();
+            } else {
+                error_log("Nenhum administrador encontrado para notificar.");
             }
-        }
-        $stmt_notif_admin->close();
-    } else {
-        error_log("Nenhum administrador encontrado para notificar.");
-    }
 
-    echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='index.php';</script>";
-} else {
-    echo "<script>alert('Erro ao enviar a mensagem. Tente novamente.');</script>";
-}
+            echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='index.php';</script>";
+        } else {
+            echo "<script>alert('Erro ao enviar a mensagem. Tente novamente.');</script>";
+        }
 
         $stmt->close();
     }
@@ -113,7 +103,7 @@ $conn->close();
         <form class="support-form" method="POST" action="suporte.php">
             <label for="nome">NOME</label>
             <input type="text" id="nome" name="nome" placeholder="Digite o seu nome de utilizador"
-                value="<?php echo isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome']) : ''; ?>"
+                value="<?php echo isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome']) : htmlspecialchars($nome_usuario); ?>"
                 required>
 
             <label for="email">EMAIL</label>

@@ -22,6 +22,9 @@ $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
 $usuario = $stmt->get_result()->fetch_assoc();
 
+// Inicializa $apelido com o valor do banco de dados
+$apelido = $usuario['apelido'] ?? '';
+
 // Processa remoção da foto de perfil
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remover_foto'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
@@ -37,6 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remover_foto'])) {
         $_SESSION['foto_perfil'] = null;
         $mensagem = "Foto de perfil removida com sucesso!";
         $usuario['foto_perfil'] = null;
+        $_SESSION['usuario_apelido'] = $apelido; // Usa o apelido atual do usuário
     }
 }
 
@@ -128,45 +132,49 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/perfil.css">
 </head>
 
-<body class="perfil">
-    <div class="perfil-container">
-        <h1>Meu Perfil</h1>
+<body class="client-perfil-body">
+    <div class="client-perfil-container">
+        <h1 class="client-perfil-title">Meu Perfil</h1>
         <?php if ($mensagem): ?>
-        <p class="mensagem"><?php echo htmlspecialchars($mensagem); ?></p>
+        <p class="client-perfil-message"><?php echo htmlspecialchars($mensagem); ?></p>
         <?php endif; ?>
 
-        <!-- Exibe foto de perfil -->
-        <?php if ($usuario['foto_perfil']): ?>
-        <div class="foto-perfil-container-PC">
-            <img src="<?php echo htmlspecialchars($usuario['foto_perfil']); ?>" alt="Foto de Perfil">
+        <!-- Seção de Foto de Perfil -->
+        <div class="client-perfil-photo-section">
+            <?php if ($usuario['foto_perfil']): ?>
+            <img src="<?php echo htmlspecialchars($usuario['foto_perfil']); ?>" alt="Foto de Perfil"
+                class="client-perfil-photo">
+            <form method="POST" class="client-perfil-photo-form">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <button type="submit" name="remover_foto" class="client-perfil-photo-remove">Remover Foto</button>
+            </form>
+            <?php else: ?>
+            <p class="client-perfil-no-photo">Sem foto de perfil</p>
+            <?php endif; ?>
         </div>
-        <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <button type="submit" name="remover_foto">Remover Foto</button>
-        </form>
-        <?php else: ?>
-        <p>Sem foto de perfil</p>
-        <?php endif; ?>
-        <br>
-        <p class="nome-perfil"><b>Nome:</b> <?php echo htmlspecialchars($usuario['nome'] ?? ''); ?></p>
-        <p class="apelido-perfil"><strong><b>Nome de usuário:</b></strong>
+
+        <p class="client-perfil-name"><b>Nome:</b> <?php echo htmlspecialchars($usuario['nome'] ?? ''); ?></p>
+        <p class="client-perfil-username"><strong><b>Nome de usuário:</b></strong>
             <?php echo htmlspecialchars($usuario['apelido'] ?? ''); ?></p>
 
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" class="client-perfil-form">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-            <label for="foto_perfil">Selecionar uma Foto de Perfil:</label>
-            <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*">
-            <label for="apelido">Nome de Usuário:</label>
+            <label for="foto_perfil" class="client-perfil-label">Selecionar uma Foto de Perfil:</label>
+            <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*" class="client-perfil-input">
+
+            <label for="apelido" class="client-perfil-label">Nome de Usuário:</label>
             <input type="text" name="apelido" id="apelido"
                 value="<?php echo htmlspecialchars($usuario['apelido'] ?? ''); ?>"
-                placeholder="Digite o seu nome de usuário" required>
-            <button type="submit" name="salvar_perfil">Salvar Alterações</button>
+                placeholder="Digite o seu nome de usuário" required class="client-perfil-input">
+
+            <button type="submit" name="salvar_perfil" class="client-perfil-submit">Salvar Alterações</button>
         </form>
 
-        <p><a href="configuracoes.php" class="Econfig">Editar Configurações</a></p>
-        <p><a href="index.php" class="Econfig">Voltar ao Início</a></p>
+        <a href="configuracoes.php" class="client-perfil-link">Editar Configurações</a>
+        <a href="index.php" class="client-perfil-link">Voltar ao Início</a>
     </div>
 </body>
 

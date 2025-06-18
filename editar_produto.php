@@ -132,8 +132,8 @@ if (isset($_GET['id'])) {
                     <p class="product-detail"><strong>Imagem:</strong> <?php echo htmlspecialchars($row['imagem']); ?>
                     </p>
                     <div class="action-buttons">
-                        <a href="editar_produto.php?id=<?php echo $row['id']; ?>" class="edit-link">Editar</a>
-                        <a href="editar_produto.php?delete_produto=<?php echo $row['id']; ?>" class="delete-link"
+                        <a href="admin_editarProduto.php?id=<?php echo $row['id']; ?>" class="edit-link">Editar</a>
+                        <a href="admin_editarProduto.php?delete_produto=<?php echo $row['id']; ?>" class="delete-link"
                             onclick="return confirm('Tem certeza que deseja excluir este produto?');">Excluir</a>
                     </div>
                 </div>

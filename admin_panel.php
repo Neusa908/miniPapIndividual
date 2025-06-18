@@ -60,60 +60,45 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
             <div class="dashboard-cards">
                 <a href="add_admin.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Gestão de Administradores</h3>
                     <p>Adicione ou remova administradores do sistema.</p>
                 </a>
 
                 <a href="admin_produtos.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Gestão de Produtos</h3>
                     <p>Adicione, edite ou remova produtos da loja.</p>
                 </a>
 
                 <a href="admin_suporte.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Gestão de Suporte</h3>
                     <p>Responda às mensagens do suporte dos clientes.</p>
                 </a>
 
                 <a href="admin_relatorios.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Dashboard</h3>
                     <p>Veja estatísticas do sistema.</p>
                 </a>
 
                 <a href="admin_usuarios.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Gestão de Usuários</h3>
                     <p>Edite e gerencie lista de clientes.</p>
                 </a>
 
                 <a href="admin_notificacoes.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Notificações</h3>
                     <p>Veja alertas de atividades.</p>
                 </a>
 
-                <a href="admin_comentarios.php" class="card">
-                    <span class="card-icon"></span>
-                    <h3>Comentários</h3>
-                    <p>Gerencie os comentários dos usuários.</p>
-                </a>
-
                 <a href="admin_cupoes.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Gestão de Cupões</h3>
                     <p>Crie e gerencie cupões promocionais.</p>
                 </a>
 
                 <a href="admin_vendas.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Relatórios de Vendas</h3>
                     <p>Veja relatórios detalhados de vendas.</p>
                 </a>
                 <a href="admin_feedback.php" class="card">
-                    <span class="card-icon"></span>
                     <h3>Feedback dos Clientes</h3>
                     <p>Veja e gerencie o feedback dos clientes.</p>
                 </a>

@@ -1,4 +1,6 @@
 <header class="header-index">
+    <link rel="stylesheet" href="./css/style.css">
+
     <div class="header-content">
         <div class="title-section">
             <h1>Mercado Bom Preço</h1>
@@ -23,6 +25,8 @@
     </div>
 </header>
 
+
+
 <nav class="nav-index">
     <div class="nav-content">
         <div class="dropdown" id="dropdownMenu">
@@ -37,6 +41,7 @@
                 <a href="notificacoes.php" class="menu-item blog"><span class="icon"></span> Notificações</a>
                 <a href="cupao.php" class="menu-item blog"><span class="icon"></span> Meus Cupões</a>
                 <a href="carteira.php" class="menu-item blog"><span class="icon"></span> Minha carteira</a>
+                <a href="configuracoes.php" class="menu-item home"><span class="icon"></span> Configurações</a>
                 <?php endif; ?>
                 <?php if (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'admin'): ?>
                 <a href="admin_verPerfil.php" class="menu-home"><span class="icon"></span> Perfil</a>
@@ -65,28 +70,36 @@
         <a href="feedback.php">Feedback</a>
         <a href="carrinho.php">Meu carrinho de compras</a>
         <a href="produtos.php">Produtos</a>
+
         <?php endif; ?>
         <a href="sobre.php">Sobre</a>
         <a href="suporte.php">Suporte</a>
-        <a href="index.php">Página inicial</a>
+
     </div>
 </nav>
-<script>
-function toggleDropdown() {
-    const dropdown = document.getElementById('dropdownMenu');
-    const content = dropdown.querySelector('.dropdown-content');
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-    dropdown.classList.toggle('active');
-}
 
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('dropdownMenu');
-    const content = dropdown.querySelector('.dropdown-content');
-    if (!dropdown.contains(event.target)) {
-        content.style.display = 'none';
-        dropdown.classList.remove('active');
+<body>
+    <footer class="footer-index">
+        <p>© 2024-2025 Mercado Bom Preço. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('dropdownMenu');
+        const content = dropdown.querySelector('.dropdown-content');
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        dropdown.classList.toggle('active');
     }
-});
-</script>
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('dropdownMenu');
+        const content = dropdown.querySelector('.dropdown-content');
+        if (!dropdown.contains(event.target)) {
+            content.style.display = 'none';
+            dropdown.classList.remove('active');
+        }
+    });
+    </script>
+</body>
 
 </html>

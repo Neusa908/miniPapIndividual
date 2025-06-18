@@ -15,7 +15,7 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['t
 $usuario_id = $_SESSION['usuario_id'];
 $sql = "SELECT id, email, mensagem, data_envio, status, resposta, data_resposta 
         FROM suporte 
-        WHERE usuario_id = ? 
+        WHERE usuario_id = ? AND status = 'resolvido'
         ORDER BY data_envio DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $usuario_id);
@@ -57,7 +57,7 @@ $stmt->close();
             <?php endwhile; ?>
             <?php else: ?>
             <div class="no-messages-box">
-                <p>Você ainda não enviou nenhuma mensagem de suporte.</p>
+                <p>Você ainda não enviou nenhuma mensagem de suporte ou a mensagem solicitada não foi encontrada.</p>
             </div>
             <?php endif; ?>
         </div>

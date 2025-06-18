@@ -7,6 +7,12 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
+// Verifica se o usuário é cliente
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    exit();
+}
+
 $usuario_id = $_SESSION['usuario_id'];
 $mensagem = "";
 
@@ -22,9 +28,8 @@ $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
 $usuario = $stmt->get_result()->fetch_assoc();
 
-
 // Obtém endereços do usuário
-$sql = "SELECT id, nome_endereco, rua, numero, bairro, cidade, estado, codigo_postal, padrao FROM enderecos WHERE usuario_id = ?";
+$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao FROM enderecos WHERE usuario_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $usuario_id);
 $stmt->execute();
@@ -80,18 +85,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_dados'])) {
     }
 }
 
-// Processa adição de endereço
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_endereco'])) {
+// Processa atualização ou adição de endereço
+if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['atualizar_endereco']) || isset($_POST['adicionar_endereco']))) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem = "Erro de validação. Tente novamente.";
     } else {
+        $endereco_id = isset($_POST['endereco_id']) ? filter_input(INPUT_POST, 'endereco_id', FILTER_SANITIZE_NUMBER_INT) : null;
         $nome_endereco = trim(filter_input(INPUT_POST, 'nome_endereco', FILTER_SANITIZE_STRING));
         $rua = trim(filter_input(INPUT_POST, 'rua', FILTER_SANITIZE_STRING));
         $numero = trim(filter_input(INPUT_POST, 'numero', FILTER_SANITIZE_STRING));
-        $bairro = trim(filter_input(INPUT_POST, 'bairro', FILTER_SANITIZE_STRING));
+        $freguesia = trim(filter_input(INPUT_POST, 'freguesia', FILTER_SANITIZE_STRING));
         $cidade = trim(filter_input(INPUT_POST, 'cidade_endereco', FILTER_SANITIZE_STRING));
-        $estado = trim(filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_STRING));
-        $cep = trim(filter_input(INPUT_POST, 'cep', FILTER_SANITIZE_STRING));
+        $distrito = trim(filter_input(INPUT_POST, 'distrito', FILTER_SANITIZE_STRING));
+        $codigo_postal = trim(filter_input(INPUT_POST, 'codigo_postal', FILTER_SANITIZE_STRING));
         $padrao = isset($_POST['padrao']) ? 1 : 0;
 
         // Validações
@@ -102,34 +108,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_endereco']))
         if (empty($rua)) {
             $erros[] = "A rua é obrigatória.";
         }
+        if (!empty($numero) && !preg_match('/^[0-9\s]+$/', $numero)) {
+            $erros[] = "O número deve conter apenas números ou espaços.";
+        }
         if (empty($cidade)) {
             $erros[] = "A cidade é obrigatória.";
         }
-        if (empty($estado)) {
-            $erros[] = "O estado é obrigatório.";
+        if (empty($distrito)) {
+            $erros[] = "O distrito é obrigatório.";
         }
-        if (empty($cep)) {
-            $erros[] = "O CEP é obrigatório.";
+        if (empty($codigo_postal) || !preg_match('/^\d{4}-\d{3}$/', $codigo_postal)) {
+            $erros[] = "O Código Postal é obrigatório e deve estar no formato 1234-567 (ex.: 2735-286).";
         }
 
         if (empty($erros)) {
-            if ($padrao) {
-                $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+            if ($endereco_id) {
+                // Atualizar endereço existente
+                if ($padrao) {
+                    $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $usuario_id);
+                    $stmt->execute();
+                }
+                $sql = "UPDATE enderecos SET nome_endereco = ?, rua = ?, numero = ?, freguesia = ?, cidade = ?, distrito = ?, codigo_postal = ?, padrao = ? WHERE id = ? AND usuario_id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $usuario_id);
-                $stmt->execute();
-            }
-
-            $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, numero, bairro, cidade, estado, cep, padrao) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("isssssssi", $usuario_id, $nome_endereco, $rua, $numero, $bairro, $cidade, $estado, $cep, $padrao);
-            if ($stmt->execute()) {
-                $mensagem = "Endereço adicionado com sucesso!";
-                header("Location: configuracoes.php");
-                exit;
+                $stmt->bind_param("ssssssiii", $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao, $endereco_id, $usuario_id);
+                if ($stmt->execute()) {
+                    $mensagem = "Endereço atualizado com sucesso!";
+                } else {
+                    $mensagem = "Erro ao atualizar o endereço.";
+                }
             } else {
-                $mensagem = "Erro ao adicionar endereço.";
+                // Adicionar novo endereço
+                if ($padrao) {
+                    $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $usuario_id);
+                    $stmt->execute();
+                }
+                $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("isssssssi", $usuario_id, $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao);
+                if ($stmt->execute()) {
+                    $mensagem = "Endereço adicionado com sucesso!";
+                } else {
+                    $mensagem = "Erro ao adicionar endereço.";
+                }
             }
         } else {
             $mensagem = implode("<br>", $erros);
@@ -137,7 +161,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_endereco']))
     }
 }
 
-// Processa exclusão de endereço
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['excluir_endereco'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem = "Erro de validação. Tente novamente.";
@@ -158,8 +181,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['excluir_endereco'])) {
                 $stmt->bind_param("ii", $endereco_id, $usuario_id);
                 if ($stmt->execute()) {
                     $mensagem = "Endereço eliminado com sucesso!";
-                    header("Location: configuracoes.php");
-                    exit;
                 } else {
                     $mensagem = "Erro ao eliminar endereço.";
                 }
@@ -180,12 +201,13 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações - Mercado Bom Preço</title>
+    <title>Configurações</title>
     <link rel="stylesheet" href="./css/style.css">
+
 </head>
 
-<body class="registar">
-    <div class="perfil-container">
+<body class="configuracoes-body">
+    <div class="configuracoes-container">
         <h1>Configurações da Conta</h1>
         <?php if ($mensagem): ?>
         <p class="mensagem"><?php echo htmlspecialchars($mensagem); ?></p>
@@ -210,50 +232,29 @@ $conn->close();
             <button type="submit" name="salvar_dados">Salvar Dados Pessoais</button>
         </form>
 
-        <h2>Endereços de Entrega</h2>
-        <?php if (!empty($enderecos)): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Morada</th>
-                    <th>Cidade</th>
-                    <th>Estado</th>
-                    <th>CP</th>
-                    <th>Padrão</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($enderecos as $endereco): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($endereco['nome_endereco']); ?></td>
-                    <td><?php echo htmlspecialchars($endereco['rua'] . ($endereco['numero'] ? ', ' . $endereco['numero'] : '') . ($endereco['bairro'] ? ', ' . $endereco['bairro'] : '')); ?>
-                    </td>
-                    <td><?php echo htmlspecialchars($endereco['cidade']); ?></td>
-                    <td><?php echo htmlspecialchars($endereco['estado']); ?></td>
-                    <td><?php echo htmlspecialchars($endereco['cep']); ?></td>
-                    <td><?php echo $endereco['padrao'] ? 'Sim' : 'Não'; ?></td>
-                    <td>
-                        <a href="editar_endereco.php?id=<?php echo $endereco['id']; ?>" class="btn">Editar</a>
-                        <?php if (!$endereco['padrao']): ?>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="csrf_token"
-                                value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                            <input type="hidden" name="endereco_id" value="<?php echo $endereco['id']; ?>">
-                            <button type="submit" name="excluir_endereco"
-                                onclick="return confirm('Tem certeza que deseja excluir este endereço?')">Excluir</button>
-                        </form>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        <?php else: ?>
-        <p>Você não tem endereços cadastrados.</p>
-        <?php endif; ?>
 
+        <?php if (!empty($enderecos)): ?>
+        <h2>Os Seus Endereços</h2>
+        <?php foreach ($enderecos as $endereco): ?>
+        <div class="endereco-card">
+            <strong><?php echo htmlspecialchars($endereco['nome_endereco']); ?></strong><br>
+            <?php echo htmlspecialchars($endereco['rua'] . ', ' . $endereco['numero']); ?><br>
+            <?php echo htmlspecialchars($endereco['freguesia'] . ', ' . $endereco['cidade'] . ', ' . $endereco['distrito']); ?><br>
+            <?php echo htmlspecialchars($endereco['codigo_postal']); ?><br>
+            <?php if ($endereco['padrao']): ?>
+            <span class="endereco-padrao">Endereço Padrão</span>
+            <?php endif; ?>
+            <form method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <input type="hidden" name="endereco_id" value="<?php echo $endereco['id']; ?>">
+                <button type="submit" name="excluir_endereco" class="apagar-endereco-btn"
+                    onclick="return confirm('Tem certeza que deseja apagar este endereço?');">Apagar</button>
+            </form>
+        </div>
+        <?php endforeach; ?>
+        <?php else: ?>
+        <p>Você não tem endereços registados.</p>
+        <?php endif; ?>
 
         <h3>Adicionar Novo Endereço</h3>
         <form method="POST">
@@ -264,20 +265,21 @@ $conn->close();
             <input type="text" name="rua" id="rua" placeholder="Digite a rua" required>
             <label for="numero">Número:</label>
             <input type="text" name="numero" id="numero" placeholder="Digite o número">
-            <label for="bairro">Bairro:</label>
-            <input type="text" name="bairro" id="bairro" placeholder="Digite o bairro">
+            <label for="freguesia">Freguesia:</label>
+            <input type="text" name="freguesia" id="freguesia" placeholder="Digite a freguesia">
             <label for="cidade_endereco">Cidade:</label>
             <input type="text" name="cidade_endereco" id="cidade_endereco" placeholder="Digite a cidade" required>
-            <label for="estado">Estado:</label>
-            <input type="text" name="estado" id="estado" placeholder="Digite o estado" required>
-            <label for="cep">CEP:</label>
-            <input type="text" name="cep" id="cep" placeholder="Digite o CEP" required>
+            <label for="distrito">Distrito:</label>
+            <input type="text" name="distrito" id="distrito" placeholder="Digite o distrito" required>
+            <label for="codigo_postal">Código Postal:</label>
+            <input type="text" name="codigo_postal" id="codigo_postal" placeholder="Digite o Código postal" required>
             <label><input type="checkbox" name="padrao"> Definir como padrão</label>
             <button type="submit" name="adicionar_endereco">Adicionar Endereço</button>
+            <button type="reset" class="btn-cancelar">Cancelar</button>
         </form>
 
-        <p><a href="perfil.php" style="color: white;">Voltar ao Perfil</a></p>
-        <p><a href="index.php" style="color: white;">Voltar ao Início</a></p>
+        <a href="perfil.php" class="btn-voltar">Voltar ao Perfil</a>
+        <a href="index.php" class="btn-voltar">Voltar ao Início</a>
     </div>
 </body>
 

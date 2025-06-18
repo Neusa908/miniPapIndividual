@@ -21,6 +21,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['responder'])) {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $resposta, $suporte_id);
         if ($stmt->execute()) {
+            // Obter o usuario_id associado ao suporte
+            $sql_usuario = "SELECT usuario_id FROM suporte WHERE id = ?";
+            $stmt_usuario = $conn->prepare($sql_usuario);
+            $stmt_usuario->bind_param("i", $suporte_id);
+            $stmt_usuario->execute();
+            $result_usuario = $stmt_usuario->get_result();
+            $usuario_id_cliente = $result_usuario->fetch_assoc()['usuario_id'];
+            $stmt_usuario->close();
+
+            if ($usuario_id_cliente) {
+                // Criar notificação para o cliente sem o ID
+                $mensagem_notif = "Sua mensagem de suporte foi respondida em " . date('d/m/Y H:i');
+                $stmt_notif = $conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
+                $stmt_notif->bind_param("is", $usuario_id_cliente, $mensagem_notif);
+                $stmt_notif->execute();
+                $stmt_notif->close();
+            }
+
             echo "<script>alert('Resposta enviada com sucesso!'); window.location.href='admin_suporte.php';</script>";
         } else {
             echo "<script>alert('Erro ao enviar a resposta. Tente novamente.');</script>";
@@ -57,7 +75,6 @@ if ($result === false) {
     echo "<p>Erro na consulta SQL: " . htmlspecialchars($conn->error) . "</p>";
     $result = null;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +95,9 @@ if ($result === false) {
             <?php if ($result && $result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
             <div class="suporte-item">
-                <p><strong>Usuário:</strong> <?php echo htmlspecialchars($row['nome'] ?? 'Anônimo'); ?></p>
+                <p><a
+                        href="verPerfil.php?id=<?php echo htmlspecialchars($row['usuario_id']); ?>"><?php echo htmlspecialchars($row['nome'] ?? 'Anônimo'); ?></a>
+                </p>
                 <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?></p>
                 <p><strong>Mensagem:</strong> <?php echo htmlspecialchars($row['mensagem']); ?></p>
                 <p><strong>Data de Envio:</strong> <?php echo htmlspecialchars($row['data_envio']); ?></p>
