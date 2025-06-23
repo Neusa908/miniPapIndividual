@@ -5,8 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
@@ -34,7 +34,7 @@ $result_produtos = $conn->query($sql_produtos);
     <div class="admin-container">
         <h2 class="admin-title">Lista de Produtos</h2>
         <div class="section product-list-section">
-            <h3 class="section-title">Produtos Cadastrados</h3>
+            <h3 class="section-title">Produtos Registados</h3>
             <div class="product-items">
                 <?php if ($result_produtos->num_rows > 0): ?>
                 <?php while ($row = $result_produtos->fetch_assoc()): ?>

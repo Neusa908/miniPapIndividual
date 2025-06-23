@@ -4,44 +4,44 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     echo "<script>alert('Faça login para acessar esta página.'); window.location.href='login.php';</script>";
     exit();
 }
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do usuário logado
-$sql_usuario = "SELECT nome, foto_perfil, descricao FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$usuario = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$sql_utilizador = "SELECT nome, foto_perfil, descricao FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$utilizador = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
-if (!$usuario) {
-    echo "<script>alert('Usuário não encontrado.'); window.location.href='index.php';</script>";
+if (!$utilizador) {
+    echo "<script>alert('Utilizador não encontrado.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Se foto_perfil for nulo, usa uma imagem padrão
-$usuario['foto_perfil'] = $usuario['foto_perfil'] ?? 'img/default-profile.jpg';
-$usuario['descricao'] = $usuario['descricao'] ?? 'Nenhuma descrição fornecida.';
+$utilizador['foto_perfil'] = $utilizador['foto_perfil'] ?? 'img/default-profile.jpg';
+$utilizador['descricao'] = $utilizador['descricao'] ?? 'Nenhuma descrição fornecida.';
 
 // Processa a atualização da descrição
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nova_descricao = trim($_POST['descricao']);
-    $sql_update = "UPDATE usuarios SET descricao = ? WHERE id = ?";
+    $sql_update = "UPDATE utilizadores SET descricao = ? WHERE id = ?";
     $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("si", $nova_descricao, $usuario_id);
+    $stmt_update->bind_param("si", $nova_descricao, $utilizador_id);
     if ($stmt_update->execute()) {
-        echo "<script>alert('Descrição atualizada com sucesso!'); window.location.href='verPerfil.php?id=$usuario_id';</script>";
+        echo "<script>alert('Descrição atualizada com sucesso!'); window.location.href='verPerfil.php?id=$utilizador_id';</script>";
     } else {
         echo "<script>alert('Erro ao atualizar descrição.'); window.location.href='desc.php';</script>";
     }
@@ -65,7 +65,7 @@ $conn->close();
     <div class="container">
         <header class="profile-header">
             <h1>Editar Descrição</h1>
-            <a href="verPerfil.php?id=<?php echo $usuario_id; ?>" class="back-link">Voltar</a>
+            <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>" class="back-link">Voltar</a>
         </header>
 
         <div class="desc-container">
@@ -73,9 +73,9 @@ $conn->close();
                 <h2>Editar Descrição do Perfil</h2>
                 <label for="descricao" class="form-label">Descrição:</label>
                 <textarea name="descricao" id="descricao" class="form-textarea"
-                    rows="5"><?php echo htmlspecialchars($usuario['descricao']); ?></textarea>
+                    rows="5"><?php echo htmlspecialchars($utilizador['descricao']); ?></textarea>
                 <button type="submit" class="submit-button">Salvar Alterações</button>
-                <a href="verPerfil.php?id=<?php echo $usuario_id; ?>" class="cancel-button">Cancelar</a>
+                <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>" class="cancel-button">Cancelar</a>
             </form>
         </div>
     </div>

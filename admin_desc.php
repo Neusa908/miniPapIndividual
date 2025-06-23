@@ -5,23 +5,23 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Obtém o ID do admin logado
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do admin logado
-$sql_usuario = "SELECT nome, foto_perfil, descricao FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$sql_utilizador = "SELECT nome, foto_perfil, descricao FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 if (!$admin) {
     echo "<script>alert('Administrador não encontrado.'); window.location.href='admin_panel.php';</script>";
@@ -35,11 +35,11 @@ $admin['descricao'] = $admin['descricao'] ?? 'Nenhuma descrição fornecida.';
 // Processa a atualização da descrição
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nova_descricao = trim($_POST['descricao']);
-    $sql_update = "UPDATE usuarios SET descricao = ? WHERE id = ?";
+    $sql_update = "UPDATE utilizadores SET descricao = ? WHERE id = ?";
     $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("si", $nova_descricao, $usuario_id);
+    $stmt_update->bind_param("si", $nova_descricao, $utilizador_id);
     if ($stmt_update->execute()) {
-        echo "<script>alert('Descrição atualizada com sucesso!'); window.location.href='admin_verPerfil.php?id=$usuario_id';</script>";
+        echo "<script>alert('Descrição atualizada com sucesso!'); window.location.href='admin_verPerfil.php?id=$utilizador_id';</script>";
     } else {
         echo "<script>alert('Erro ao atualizar descrição.'); window.location.href='admin_desc.php';</script>";
     }
@@ -75,13 +75,13 @@ $conn->close();
         <!-- Conteúdo Principal -->
         <div class="main-content">
             <header class="admin-header">
-                <h1>Editar Descrição</h1>
+                <h1>Editar a Descrição</h1>
                 <div class="admin-profile">
                     <div class="profile-pic">
                         <img src="<?php echo htmlspecialchars($admin['foto_perfil']); ?>" alt="Foto de perfil">
                         <div class="profile-dropdown">
                             <a href="admin_perfil.php">Configurações</a>
-                            <a href="admin_verPerfil.php?id=<?php echo $usuario_id; ?>">Ver Perfil</a>
+                            <a href="admin_verPerfil.php?id=<?php echo $utilizador_id; ?>">Ver Perfil</a>
                             <a href="admin_lista.php">Lista de Administradores</a>
                             <a href="logout.php">Sair</a>
                         </div>
@@ -91,12 +91,13 @@ $conn->close();
 
             <div class="desc-container">
                 <form method="POST" class="desc-form">
-                    <h2>Editar Descrição do Perfil</h2>
+                    <h2>Editar a Descrição do Perfil</h2>
                     <label for="descricao">Descrição:</label>
                     <textarea name="descricao" id="descricao"
                         rows="5"><?php echo htmlspecialchars($admin['descricao']); ?></textarea>
                     <button type="submit">Salvar Alterações</button>
-                    <a href="admin_verPerfil.php?id=<?php echo $usuario_id; ?>" class="desc-cancel-button">Cancelar</a>
+                    <a href="admin_verPerfil.php?id=<?php echo $utilizador_id; ?>"
+                        class="desc-cancel-button">Cancelar</a>
                 </form>
             </div>
         </div>

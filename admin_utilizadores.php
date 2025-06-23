@@ -5,15 +5,15 @@
    }
    require 'conexao.php';
 
-   // Verifica se o usuário é administrador
-   if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+   // Verifica se o utilizador é administrador
+   if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
        echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
        exit();
    }
 
    // Busca clientes
-   $sql_usuarios = "SELECT id, nome, email FROM usuarios WHERE tipo = 'cliente'";
-   $result_usuarios = $conn->query($sql_usuarios);
+   $sql_utilizadores = "SELECT id, nome, email FROM utilizadores WHERE tipo = 'cliente'";
+   $result_utilizadores = $conn->query($sql_utilizadores);
    ?>
 
 <!DOCTYPE html>
@@ -22,7 +22,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Usuários - Mercado Bom Preço</title>
+    <title>Gestão de Utilizadores - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
@@ -39,10 +39,10 @@
 
         <div class="main-content">
             <header class="admin-header">
-                <h1>Gestão de Usuários</h1>
+                <h1>Gestão de Utilizadores</h1>
             </header>
             <div class="users-container">
-                <?php if ($result_usuarios->num_rows > 0): ?>
+                <?php if ($result_utilizadores->num_rows > 0): ?>
                 <table class="users-table">
                     <thead>
                         <tr>
@@ -53,15 +53,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($usuario = $result_usuarios->fetch_assoc()): ?>
+                        <?php while ($utilizador = $result_utilizadores->fetch_assoc()): ?>
                         <tr class="user-row">
-                            <td><?php echo $usuario['id']; ?></td>
-                            <td><?php echo htmlspecialchars($usuario['nome']); ?></td>
-                            <td><?php echo htmlspecialchars($usuario['email']); ?></td>
+                            <td><?php echo $utilizador['id']; ?></td>
+                            <td><?php echo htmlspecialchars($utilizador['nome']); ?></td>
+                            <td><?php echo htmlspecialchars($utilizador['email']); ?></td>
                             <td>
-                                <a href="admin_editarUsuarios.php?id=<?php echo $usuario['id']; ?>"
+                                <a href="admin_editarUtilizadores.php?id=<?php echo $utilizador['id']; ?>"
                                     class="user-action edit">Editar</a>
-                                <a href="admin_excluirUsuarios.php?id=<?php echo $usuario['id']; ?>"
+                                <a href="admin_excluirUtilizadores.php?id=<?php echo $utilizador['id']; ?>"
                                     class="user-action delete"
                                     onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
                             </td>
@@ -70,7 +70,7 @@
                     </tbody>
                 </table>
                 <?php else: ?>
-                <p class="no-users">Nenhum usuário encontrado.</p>
+                <p class="no-users">Nenhum utilizador encontrado.</p>
                 <?php endif; ?>
             </div>
         </div>

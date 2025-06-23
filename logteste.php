@@ -11,7 +11,7 @@ $senha = $_POST['senha'];
 //print_r('<br>');
 //print_r('senha: ' . $senha);
 
-$sql = "SELECT * FROM usuarios WHERE email = '$email' and senha = '$senha'";
+$sql = "SELECT * FROM utilizadores WHERE email = '$email' and senha = '$senha'";
 
 $result = $conexao->query($sql);
 

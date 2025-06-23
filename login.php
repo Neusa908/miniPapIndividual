@@ -8,24 +8,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $username = filter_var($username, FILTER_SANITIZE_STRING);
 
-    $sql = "SELECT id, nome, apelido, senha, tipo, foto_perfil FROM usuarios WHERE (email = ? OR apelido = ?)";
+    $sql = "SELECT id, nome, apelido, senha, tipo, foto_perfil FROM utilizadores WHERE (email = ? OR apelido = ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $username, $username);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
-        $usuario = $result->fetch_assoc();
+        $utilizador = $result->fetch_assoc();
 
-        if (password_verify($password, $usuario['senha'])) {
-            $_SESSION['usuario_id'] = $usuario['id'];
-            $_SESSION['usuario_nome'] = $usuario['apelido'] ?? $usuario['nome']; // Usa apelido se disponível
-            $_SESSION['tipo'] = $usuario['tipo'];
-            $_SESSION['foto_perfil'] = $usuario['foto_perfil'] ?? null; // Armazena a foto na sessão
+        if (password_verify($password, $utilizador['senha'])) {
+            $_SESSION['utilizador_id'] = $utilizador['id'];
+            $_SESSION['utilizador_nome'] = $utilizador['apelido'] ?? $utilizador['nome']; // Usa apelido se disponível
+            $_SESSION['tipo'] = $utilizador['tipo'];
+            $_SESSION['foto_perfil'] = $utilizador['foto_perfil'] ?? null; // Armazena a foto na sessão
 
-            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['usuario_nome']) . "!";
+            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['utilizador_nome']) . "!";
             $_SESSION['mensagem_sucesso'] = true;
-            $redirect = $usuario['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
+            $redirect = $utilizador['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
             header("Location: $redirect");
             exit();
         } else {

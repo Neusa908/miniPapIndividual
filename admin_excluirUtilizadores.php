@@ -5,30 +5,30 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php';
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Verifica se o ID foi passado
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    echo "<script>alert('ID de usuário inválido.'); window.location.href='admin_usuarios.php';</script>";
+    echo "<script>alert('ID de utilizador inválido.'); window.location.href='admin_usuarios.php';</script>";
     exit();
 }
 
 $id = $_GET['id'];
 
-// Exclui o usuário
+// Exclui o utilizador
 if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
-    $sql = "DELETE FROM usuarios WHERE id = ? AND tipo = 'cliente'";
+    $sql = "DELETE FROM utilizadores WHERE id = ? AND tipo = 'cliente'";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Usuário excluído com sucesso!'); window.location.href='admin_usuarios.php';</script>";
+        echo "<script>alert('Utilizador excluído com sucesso!'); window.location.href='admin_utilizadores.php';</script>";
     } else {
-        echo "<script>alert('Erro ao excluir usuário.'); window.location.href='admin_usuarios.php';</script>";
+        echo "<script>alert('Erro ao excluir utilizador.'); window.location.href='admin_utilizadores.php';</script>";
     }
     $stmt->close();
     $conn->close();
@@ -54,19 +54,19 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
             </div>
             <nav class="sidebar-nav">
                 <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
-                <a href="admin_usuarios.php" class="nav-item"><span class="icon">⬅️</span>Usuários</a>
+                <a href="admin_usuarios.php" class="nav-item"><span class="icon">⬅️</span>Utilizadores</a>
             </nav>
 
         </div>
         <div class="main-content">
             <header class="admin-header">
-                <h1>Eliminar Usuário</h1>
+                <h1>Eliminar Utilizador</h1>
             </header>
             <div class="delete-user-container">
-                <p>Tem certeza que deseja eliminar este usuário? Esta ação não pode ser desfeita.</p>
-                <a href="admin_excluirUsuarios.php?id=<?php echo $id; ?>&confirm=yes" class="delete-btn-excluir">
+                <p>Tem certeza que deseja eliminar este utilizador? Esta ação não pode ser desfeita.</p>
+                <a href="admin_excluirUtilizadores.php?id=<?php echo $id; ?>&confirm=yes" class="delete-btn-excluir">
                     Eliminar</a>
-                <p></p> <a href="admin_usuarios.php" class="cancel-btn-excluir">Cancelar</a>
+                <p></p> <a href="admin_utilizadores.php" class="cancel-btn-excluir">Cancelar</a>
             </div>
         </div>
     </div>

@@ -2,18 +2,18 @@
 session_start();
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     echo "<script>alert('É necessário estar logado para acessar as configurações. Você será redirecionado para o login.'); window.location.href='login.php';</script>";
     exit();
 }
 
 // Verifica se o usuário é cliente
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $mensagem = "";
 
 // Gerar token CSRF se não existir
@@ -22,16 +22,16 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 // Obtém dados do usuário
-$sql = "SELECT email, telefone, morada, cidade FROM usuarios WHERE id = ?";
+$sql = "SELECT email, telefone, morada, cidade FROM utilizadores WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
-$usuario = $stmt->get_result()->fetch_assoc();
+$utilizador = $stmt->get_result()->fetch_assoc();
 
 // Obtém endereços do usuário
 $sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao FROM enderecos WHERE usuario_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -50,12 +50,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_dados'])) {
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erros[] = "Por favor, insira um email válido.";
         } else {
-            $sql = "SELECT id FROM usuarios WHERE email = ? AND id != ?";
+            $sql = "SELECT id FROM utilizadores WHERE email = ? AND id != ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("si", $email, $usuario_id);
+            $stmt->bind_param("si", $email, $utilizador_id);
             $stmt->execute();
             if ($stmt->get_result()->num_rows > 0) {
-                $erros[] = "Este email já está em uso por outro usuário.";
+                $erros[] = "Este email já está em uso por outro utilizador.";
             }
         }
         if (empty($telefone) || !preg_match('/^[0-9\s+]+$/', $telefone)) {
@@ -69,13 +69,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_dados'])) {
         }
 
         if (empty($erros)) {
-            $sql = "UPDATE usuarios SET email = ?, telefone = ?, morada = ?, cidade = ? WHERE id = ?";
+            $sql = "UPDATE utilizadores SET email = ?, telefone = ?, morada = ?, cidade = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssi", $email, $telefone, $morada, $cidade, $usuario_id);
+            $stmt->bind_param("ssssi", $email, $telefone, $morada, $cidade, $utilizador_id);
             if ($stmt->execute()) {
                 $mensagem = "Dados pessoais atualizados com sucesso!";
-                $_SESSION['usuario_email'] = $email;
-                $usuario = ['email' => $email, 'telefone' => $telefone, 'morada' => $morada, 'cidade' => $cidade];
+                $_SESSION['utilizador_email'] = $email;
+                $utilizador = ['email' => $email, 'telefone' => $telefone, 'morada' => $morada, 'cidade' => $cidade];
             } else {
                 $mensagem = "Erro ao atualizar os dados.";
             }
@@ -125,14 +125,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['atualizar_endereco'])
             if ($endereco_id) {
                 // Atualizar endereço existente
                 if ($padrao) {
-                    $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+                    $sql = "UPDATE enderecos SET padrao = 0 WHERE utilizador_id = ?";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("i", $usuario_id);
+                    $stmt->bind_param("i", $utilizador_id);
                     $stmt->execute();
                 }
-                $sql = "UPDATE enderecos SET nome_endereco = ?, rua = ?, numero = ?, freguesia = ?, cidade = ?, distrito = ?, codigo_postal = ?, padrao = ? WHERE id = ? AND usuario_id = ?";
+                $sql = "UPDATE enderecos SET nome_endereco = ?, rua = ?, numero = ?, freguesia = ?, cidade = ?, distrito = ?, codigo_postal = ?, padrao = ? WHERE id = ? AND utilizador_id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssssssiii", $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao, $endereco_id, $usuario_id);
+                $stmt->bind_param("ssssssiii", $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao, $endereco_id, $utilizador_id);
                 if ($stmt->execute()) {
                     $mensagem = "Endereço atualizado com sucesso!";
                 } else {
@@ -141,14 +141,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['atualizar_endereco'])
             } else {
                 // Adicionar novo endereço
                 if ($padrao) {
-                    $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+                    $sql = "UPDATE enderecos SET padrao = 0 WHERE utilizador_id = ?";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("i", $usuario_id);
+                    $stmt->bind_param("i", $utilizador_id);
                     $stmt->execute();
                 }
-                $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO enderecos (utilizador_id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("isssssssi", $usuario_id, $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao);
+                $stmt->bind_param("isssssssi", $utilizador_id, $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao);
                 if ($stmt->execute()) {
                     $mensagem = "Endereço adicionado com sucesso!";
                 } else {
@@ -166,9 +166,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['excluir_endereco'])) {
         $mensagem = "Erro de validação. Tente novamente.";
     } else {
         $endereco_id = filter_input(INPUT_POST, 'endereco_id', FILTER_SANITIZE_NUMBER_INT);
-        $sql = "SELECT padrao FROM enderecos WHERE id = ? AND usuario_id = ?";
+        $sql = "SELECT padrao FROM enderecos WHERE id = ? AND utilizador_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $endereco_id, $usuario_id);
+        $stmt->bind_param("ii", $endereco_id, $utilizador_id);
         $stmt->execute();
         $endereco = $stmt->get_result()->fetch_assoc();
 
@@ -176,9 +176,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['excluir_endereco'])) {
             if ($endereco['padrao'] == 1) {
                 $mensagem = "Não é possível eliminar o endereço padrão. Defina outro endereço como padrão primeiro.";
             } else {
-                $sql = "DELETE FROM enderecos WHERE id = ? AND usuario_id = ?";
+                $sql = "DELETE FROM enderecos WHERE id = ? AND utilizador_id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ii", $endereco_id, $usuario_id);
+                $stmt->bind_param("ii", $endereco_id, $utilizador_id);
                 if ($stmt->execute()) {
                     $mensagem = "Endereço eliminado com sucesso!";
                 } else {

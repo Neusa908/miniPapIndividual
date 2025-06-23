@@ -125,10 +125,10 @@ $result = $stmt->get_result();
                         <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
                         <button class="favorito-button" type="submit" name="adicionar_favorito">
                             <?php
-                                        $usuario_id = $_SESSION['usuario_id'];
+                                        $utilizador_id = $_SESSION['usuario_id'];
                                         $produto_id = $produto['id'];
-                                        $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE usuario_id = ? AND produto_id = ?");
-                                        $stmt_fav->bind_param("ii", $usuario_id, $produto_id);
+                                        $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE utilizador_id = ? AND produto_id = ?");
+                                        $stmt_fav->bind_param("ii", $utilizador_id, $produto_id);
                                         $stmt_fav->execute();
                                         $is_favorito = $stmt_fav->get_result()->num_rows > 0;
                                         $stmt_fav->close();

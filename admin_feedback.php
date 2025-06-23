@@ -4,12 +4,12 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$admin_id = $_SESSION['usuario_id'];
+$admin_id = $_SESSION['utilizador_id'];
 
 // Exclusão de feedback
 if (isset($_GET['delete_id'])) {
@@ -52,9 +52,9 @@ unset($_SESSION['error_message']);
 
 // Busca feedbacks e respostas
 $stmt = $conn->prepare("
-    SELECT f.id, f.comentario, f.avaliacao, f.data_feedback, u.nome AS usuario_nome
+    SELECT f.id, f.comentario, f.avaliacao, f.data_feedback, u.nome AS utilizador_nome
     FROM feedback_site f
-    JOIN usuarios u ON f.usuario_id = u.id
+    JOIN utilizadores u ON f.utilizador_id = u.id
     ORDER BY f.data_feedback DESC
 ");
 $stmt->execute();
@@ -65,7 +65,7 @@ foreach ($feedbacks as &$feedback) {
     $stmt = $conn->prepare("
         SELECT r.resposta, r.data_resposta, u.nome AS admin_nome
         FROM respostas_feedback r
-        JOIN usuarios u ON r.admin_id = u.id
+        JOIN utilizadores u ON r.admin_id = u.id
         WHERE r.feedback_id = ?
         ORDER BY r.data_resposta ASC
     ");
@@ -126,7 +126,7 @@ foreach ($feedbacks as &$feedback) {
                     <?php foreach ($feedbacks as $feedback): ?>
                     <div class="feedback-item">
                         <p class="feedback-author">Feedback de
-                            <?php echo htmlspecialchars($feedback['usuario_nome']); ?></p>
+                            <?php echo htmlspecialchars($feedback['utilizador_nome']); ?></p>
                         <p class="feedback-rating">Avaliação: <?php echo htmlspecialchars($feedback['avaliacao']); ?>/5
                         </p>
                         <p class="feedback-text"><?php echo htmlspecialchars($feedback['comentario']); ?></p>

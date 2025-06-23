@@ -4,35 +4,35 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     echo "<script>alert('Faça login para acessar esta página.'); window.location.href='login.php';</script>";
     exit();
 }
 
 
-$perfil_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['usuario_id'];
-$usuario_id = $_SESSION['usuario_id'];
+$perfil_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['utilizador_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do usuário a ser visualizado
-$sql_usuario = "SELECT nome, tipo, foto_perfil, descricao FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $perfil_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$usuario = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$sql_utilizador = "SELECT nome, tipo, foto_perfil, descricao FROM usuarios WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $perfil_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$utilizador = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
-if (!$usuario) {
+if (!$utilizador) {
     echo "<script>alert('Usuário não encontrado.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Se foto_perfil for nulo, usa uma imagem padrão
-$usuario['foto_perfil'] = $usuario['foto_perfil'] ?? 'img/default-profile.jpg';
-$usuario['descricao'] = $usuario['descricao'] ?? 'Nenhuma descrição fornecida.';
+$utilizador['foto_perfil'] = $utilizador['foto_perfil'] ?? 'img/default-profile.jpg';
+$utilizador['descricao'] = $utilizador['descricao'] ?? 'Nenhuma descrição fornecida.';
 
 // Verifica se o usuário logado é o dono do perfil
-$is_own_profile = ($perfil_id === $usuario_id);
+$is_own_profile = ($perfil_id === $utilizador_id);
 
 $conn->close();
 ?>

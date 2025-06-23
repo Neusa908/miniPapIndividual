@@ -3,18 +3,18 @@ session_start();
 require_once 'conexao.php';
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para finalizar a compra.";
     header("Location: login.php");
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Obtém o saldo do usuário
-$sql = "SELECT saldo FROM usuarios WHERE id = ?";
+$sql = "SELECT saldo FROM utilizadores WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $stmt->bind_result($saldo);
 $stmt->fetch();
@@ -24,9 +24,10 @@ if ($saldo === null) {
     $saldo = 0.00;
 }
 
-// Obtém endereços do usuário
-$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal FROM enderecos WHERE usuario_id = ?";$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+// Obtém endereços do utilizador
+$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal FROM enderecos WHERE utilizador_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -35,9 +36,9 @@ $stmt->close();
 $sql = "SELECT c.id, c.quantidade, p.id AS produto_id, p.nome, p.preco, p.descricao, p.quantidade_estoque 
         FROM carrinho c 
         JOIN produtos p ON c.produto_id = p.id 
-        WHERE c.usuario_id = ?";
+        WHERE c.utilizador_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $carrinho = $stmt->get_result();
 
@@ -56,9 +57,9 @@ $frete = 0;
 $cidade_entrega = '';
 if (isset($_POST['endereco_id']) && is_numeric($_POST['endereco_id'])) {
     $endereco_id = $_POST['endereco_id'];
-    $sql = "SELECT cidade FROM enderecos WHERE id = ? AND usuario_id = ?";
+    $sql = "SELECT cidade FROM enderecos WHERE id = ? AND utilizador_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $endereco_id, $usuario_id);
+    $stmt->bind_param("ii", $endereco_id, $utilizador_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($endereco = $result->fetch_assoc()) {
@@ -68,15 +69,15 @@ if (isset($_POST['endereco_id']) && is_numeric($_POST['endereco_id'])) {
         $stmt->bind_param("s", $cidade_entrega);
         $stmt->execute();
         $result = $stmt->get_result();
-        $frete = $result->fetch_assoc()['valor_frete'] ?? 10.00; // Frete padrão se cidade não encontrada
+        $frete = $result->fetch_assoc()['valor_frete'] ?? 10.00;
     }
     $stmt->close();
 }
 
 // Aplica o desconto do cupom, se existir
 $desconto = 0;
-if (isset($_SESSION['cupom'])) {
-    $desconto = $_SESSION['cupom']['desconto'];
+if (isset($_SESSION['cupao'])) {
+    $desconto = $_SESSION['cupao']['desconto'];
 }
 $total_com_desconto = $total_carrinho - $desconto + $frete;
 if ($total_com_desconto < 0) {
@@ -101,9 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
 
     try {
         // Insere o pedido na tabela pedidos
-        $sql = "INSERT INTO pedidos (usuario_id, status, total, cidade_entrega) VALUES (?, 'pendente', ?, ?)";
+        $sql = "INSERT INTO pedidos (utilizador_id, status, total, cidade_entrega) VALUES (?, 'pendente', ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ids", $usuario_id, $total_com_desconto, $cidade_entrega);
+        $stmt->bind_param("ids", $utilizador_id, $total_com_desconto, $cidade_entrega);
         $stmt->execute();
         $pedido_id = $conn->insert_id;
         $stmt->close();
@@ -133,18 +134,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
             $stmt->close();
         }
 
-        // Atualiza o saldo do usuário
+        // Atualiza o saldo do utilizador
         $novo_saldo = $saldo - $total_com_desconto;
-        $sql = "UPDATE usuarios SET saldo = ? WHERE id = ?";
+        $sql = "UPDATE utilizadores SET saldo = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("di", $novo_saldo, $usuario_id);
+        $stmt->bind_param("di", $novo_saldo, $utilizador_id);
         $stmt->execute();
         $stmt->close();
 
         // Registra o pagamento na tabela pagamentos
-        $sql = "INSERT INTO pagamentos (usuario_id, tipo, detalhes, data_cadastro) VALUES (?, ?, ?, NOW())";
+        $sql = "INSERT INTO pagamentos (utilizador_id, tipo, detalhes, data_cadastro) VALUES (?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iss", $usuario_id, $tipo_pagamento, $detalhes_pagamento);
+        $stmt->bind_param("iss", $utilizador_id, $tipo_pagamento, $detalhes_pagamento);
         $stmt->execute();
         $stmt->close();
 
@@ -156,27 +157,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
         $stmt->close();
 
         // Limpa o carrinho
-        $sql = "DELETE FROM carrinho WHERE usuario_id = ?";
+        $sql = "DELETE FROM carrinho WHERE utilizador_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $usuario_id);
+        $stmt->bind_param("i", $utilizador_id);
         $stmt->execute();
         $stmt->close();
 
         // Registra log da compra
-        $sql = "INSERT INTO logs (usuario_id, acao, detalhes, data_log) 
+        $sql = "INSERT INTO logs (utilizador_id, acao, detalhes, data_log) 
                 VALUES (?, 'Compra finalizada', ?, NOW())";
-        $detalhes = "Usuário ID $usuario_id finalizou o pedido ID $pedido_id com total €" . number_format($total_com_desconto, 2, ',', '.') . " (Frete: €" . number_format($frete, 2, ',', '.') . ")";
-        if (isset($_SESSION['cupom'])) {
-            $detalhes .= " (Cupom: {$_SESSION['cupom']['codigo']}, Desconto: €" . number_format($desconto, 2, ',', '.') . ")";
+        $detalhes = "Utilizador ID $utilizador_id finalizou o pedido ID $pedido_id com total €" . number_format($total_com_desconto, 2, ',', '.') . " (Frete: €" . number_format($frete, 2, ',', '.') . ")";
+        if (isset($_SESSION['cupao'])) {
+            $detalhes .= " (Cupao: {$_SESSION['cupao']['codigo']}, Desconto: €" . number_format($desconto, 2, ',', '.') . ")";
         }
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("is", $usuario_id, $detalhes);
+        $stmt->bind_param("is", $utilizador_id, $detalhes);
         $stmt->execute();
         $stmt->close();
 
         // Confirma a transação
         $conn->commit();
-        unset($_SESSION['cupom']);
+        unset($_SESSION['cupao']);
 
         $_SESSION['mensagem'] = "Compra finalizada com sucesso! Pedido ID: $pedido_id";
         $_SESSION['mensagem_sucesso'] = true;
@@ -249,7 +250,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
         <div class="resumo-totais">
             <p><strong>Subtotal:</strong> €<?php echo number_format($total_carrinho, 2, ',', '.'); ?></p>
             <?php if ($desconto > 0): ?>
-            <p><strong>Desconto (Cupom):</strong> -€<?php echo number_format($desconto, 2, ',', '.'); ?></p>
+            <p><strong>Desconto (Cupao):</strong> -€<?php echo number_format($desconto, 2, ',', '.'); ?></p>
             <?php endif; ?>
             <p><strong>Frete:</strong> €<?php echo number_format($frete, 2, ',', '.'); ?></p>
             <p><strong>Total:</strong> €<?php echo number_format($total_com_desconto, 2, ',', '.'); ?></p>
@@ -263,7 +264,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
                 <option value="">Selecione um endereço</option>
                 <?php foreach ($enderecos as $endereco): ?>
                 <option value="<?php echo $endereco['id']; ?>">
-                    <?php echo htmlspecialchars($endereco['nome_endereco'] . ' - ' . $endereco['rua'] . ', ' . $endereco['bairro'] . ', ' . $endereco['cidade']); ?>
+                    <?php echo htmlspecialchars($endereco['nome_endereco'] . ' - ' . $endereco['rua'] . ', ' . $endereco['freguesia'] . ', ' . $endereco['cidade']); ?>
                 </option>
                 <?php endforeach; ?>
             </select>
@@ -279,7 +280,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
             <?php endif; ?>
         </form>
         <?php else: ?>
-        <p>Você não tem endereços cadastrados.</p>
+        <p>Você não tem endereços registados.</p>
         <a href="configuracoes.php" class="btn">Adicionar Endereço</a>
         <?php endif; ?>
         <div class="link">

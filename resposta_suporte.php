@@ -6,19 +6,19 @@ if (session_status() === PHP_SESSION_NONE) {
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
 // Verifica se o usuário está logado e é um cliente
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Busca as mensagens de suporte do cliente logado
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $sql = "SELECT id, email, mensagem, data_envio, status, resposta, data_resposta 
         FROM suporte 
-        WHERE usuario_id = ? AND status = 'resolvido'
+        WHERE utilizador_id = ? AND status = 'resolvido'
         ORDER BY data_envio DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();

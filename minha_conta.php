@@ -2,24 +2,24 @@
 session_start();
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para acessar esta página.";
     header("Location: login.php");
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
-$sql = "SELECT nome, email, telefone, saldo FROM usuarios WHERE id = ?";
+$sql = "SELECT nome, email, telefone, saldo FROM utilizadores WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
-$usuario = $stmt->get_result()->fetch_assoc();
+$utilizador = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 $sql = "SELECT id, nome_endereco, rua, numero, bairro, cidade, estado, cep, padrao FROM enderecos WHERE usuario_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -37,15 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_endereco'])
     if ($padrao) {
         $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $usuario_id);
+        $stmt->bind_param("i", $utilizador_id);
         $stmt->execute();
         $stmt->close();
     }
 
-    $sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, numero, bairro, cidade, estado, cep, padrao) 
+    $sql = "INSERT INTO enderecos (utilizador_id, nome_endereco, rua, numero, bairro, cidade, estado, cep, padrao) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isssssssi", $usuario_id, $nome_endereco, $rua, $numero, $bairro, $cidade, $estado, $cep, $padrao);
+    $stmt->bind_param("isssssssi", $utilizador_id, $nome_endereco, $rua, $numero, $bairro, $cidade, $estado, $cep, $padrao);
     if ($stmt->execute()) {
         $_SESSION['mensagem'] = "Endereço adicionado com sucesso!";
     } else {
@@ -82,10 +82,10 @@ unset($_SESSION['mensagem']);
         </script>
         <?php endif; ?>
         <h2>Dados Pessoais</h2>
-        <p><strong>Nome:</strong> <?php echo htmlspecialchars($usuario['nome']); ?></p>
-        <p><strong>Email:</strong> <?php echo htmlspecialchars($usuario['email']); ?></p>
-        <p><strong>Telefone:</strong> <?php echo htmlspecialchars($usuario['telefone']); ?></p>
-        <p><strong>Saldo:</strong> €<?php echo number_format($usuario['saldo'], 2, ',', '.'); ?></p>
+        <p><strong>Nome:</strong> <?php echo htmlspecialchars($utilizador['nome']); ?></p>
+        <p><strong>Email:</strong> <?php echo htmlspecialchars($utilizador['email']); ?></p>
+        <p><strong>Telefone:</strong> <?php echo htmlspecialchars($utilizador['telefone']); ?></p>
+        <p><strong>Saldo:</strong> €<?php echo number_format($utilizador['saldo'], 2, ',', '.'); ?></p>
 
         <h2 id="enderecos">Endereços</h2>
         <?php if (!empty($enderecos)): ?>
@@ -121,14 +121,14 @@ unset($_SESSION['mensagem']);
             <label>Morada:</label>
             <input type="text" name="rua" required>
             <label>Número:</label>
-            <input type="text" name="numero">
-            <label>Bairro:</label>
-            <input type="text" name="bairro">
+            <input type="text" name="numero" required>
+            <label>Freguesia:</label>
+            <input type="text" name="freguesia">
             <label>Cidade:</label>
             <input type="text" name="cidade" required>
-            <label>Estado:</label>
-            <input type="text" name="estado">
-            <label>CEP:</label>
+            <label>Distrito:</label>
+            <input type="text" name="distrito" required>
+            <label>Código Postal:</label>
             <input type="text" name="cep">
             <label><input type="checkbox" name="padrao"> Definir como padrão</label>
             <button type="submit" name="adicionar_endereco" class="btn">Adicionar</button>

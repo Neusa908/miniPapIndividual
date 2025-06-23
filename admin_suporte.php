@@ -5,8 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
@@ -21,20 +21,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['responder'])) {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $resposta, $suporte_id);
         if ($stmt->execute()) {
-            // Obter o usuario_id associado ao suporte
-            $sql_usuario = "SELECT usuario_id FROM suporte WHERE id = ?";
-            $stmt_usuario = $conn->prepare($sql_usuario);
-            $stmt_usuario->bind_param("i", $suporte_id);
-            $stmt_usuario->execute();
-            $result_usuario = $stmt_usuario->get_result();
-            $usuario_id_cliente = $result_usuario->fetch_assoc()['usuario_id'];
-            $stmt_usuario->close();
+            // Obter o utilizador_id associado ao suporte
+            $sql_utilizador = "SELECT utilizador_id FROM suporte WHERE id = ?";
+            $stmt_utilizador = $conn->prepare($sql_utilizador);
+            $stmt_utilizador->bind_param("i", $suporte_id);
+            $stmt_utilizador->execute();
+            $result_utilizador = $stmt_utilizador->get_result();
+            $utilizador_id_cliente = $result_utilizador->fetch_assoc()['utilizador_id'];
+            $stmt_utilizador->close();
 
-            if ($usuario_id_cliente) {
+            if ($utilizador_id_cliente) {
                 // Criar notificação para o cliente sem o ID
                 $mensagem_notif = "Sua mensagem de suporte foi respondida em " . date('d/m/Y H:i');
-                $stmt_notif = $conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
-                $stmt_notif->bind_param("is", $usuario_id_cliente, $mensagem_notif);
+                $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
+                $stmt_notif->bind_param("is", $utilizador_id_cliente, $mensagem_notif);
                 $stmt_notif->execute();
                 $stmt_notif->close();
             }
@@ -64,9 +64,9 @@ if (isset($_GET['delete_suporte'])) {
 }
 
 // Busca todas as mensagens de suporte
-$sql = "SELECT s.id, s.usuario_id, s.email, s.mensagem, s.data_envio, s.status, s.resposta, s.data_resposta, u.nome 
+$sql = "SELECT s.id, s.utilizador_id, s.email, s.mensagem, s.data_envio, s.status, s.resposta, s.data_resposta, u.nome 
         FROM suporte s 
-        LEFT JOIN usuarios u ON s.usuario_id = u.id 
+        LEFT JOIN utilizadores u ON s.utilizador_id = u.id 
         ORDER BY s.data_envio DESC";
 $result = $conn->query($sql);
 
@@ -96,7 +96,7 @@ if ($result === false) {
             <?php while ($row = $result->fetch_assoc()): ?>
             <div class="suporte-item">
                 <p><a
-                        href="verPerfil.php?id=<?php echo htmlspecialchars($row['usuario_id']); ?>"><?php echo htmlspecialchars($row['nome'] ?? 'Anônimo'); ?></a>
+                        href="verPerfil.php?id=<?php echo htmlspecialchars($row['utilizador_id']); ?>"><?php echo htmlspecialchars($row['nome'] ?? 'Anônimo'); ?></a>
                 </p>
                 <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?></p>
                 <p><strong>Mensagem:</strong> <?php echo htmlspecialchars($row['mensagem']); ?></p>
@@ -110,7 +110,7 @@ if ($result === false) {
                 <?php else: ?>
                 <form class="suporte-resposta-form" method="POST" action="admin_suporte.php">
                     <input type="hidden" name="suporte_id" value="<?php echo $row['id']; ?>">
-                    <textarea name="resposta" placeholder="Digite sua resposta aqui" required></textarea>
+                    <textarea name="resposta" placeholder="Digite a sua resposta aqui" required></textarea>
                     <button type="submit" name="responder">Enviar Resposta</button>
                 </form>
                 <?php endif; ?>

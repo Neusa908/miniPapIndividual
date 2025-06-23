@@ -4,19 +4,19 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; 
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
-$sql_usuario = "SELECT nome, apelido, tipo, foto_perfil FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$utilizador_id = $_SESSION['utilizador_id'];
+$sql_utilizador = "SELECT nome, apelido, tipo, foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 ?>
@@ -76,12 +76,12 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
                 <a href="admin_relatorios.php" class="card">
                     <h3>Dashboard</h3>
-                    <p>Veja estatísticas do sistema.</p>
+                    <p>Veja as estatísticas do sistema.</p>
                 </a>
 
-                <a href="admin_usuarios.php" class="card">
-                    <h3>Gestão de Usuários</h3>
-                    <p>Edite e gerencie lista de clientes.</p>
+                <a href="admin_utilizadores.php" class="card">
+                    <h3>Gestão de Utilizadores</h3>
+                    <p>Edite e gerencie a lista de clientes.</p>
                 </a>
 
                 <a href="admin_notificacoes.php" class="card">
@@ -96,7 +96,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
                 <a href="admin_vendas.php" class="card">
                     <h3>Relatórios de Vendas</h3>
-                    <p>Veja relatórios detalhados de vendas.</p>
+                    <p>Veja os relatórios detalhados de vendas.</p>
                 </a>
                 <a href="admin_feedback.php" class="card">
                     <h3>Feedback dos Clientes</h3>

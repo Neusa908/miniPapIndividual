@@ -6,7 +6,7 @@
             <h1>Mercado Bom Preço</h1>
             <p>Onde o preço é bom!</p>
         </div>
-        <?php if (isset($_SESSION['usuario_id'])): ?>
+        <?php if (isset($_SESSION['utilizador_id'])): ?>
         <div class="user-section" style="display: flex; align-items: center; gap: 10px;">
             <?php if (isset($_SESSION['foto_perfil']) && !empty($_SESSION['foto_perfil'])): ?>
             <img src="<?php echo htmlspecialchars($_SESSION['foto_perfil']); ?>" alt="Foto de Perfil"
@@ -16,7 +16,7 @@
                 style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #fff;">
             <?php endif; ?>
             <span><b>Bem-vindo,</b>
-                <b><?php echo htmlspecialchars($_SESSION['usuario_apelido'] ?? 'Usuário'); ?>!</b></span>
+                <b><?php echo htmlspecialchars($_SESSION['utilizador_apelido'] ?? 'Utilizador'); ?>!</b></span>
         </div>
         <button class="login-button" onclick="window.location.href='logout.php'">Logout</button>
         <?php else: ?>
@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <?php if (!isset($_SESSION['usuario_id']) || (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'cliente')): ?>
+        <?php if (!isset($_SESSION['utilizador_id']) || (isset($_SESSION['tipo']) && $_SESSION['tipo'] === 'cliente')): ?>
         <a href="registar.php">Criar Conta</a>
         <a href="feedback.php">Feedback</a>
         <a href="carrinho.php">Meu carrinho de compras</a>

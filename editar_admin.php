@@ -5,8 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
@@ -18,10 +18,10 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 }
 
 $admin_id = $_GET['id'];
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do administrador a ser editado
-$sql = "SELECT nome, apelido, email, telefone FROM usuarios WHERE id = ? AND tipo = 'admin'";
+$sql = "SELECT nome, apelido, email, telefone FROM utilizadores WHERE id = ? AND tipo = 'admin'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
     $email_prefix = trim($_POST['email_prefix']);
     $novo_telefone = trim($_POST['telefone']);
     $nova_senha = $_POST['senha'];
-    $novo_email = $email_prefix . '@mercadobompreco.com'; // Reconstruct the email
+    $novo_email = $email_prefix . '@mercadobompreco.com';
 
     // Validações
     if (empty($novo_nome)) {
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
         echo "<script>alert('A nova senha deve ter pelo menos 8 caracteres!');</script>";
     } else {
         // Verifica se o email já existe (exceto para o próprio administrador)
-        $sql = "SELECT id FROM usuarios WHERE email = ? AND id != ?";
+        $sql = "SELECT id FROM utilizadores WHERE email = ? AND id != ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $novo_email, $admin_id);
         $stmt->execute();
@@ -71,12 +71,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
             if (!empty($nova_senha)) {
                 // Se uma nova senha foi fornecida, faz o hash
                 $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
-                $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
+                $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $senha_hash, $admin_id);
             } else {
                 // Se não houver nova senha, atualiza apenas os outros campos
-                $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ? WHERE id = ?";
+                $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("ssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $admin_id);
             }

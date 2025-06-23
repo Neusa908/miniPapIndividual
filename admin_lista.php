@@ -5,17 +5,17 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Busca os dados do admin logado
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $sql_usuario = "SELECT nome, tipo, foto_perfil FROM usuarios WHERE id = ?";
 $stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
+$stmt_usuario->bind_param("i", $utilizador_id);
 $stmt_usuario->execute();
 $result_usuario = $stmt_usuario->get_result();
 $admin = $result_usuario->fetch_assoc();
@@ -25,7 +25,7 @@ $stmt_usuario->close();
 $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
 // Busca todos os administradores
-$sql_admins = "SELECT id, nome, foto_perfil FROM usuarios WHERE tipo = 'admin'";
+$sql_admins = "SELECT id, nome, foto_perfil FROM utilizadores WHERE tipo = 'admin'";
 $result_admins = $conn->query($sql_admins);
 
 $conn->close();

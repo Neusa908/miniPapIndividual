@@ -2,12 +2,12 @@
 session_start();
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     header('Location: login.php');
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $produto_id = isset($_GET['produto_id']) ? (int)$_GET['produto_id'] : 0;
 
 if ($produto_id <= 0) {
@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comentario = isset($_POST['comentario']) ? trim($_POST['comentario']) : '';
 
     if ($avaliacao >= 1 && $avaliacao <= 5 && !empty($comentario)) {
-        $stmt = $conn->prepare("INSERT INTO avaliacoes (usuario_id, produto_id, avaliacao, comentario) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiis", $usuario_id, $produto_id, $avaliacao, $comentario);
+        $stmt = $conn->prepare("INSERT INTO avaliacoes (utilizador_id, produto_id, avaliacao, comentario) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiis", $utilizador_id, $produto_id, $avaliacao, $comentario);
         if ($stmt->execute()) {
             $success_message = "Comentário enviado com sucesso!";
         } else {
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $conn->prepare("
     SELECT a.comentario, a.avaliacao, a.data_avaliacao, u.nome 
     FROM avaliacoes a 
-    JOIN usuarios u ON a.usuario_id = u.id 
+    JOIN utilizadores u ON a.utilizador_id = u.id 
     WHERE a.produto_id = ? 
     ORDER BY a.data_avaliacao DESC
 ");

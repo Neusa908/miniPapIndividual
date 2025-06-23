@@ -5,23 +5,23 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
-$sql_usuario = "SELECT nome, apelido, email, telefone, foto_perfil FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$utilizador_id = $_SESSION['utilizador_id'];
+$sql_utilizador = "SELECT nome, apelido, email, telefone, foto_perfil FROM usuarios WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 if (!$admin) {
-    echo "<script>alert('Usuário não encontrado!'); window.location.href='index.php';</script>";
+    echo "<script>alert('Utilizador não encontrado!'); window.location.href='index.php';</script>";
     exit();
 }
 
@@ -60,14 +60,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
     } elseif (!empty($novo_telefone) && !preg_match('/^[0-9\s+]+$/', $novo_telefone)) {
         echo "<script>alert('O telefone deve conter apenas números, espaços ou o símbolo +!');</script>";
     } else {
-        // Verifica se o email já existe (exceto para o próprio usuário)
-        $sql = "SELECT id FROM usuarios WHERE email = ? AND id != ?";
+        // Verifica se o email já existe (exceto para o próprio utilizador)
+        $sql = "SELECT id FROM utilizadores WHERE email = ? AND id != ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $novo_email, $usuario_id);
+        $stmt->bind_param("si", $novo_email, $utilizador_id);
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
-            echo "<script>alert('Este email já está registrado por outro usuário! Tente um nome diferente.'); window.location.href='admin_perfil.php';</script>";
+            echo "<script>alert('Este email já está registrado por outro utilizador! Tente um nome diferente.'); window.location.href='admin_perfil.php';</script>";
         } else {
 
             // Upload da foto de perfil, se fornecida
@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
                 $file_tmp = $_FILES['foto_perfil']['tmp_name'];
 
                 if (in_array($file_type, $allowed_types) && $file_size <= $max_size) {
-                    $file_name = 'perfil_' . $usuario_id . '_' . substr(md5(time()), 0, 8) . '.' . pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
+                    $file_name = 'perfil_' . $utilizador_id . '_' . substr(md5(time()), 0, 8) . '.' . pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION);
                     $upload_dir = 'img/perfil/';
                     $upload_path = $upload_dir . $file_name;
 
@@ -103,17 +103,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_perfil'])) {
             }
 
             // Atualiza os dados no banco
-            $sql = "UPDATE usuarios SET nome = ?, apelido = ?, email = ?, telefone = ?, foto_perfil = ? WHERE id = ?";
+            $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ?, foto_perfil = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $telefone_final = $novo_telefone ?: $admin['telefone'];
-            $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $telefone_final, $foto_perfil, $usuario_id);
+            $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $telefone_final, $foto_perfil, $utilizador_id);
 
             // Debug: Log variables to check their values
-            error_log("Debug: nome=$novo_nome, apelido=$novo_apelido, email=$novo_email, telefone=$telefone_final, foto_perfil=$foto_perfil, usuario_id=$usuario_id");
+            error_log("Debug: nome=$novo_nome, apelido=$novo_apelido, email=$novo_email, telefone=$telefone_final, foto_perfil=$foto_perfil, utilizador_id=$utilizador_id");
 
             if ($stmt->execute()) {
                 // Atualiza a sessão com o nome completo
-                $_SESSION['usuario_nome'] = getFullName($novo_nome, $novo_apelido);
+                $_SESSION['utilizador_nome'] = getFullName($novo_nome, $novo_apelido);
                 echo "<script>alert('Perfil atualizado com sucesso!'); window.location.href='admin_perfil.php';</script>";
             } else {
                 echo "<script>alert('Erro ao atualizar o perfil: " . addslashes($stmt->error) . "'); window.location.href='admin_perfil.php';</script>";

@@ -2,7 +2,7 @@
 session_start();
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     header("Location: login.php");
     exit();
 }
@@ -11,20 +11,20 @@ if (!isset($_SESSION['usuario_id'])) {
 session_start();
 include 'conexao.php'; // Arquivo com conexão ao banco
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     header("Location: login.php");
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $usuario_id = $_SESSION['usuario_id'];
+    $utilizador_id = $_SESSION['utilizador_id'];
     $produto_id = $_POST['produto_id'];
     $avaliacao = $_POST['avaliacao'];
     $comentario = $_POST['comentario'];
 
-    $sql = "INSERT INTO avaliacoes (usuario_id, produto_id, avaliacao, comentario) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO avaliacoes (utilizador_id, produto_id, avaliacao, comentario) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iiis", $usuario_id, $produto_id, $avaliacao, $comentario);
+    $stmt->bind_param("iiis", $utilizador_id, $produto_id, $avaliacao, $comentario);
 
     if ($stmt->execute()) {
         echo "Comentário adicionado com sucesso!";

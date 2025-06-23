@@ -2,12 +2,12 @@
 session_start();
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     echo "<script>alert('É necessário estar logado para editar endereços. Você será redirecionado para o login.'); window.location.href='login.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $mensagem = "";
 
 if (empty($_SESSION['csrf_token'])) {
@@ -20,9 +20,9 @@ if (!$endereco_id) {
     exit;
 }
 
-$sql = "SELECT id, nome_endereco, rua, numero, bairro, cidade, estado, cep, padrao FROM enderecos WHERE id = ? AND usuario_id = ?";
+$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao FROM enderecos WHERE id = ? AND utilizador_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $endereco_id, $usuario_id);
+$stmt->bind_param("ii", $endereco_id, $utilizador_id);
 $stmt->execute();
 $endereco = $stmt->get_result()->fetch_assoc();
 
@@ -39,10 +39,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_endereco'])) {
         $nome_endereco = trim(filter_input(INPUT_POST, 'nome_endereco', FILTER_SANITIZE_STRING));
         $rua = trim(filter_input(INPUT_POST, 'rua', FILTER_SANITIZE_STRING));
         $numero = trim(filter_input(INPUT_POST, 'numero', FILTER_SANITIZE_STRING));
-        $bairro = trim(filter_input(INPUT_POST, 'bairro', FILTER_SANITIZE_STRING));
+        $freguesia = trim(filter_input(INPUT_POST, 'freguesia', FILTER_SANITIZE_STRING));
         $cidade = trim(filter_input(INPUT_POST, 'cidade', FILTER_SANITIZE_STRING));
-        $estado = trim(filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_STRING));
-        $cep = trim(filter_input(INPUT_POST, 'cep', FILTER_SANITIZE_STRING));
+        $distrito = trim(filter_input(INPUT_POST, 'distrito', FILTER_SANITIZE_STRING));
+        $codigo_postal = trim(filter_input(INPUT_POST, 'codigo_postal', FILTER_SANITIZE_STRING));
         $padrao = isset($_POST['padrao']) ? 1 : 0;
 
         // Validações
@@ -56,25 +56,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_endereco'])) {
         if (empty($cidade)) {
             $erros[] = "A cidade é obrigatória.";
         }
-        if (empty($estado)) {
-            $erros[] = "O estado é obrigatório.";
+        if (empty($distrito)) {
+            $erros[] = "O distrito é obrigatório.";
         }
-        if (empty($cep)) {
-            $erros[] = "O CEP é obrigatório.";
+        if (empty($codigo_postal)) {
+            $erros[] = "O código postal é obrigatório.";
         }
 
         if (empty($erros)) {
             if ($padrao) {
-                $sql = "UPDATE enderecos SET padrao = 0 WHERE usuario_id = ?";
+                $sql = "UPDATE enderecos SET padrao = 0 WHERE utilizador_id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $usuario_id);
+                $stmt->bind_param("i", $utilizador_id);
                 $stmt->execute();
             }
 
-            $sql = "UPDATE enderecos SET nome_endereco = ?, rua = ?, numero = ?, bairro = ?, cidade = ?, estado = ?, cep = ?, padrao = ? 
-                    WHERE id = ? AND usuario_id = ?";
+            $sql = "UPDATE enderecos SET nome_endereco = ?, rua = ?, numero = ?, freguesia = ?, cidade = ?, distrito = ?, codigo_postal = ?, padrao = ? 
+                    WHERE id = ? AND utilizador_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssssiii", $nome_endereco, $rua, $numero, $bairro, $cidade, $estado, $cep, $padrao, $endereco_id, $usuario_id);
+            $stmt->bind_param("sssssssiii", $nome_endereco, $rua, $numero, $freguesia, $cidade, $distrito, $codigo_postal, $padrao, $endereco_id, $utilizador_id);
             if ($stmt->execute()) {
                 $mensagem = "Endereço atualizado com sucesso!";
                 header("Location: configuracoes.php");
@@ -121,18 +121,19 @@ $conn->close();
             <label for="numero">Número:</label>
             <input type="text" name="numero" id="numero"
                 value="<?php echo htmlspecialchars($endereco['numero'] ?? ''); ?>" placeholder="Digite o número">
-            <label for="bairro">Bairro:</label>
-            <input type="text" name="bairro" id="bairro"
-                value="<?php echo htmlspecialchars($endereco['bairro'] ?? ''); ?>" placeholder="Digite o bairro">
+            <label for="freguesia">Freguesia:</label>
+            <input type="text" name="freguesia" id="freguesia"
+                value="<?php echo htmlspecialchars($endereco['freguesia'] ?? ''); ?>" placeholder="Digite a freguesia">
             <label for="cidade">Cidade:</label>
             <input type="text" name="cidade" id="cidade" value="<?php echo htmlspecialchars($endereco['cidade']); ?>"
                 placeholder="Digite a cidade" required>
-            <label for="estado">Estado:</label>
-            <input type="text" name="estado" id="estado" value="<?php echo htmlspecialchars($endereco['estado']); ?>"
-                placeholder="Digite o estado" required>
-            <label for="cep">CEP:</label>
-            <input type="text" name="cep" id="cep" value="<?php echo htmlspecialchars($endereco['cep']); ?>"
-                placeholder="Digite o CEP" required>
+            <label for="distrito">Distrito:</label>
+            <input type="text" name="distrito" id="distrito"
+                value="<?php echo htmlspecialchars($endereco['distrito']); ?>" placeholder="Digite o distrito" required>
+            <label for="codigo_postal">Código Postal:</label>
+            <input type="text" name="codigo_postal" id="codigo_postal"
+                value="<?php echo htmlspecialchars($endereco['codigo_postal']); ?>" placeholder="Digite o Código Postal"
+                required>
             <label><input type="checkbox" name="padrao" <?php echo $endereco['padrao'] ? 'checked' : ''; ?>> Definir
                 como padrão</label>
             <button type="submit" name="salvar_endereco">Salvar Endereço</button>

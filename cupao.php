@@ -3,14 +3,14 @@ session_start();
 require_once 'conexao.php';
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para ver os cupões.";
     header("Location: login.php");
     exit();
 }
 
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem-erro';
@@ -72,19 +72,19 @@ if ($conn) {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($cupons as $cupom): ?>
+                <?php foreach ($cupons as $cupao): ?>
                 <tr>
                     <td class="product-cell">
-                        <?php echo htmlspecialchars($cupom['codigo']); ?>
+                        <?php echo htmlspecialchars($cupao['codigo']); ?>
                     </td>
                     <td class="price-cell"><b>€
-                            <?php echo number_format($cupom['desconto'], 2, ',', '.'); ?>
+                            <?php echo number_format($cupao['desconto'], 2, ',', '.'); ?>
                         </b></td>
                     <td class="quantity-cell">
-                        <?php echo date('d-m-Y H:i', strtotime($cupom['data_inicio'])); ?>
+                        <?php echo date('d-m-Y H:i', strtotime($cupao['data_inicio'])); ?>
                     </td>
                     <td class="subtotal-cell">
-                        <?php echo date('d-m-Y H:i', strtotime($cupom['data_fim'])); ?>
+                        <?php echo date('d-m-Y H:i', strtotime($cupao['data_fim'])); ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

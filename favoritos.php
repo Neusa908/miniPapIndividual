@@ -3,7 +3,7 @@ session_start();
 require_once 'conexao.php';
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "Faça login para ver seus favoritos.";
     header("Location: login.php");
     exit;
@@ -15,13 +15,13 @@ $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : '
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
 // Obtém os produtos favoritados
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $sql = "SELECT p.id, p.nome, p.preco, p.descricao, p.quantidade_estoque, p.imagem
         FROM produtos p
         INNER JOIN favoritos f ON p.id = f.produto_id
-        WHERE f.usuario_id = ?";
+        WHERE f.utilizador_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $usuario_id);
+$stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>

@@ -8,25 +8,25 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para enviar um suporte.";
     header("Location: login.php");
     exit();
 }
 
-$email_usuario = '';
-$nome_usuario = '';
-if (isset($_SESSION['usuario_id'])) {
-    $usuario_id = $_SESSION['usuario_id'];
+$email_utilizador = '';
+$nome_utilizador = '';
+if (isset($_SESSION['utilizador_id'])) {
+    $utilizador_id = $_SESSION['utilizador_id'];
     $sql = "SELECT email, nome FROM usuarios WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $usuario_id);
+    $stmt->bind_param("i", $utilizador_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
         $user_data = $result->fetch_assoc();
-        $email_usuario = $user_data['email'];
-        $nome_usuario = $user_data['nome'];
+        $email_utilizador = $user_data['email'];
+        $nome_utilizador = $user_data['nome'];
     }
     $stmt->close();
 }
@@ -35,29 +35,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
     $mensagem = trim($_POST['mensagem']);
-    $usuario_id = $_SESSION['usuario_id'];
+    $utilizador_id = $_SESSION['utilizador_id'];
 
     if (empty($nome) || empty($email) || empty($mensagem)) {
         echo "<script>alert('Por favor, preencha todos os campos!');</script>";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "<script>alert('Por favor, insira um email válido!');</script>";
-    } elseif ($email !== $email_usuario || $nome !== $nome_usuario) {
+    } elseif ($email !== $email_utilizador || $nome !== $nome_utilizador) {
         echo "<script>alert('O nome ou email não correspondem à sua conta. Use os dados associados à sua conta.');</script>";
     } else {
-        $sql = "INSERT INTO suporte (usuario_id, email, mensagem, data_envio, status) VALUES (?, ?, ?, NOW(), 'pendente')";
+        $sql = "INSERT INTO suporte (utilizador_id, email, mensagem, data_envio, status) VALUES (?, ?, ?, NOW(), 'pendente')";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iss", $usuario_id, $email, $mensagem);
+        $stmt->bind_param("iss", $utilizador_id, $email, $mensagem);
 
         if ($stmt->execute()) {
             // Inserir notificação para o cliente sem ID
             $mensagem_notif_cliente = "Sua mensagem de suporte foi enviada em " . date('d/m/Y H:i');
             $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, usuario_id) VALUES (?, ?)");
-            $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $usuario_id);
+            $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $utilizador_id);
             $stmt_notif_cliente->execute();
             $stmt_notif_cliente->close();
 
             // Inserir notificação para todos os administradores
-            $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $usuario_id) recebida em " . date('d/m/Y H:i');
+            $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $utilizador_id) recebida em " . date('d/m/Y H:i');
             $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
             $result_admins = $conn->query($sql_admins);
             

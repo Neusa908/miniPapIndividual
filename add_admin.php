@@ -4,19 +4,19 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php'; // conexão com o banco de dados
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
-$sql_usuario = "SELECT nome, apelido, tipo, foto_perfil FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$utilizador_id = $_SESSION['utilizador_id'];
+$sql_utilizador = "SELECT nome, apelido, tipo, foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
         } elseif (!preg_match('/@mercadobompreco\.com$/', $email)) {
             echo "<script>alert('O email deve terminar com @mercadobompreco.com!');</script>";
         } else {
-            $sql = "SELECT id FROM usuarios WHERE email = ?";
+            $sql = "SELECT id FROM utilizadores WHERE email = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $email);
             $stmt->execute();
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
             } else {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-                $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, tipo) VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "INSERT INTO utilizadores (nome, apelido, email, senha, telefone, tipo) VALUES (?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $tipo);
                 if ($stmt->execute()) {
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
 if (isset($_GET['delete_admin'])) {
     $admin_id = $_GET['delete_admin'];
 
-    if ($admin_id == $usuario_id) {
+    if ($admin_id == $utilizador_id) {
         echo "<script>alert('Você não pode excluir sua própria conta!'); window.location.href='add_admin.php';</script>";
     } else {
         // Deletar notificações associadas ao administrador
@@ -84,7 +84,7 @@ if (isset($_GET['delete_admin'])) {
         $stmt_notificacoes->close();
 
         // Deletar o administrador
-        $sql = "DELETE FROM usuarios WHERE id = ? AND tipo = 'admin'";
+        $sql = "DELETE FROM utilizadores WHERE id = ? AND tipo = 'admin'";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $admin_id);
         if ($stmt->execute()) {
@@ -96,7 +96,7 @@ if (isset($_GET['delete_admin'])) {
     }
 }
 
-$sql_admins = "SELECT id, nome, apelido, email FROM usuarios WHERE tipo = 'admin' ORDER BY nome";
+$sql_admins = "SELECT id, nome, apelido, email FROM utilizadores WHERE tipo = 'admin' ORDER BY nome";
 $result_admins = $conn->query($sql_admins);
 
 ?>

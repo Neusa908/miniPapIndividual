@@ -6,13 +6,13 @@ header('Content-Type: application/json');
 
 $response = ['sucesso' => false, 'mensagem' => '', 'classe' => 'mensagem-erro'];
 
-if (!isset($_SESSION['usuario_id'])) {
-    $response['mensagem'] = "Usuário não autenticado.";
+if (!isset($_SESSION['utilizador_id'])) {
+    $response['mensagem'] = "Utilizador não autenticado.";
     echo json_encode($response);
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_id = intval($_POST['item_id']);
@@ -29,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $produto = $stmt->get_result()->fetch_assoc();
 
     if ($produto && $nova_quantidade > 0 && $nova_quantidade <= $produto['quantidade_estoque']) {
-        $sql = "UPDATE carrinho SET quantidade = ? WHERE id = ? AND usuario_id = ?";
+        $sql = "UPDATE carrinho SET quantidade = ? WHERE id = ? AND utilizador_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iii", $nova_quantidade, $item_id, $usuario_id);
+        $stmt->bind_param("iii", $nova_quantidade, $item_id, $utilizador_id);
         if ($stmt->execute()) {
             // Calcula o novo subtotal da linha
             $subtotal_linha = $produto['preco'] * $nova_quantidade;
@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "SELECT c.quantidade, p.preco 
                     FROM carrinho c 
                     JOIN produtos p ON c.produto_id = p.id 
-                    WHERE c.usuario_id = ?";
+                    WHERE c.utilizador_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $usuario_id);
+            $stmt->bind_param("i", $utilizador_id);
             $stmt->execute();
             $carrinho = $stmt->get_result();
 
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Calcula o total com desconto
-            $desconto = isset($_SESSION['cupom']) ? $_SESSION['cupom']['desconto'] : 0;
+            $desconto = isset($_SESSION['cupao']) ? $_SESSION['cupao']['desconto'] : 0;
             $total_com_desconto = $total_carrinho - $desconto;
             if ($total_com_desconto < 0) {
                 $total_com_desconto = 0;

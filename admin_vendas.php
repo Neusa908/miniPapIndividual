@@ -6,8 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require 'conexao.php';
 
-// Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
@@ -31,7 +31,7 @@ $resumo = $result_resumo->fetch_assoc();
 // Lista de todos os pedidos
 $sql_pedidos = "SELECT p.id, p.data_pedido, p.total, p.status, u.nome 
                 FROM pedidos p 
-                JOIN usuarios u ON p.usuario_id = u.id 
+                JOIN utilizadores u ON p.utilizador_id = u.id 
                 ORDER BY p.data_pedido DESC";
 $result_pedidos = $conn->query($sql_pedidos);
 ?>

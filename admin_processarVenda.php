@@ -2,12 +2,12 @@
 session_start();
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem realizar compras.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$cliente_id = $_SESSION['usuario_id'];
+$cliente_id = $_SESSION['utilizador_id'];
 
 $valor = 50.00; 
 

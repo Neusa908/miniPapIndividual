@@ -6,18 +6,18 @@ if (session_status() === PHP_SESSION_NONE) {
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     echo "<script>alert('É necessário estar logado para ver o histórico de suporte. Você será redirecionado para o login.'); window.location.href='login.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $suporte_id = isset($_GET['suporte_id']) ? (int)$_GET['suporte_id'] : 0;
 
 // Busca a mensagem de suporte específica do usuário logado
-$sql = "SELECT id, email, mensagem, data_envio, status, resposta, data_resposta FROM suporte WHERE id = ? AND usuario_id = ? LIMIT 1";
+$sql = "SELECT id, email, mensagem, data_envio, status, resposta, data_resposta FROM suporte WHERE id = ? AND utilizador_id = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $suporte_id, $usuario_id);
+$stmt->bind_param("ii", $suporte_id, $utilizador_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

@@ -2,27 +2,27 @@
 session_start();
 require_once 'conexao.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "Faça login para acessar sua carteira.";
     header("Location: login.php");
     exit;
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem';
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
-$sql_saldo = "SELECT saldo FROM usuarios WHERE id = ?";
+$sql_saldo = "SELECT saldo FROM utilizadores WHERE id = ?";
 $stmt_saldo = $conn->prepare($sql_saldo);
-$stmt_saldo->bind_param("i", $usuario_id);
+$stmt_saldo->bind_param("i", $utilizador_id);
 $stmt_saldo->execute();
 $saldo = $stmt_saldo->get_result()->fetch_assoc()['saldo'] ?? 0.00;
 $stmt_saldo->close();
 
-$sql_pagamentos = "SELECT id, tipo, detalhes, data_cadastro FROM pagamentos WHERE usuario_id = ?";
+$sql_pagamentos = "SELECT id, tipo, detalhes, data_cadastro FROM pagamentos WHERE utilizador_id = ?";
 $stmt_pagamentos = $conn->prepare($sql_pagamentos);
-$stmt_pagamentos->bind_param("i", $usuario_id);
+$stmt_pagamentos->bind_param("i", $utilizador_id);
 $stmt_pagamentos->execute();
 $pagamentos = $stmt_pagamentos->get_result();
 
@@ -30,21 +30,21 @@ $sql_pedidos = "SELECT p.id, p.data_pedido, p.status, p.total, GROUP_CONCAT(CONC
                 FROM pedidos p
                 JOIN itens_pedido ip ON p.id = ip.pedido_id
                 JOIN produtos pr ON ip.produto_id = pr.id
-                WHERE p.usuario_id = ?
+                WHERE p.utilizador_id = ?
             GROUP BY p.id
             ORDER BY p.data_pedido DESC";
 $stmt_pedidos = $conn->prepare($sql_pedidos);
-$stmt_pedidos->bind_param("i", $usuario_id);
+$stmt_pedidos->bind_param("i", $utilizador_id);
 $stmt_pedidos->execute();
 $pedidos = $stmt_pedidos->get_result();
 
-$sql_usuario = "SELECT foto_perfil, nome FROM usuarios WHERE id = ?";
+$sql_usuario = "SELECT foto_perfil, nome FROM utilizadores WHERE id = ?";
 $stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $usuario_id);
+$stmt_usuario->bind_param("i", $utilizador_id);
 $stmt_usuario->execute();
-$usuario_dados = $stmt_usuario->get_result()->fetch_assoc();
-$foto_perfil = $usuario_dados['foto_perfil'] ?? null;
-$nome_usuario = $usuario_dados['nome'] ?? 'Usuário';
+$utilizador_dados = $stmt_usuario->get_result()->fetch_assoc();
+$foto_perfil = $utilizador_dados['foto_perfil'] ?? null;
+$nome_utilizador = $utilizador_dados['nome'] ?? 'Utilizador';
 $stmt_usuario->close();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])) {
@@ -60,9 +60,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])
     }
 
     if (empty($erros)) {
-        $sql = "INSERT INTO pagamentos (usuario_id, tipo, detalhes) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO pagamentos (utilizador_id, tipo, detalhes) VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iss", $usuario_id, $tipo, $detalhes);
+        $stmt->bind_param("iss", $utilizador_id, $tipo, $detalhes);
         if ($stmt->execute()) {
             $_SESSION['mensagem'] = "Método de pagamento adicionado com sucesso!";
             $_SESSION['mensagem_sucesso'] = true;

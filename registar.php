@@ -54,8 +54,8 @@ if (!empty($apelido)) {
     $sql = "SELECT id FROM usuarios WHERE apelido = ? AND id != ?";
     $stmt = $conn->prepare($sql);
     $apelido_param = $apelido;
-    $usuario_id_param = $usuario_id ?? 0;
-    $stmt->bind_param("si", $apelido_param, $usuario_id_param); // Usa 0 se $usuario_id não estiver definido
+    $utilizador_id_param = $utilizador_id ?? 0;
+    $stmt->bind_param("si", $apelido_param, $utilizador_id_param); // Usa 0 se $utilizador_id não estiver definido
     $stmt->execute();
     if ($stmt->get_result()->num_rows > 0) {
         $erros[] = "Este nome de usuário já está registado.";
@@ -136,31 +136,31 @@ $sql = "INSERT INTO usuarios (nome, apelido, email, senha, telefone, morada, cid
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("sssssss", $nome, $apelido, $email, $senha_hash, $telefone, $morada, $cidade);
 $stmt->execute();
-                $novo_usuario_id = $conn->insert_id;
+                $novo_utilizador_id = $conn->insert_id;
 
 
 
-$sql = "INSERT INTO enderecos (usuario_id, nome_endereco, rua, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO enderecos (utilizador_id, nome_endereco, rua, cidade, distrito, codigo_postal, padrao) VALUES (?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("issssii", $novo_usuario_id, $nome_endereco, $rua, $cidade, $distrito, $codigo_postal, $padrao);
+$stmt->bind_param("issssii", $novo_utilizador_id, $nome_endereco, $rua, $cidade, $distrito, $codigo_postal, $padrao);
 if (!$stmt->execute()) {
     throw new Exception("Erro ao inserir endereço: " . $conn->error);
 }
 
                 // Registra a ação na tabela logs
-                $acao = "Novo usuário registrado";
-                $detalhes = "Usuário $apelido ($email) foi registrado.";
-                $sql_log = "INSERT INTO logs (usuario_id, acao, detalhes, data_log) VALUES (?, ?, ?, NOW())";
+                $acao = "Novo utilizador registrado";
+                $detalhes = "Utilizador $apelido ($email) foi registrado.";
+                $sql_log = "INSERT INTO logs (utilizador_id, acao, detalhes, data_log) VALUES (?, ?, ?, NOW())";
                 $stmt_log = $conn->prepare($sql_log);
-                $stmt_log->bind_param("iss", $novo_usuario_id, $acao, $detalhes);
+                $stmt_log->bind_param("iss", $novo_utilizador_id, $acao, $detalhes);
                 $stmt_log->execute();
                 $stmt_log->close();
 
                 // Registra notificação para TODOS os administradores
-                $mensagem_notif = "Novo cadastro: Usuário $apelido (ID $novo_usuario_id) registrado em " . date('d/m/Y H:i');
-                
+                $mensagem_notif = "Novo cadastro: Utilizador $apelido (ID $novo_utilizador_id) registrado em " . date('d/m/Y H:i');
+
                 // Busca todos os administradores
-                $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
+                $sql_admins = "SELECT id FROM utilizadores WHERE tipo = 'admin'";
                 $result_admins = $conn->query($sql_admins);
                 
                 if ($result_admins->num_rows > 0) {

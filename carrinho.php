@@ -3,38 +3,38 @@ session_start();
 require_once 'conexao.php';
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_id'])) {
+if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para adicionar itens ao carrinho.";
     header("Location: login.php");
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem-erro';
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
 $desconto = 0;
-$cupom_mensagem = '';
-$cupom_mensagem_classe = '';
+$cupao_mensagem = '';
+$cupao_mensagem_classe = '';
 
 if (isset($_GET['limpar_carrinho'])) {
-    $sql = "DELETE FROM carrinho WHERE usuario_id = ?";
+    $sql = "DELETE FROM carrinho WHERE utilizador_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $usuario_id);
+    $stmt->bind_param("i", $utilizador_id);
     if ($stmt->execute()) {
         if ($stmt->affected_rows > 0) {
-            unset($_SESSION['cupom']); 
-            $cupom_mensagem = "Carrinho limpo com sucesso.";
-            $cupom_mensagem_classe = 'mensagem-sucesso';
+            unset($_SESSION['cupao']);
+            $cupao_mensagem = "Carrinho limpo com sucesso.";
+            $cupao_mensagem_classe = 'mensagem-sucesso';
         } else {
-            $cupom_mensagem = "O carrinho já está vazio.";
-            $cupom_mensagem_classe = 'mensagem-erro';
+            $cupao_mensagem = "O carrinho já está vazio.";
+            $cupao_mensagem_classe = 'mensagem-erro';
         }
     } else {
-        $cupom_mensagem = "Erro ao limpar o carrinho.";
-        $cupom_mensagem_classe = 'mensagem-erro';
+        $cupao_mensagem = "Erro ao limpar o carrinho.";
+        $cupao_mensagem_classe = 'mensagem-erro';
     }
     header("Location: carrinho.php");
     exit();
@@ -51,24 +51,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupom'])) {
 
     if ($result->num_rows > 0) {
         $promocao = $result->fetch_assoc();
-        $_SESSION['cupom'] = [
+        $_SESSION['cupao'] = [
             'codigo' => $codigo,
             'desconto' => $promocao['desconto']
         ];
         $desconto = $promocao['desconto'];
-        $cupom_mensagem = "Cupom aplicado com sucesso! Desconto de €" . number_format($desconto, 2, ',', '.');
-        $cupom_mensagem_classe = 'mensagem-sucesso';
+        $cupao_mensagem = "Cupao aplicado com sucesso! Desconto de €" . number_format($desconto, 2, ',', '.');
+        $cupao_mensagem_classe = 'mensagem-sucesso';
     } else {
-        unset($_SESSION['cupom']);
-        $cupom_mensagem = "Cupom inválido ou expirado.";
-        $cupom_mensagem_classe = 'mensagem-erro';
+        unset($_SESSION['cupao']);
+        $cupao_mensagem = "Cupao inválido ou expirado.";
+        $cupao_mensagem_classe = 'mensagem-erro';
     }
     header("Location: carrinho.php");
     exit();
 }
 
-if (isset($_SESSION['cupom'])) {
-    $desconto = $_SESSION['cupom']['desconto'];
+if (isset($_SESSION['cupao'])) {
+    $desconto = $_SESSION['cupao']['desconto'];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])) {
@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])
     $produto = $stmt->get_result()->fetch_assoc();
 
     if ($produto && $quantidade > 0 && $quantidade <= $produto['quantidade_estoque']) {
-        $sql = "SELECT id, quantidade FROM carrinho WHERE usuario_id = ? AND produto_id = ?";
+        $sql = "SELECT id, quantidade FROM carrinho WHERE utilizador_id = ? AND produto_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $usuario_id, $produto_id);
+        $stmt->bind_param("ii", $utilizador_id, $produto_id);
         $stmt->execute();
         $item = $stmt->get_result()->fetch_assoc();
 
@@ -94,21 +94,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $nova_quantidade, $item['id']);
         } else {
-            $sql = "INSERT INTO carrinho (usuario_id, produto_id, quantidade) VALUES (?, ?, ?)";
+            $sql = "INSERT INTO carrinho (utilizador_id, produto_id, quantidade) VALUES (?, ?, ?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("iii", $usuario_id, $produto_id, $quantidade);
+            $stmt->bind_param("iii", $utilizador_id, $produto_id, $quantidade);
         }
 
         if ($stmt->execute()) {
-            $cupom_mensagem = "Item adicionado ao carrinho.";
-            $cupom_mensagem_classe = 'mensagem-sucesso';
+            $cupao_mensagem = "Item adicionado ao carrinho.";
+            $cupao_mensagem_classe = 'mensagem-sucesso';
         } else {
-            $cupom_mensagem = "Erro ao adicionar item ao carrinho.";
-            $cupom_mensagem_classe = 'mensagem-erro';
+            $cupao_mensagem = "Erro ao adicionar item ao carrinho.";
+            $cupao_mensagem_classe = 'mensagem-erro';
         }
     } else {
-        $cupom_mensagem = "Quantidade inválida ou estoque insuficiente.";
-        $cupom_mensagem_classe = 'mensagem-erro';
+        $cupao_mensagem = "Quantidade inválida ou estoque insuficiente.";
+        $cupao_mensagem_classe = 'mensagem-erro';
     }
     header("Location: carrinho.php");
     exit();
@@ -118,25 +118,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_carrinho'])
 if (isset($_GET['remover'])) {
     $item_id = intval($_GET['remover']);
     if ($item_id > 0) {
-        $sql = "DELETE FROM carrinho WHERE id = ? AND usuario_id = ?";
+        $sql = "DELETE FROM carrinho WHERE id = ? AND utilizador_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $item_id, $usuario_id);
+        $stmt->bind_param("ii", $item_id, $utilizador_id);
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
-                $cupom_mensagem = "Item removido do carrinho.";
-                $cupom_mensagem_classe = 'mensagem-sucesso';
+                $cupao_mensagem = "Item removido do carrinho.";
+                $cupao_mensagem_classe = 'mensagem-sucesso';
             } else {
-                $cupom_mensagem = "Item não encontrado.";
-                $cupom_mensagem_classe = 'mensagem-erro';
+                $cupao_mensagem = "Item não encontrado.";
+                $cupao_mensagem_classe = 'mensagem-erro';
             }
         } else {
-            $cupom_mensagem = "Erro ao remover item.";
-            $cupom_mensagem_classe = 'mensagem-erro';
+            $cupao_mensagem = "Erro ao remover item.";
+            $cupao_mensagem_classe = 'mensagem-erro';
         }
         $stmt->close();
     } else {
-        $cupom_mensagem = "ID de item inválido.";
-        $cupom_mensagem_classe = 'mensagem-erro';
+        $cupao_mensagem = "ID de item inválido.";
+        $cupao_mensagem_classe = 'mensagem-erro';
     }
     header("Location: carrinho.php");
     exit();
@@ -150,9 +150,9 @@ if ($conn) {
     $sql = "SELECT c.id, c.quantidade, p.id AS produto_id, p.nome, p.preco, p.imagem 
             FROM carrinho c 
             JOIN produtos p ON c.produto_id = p.id 
-            WHERE c.usuario_id = ?";
+            WHERE c.utilizador_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $usuario_id);
+    $stmt->bind_param("i", $utilizador_id);
     $stmt->execute();
     $carrinho = $stmt->get_result();
 
@@ -163,8 +163,8 @@ if ($conn) {
         $itens_carrinho[] = $item;
     }
 } else {
-    $cupom_mensagem = "Erro ao conectar ao banco de dados.";
-    $cupom_mensagem_classe = 'mensagem-erro';
+    $cupao_mensagem = "Erro ao conectar ao banco de dados.";
+    $cupao_mensagem_classe = 'mensagem-erro';
 }
 
 // Calcula o total com desconto
@@ -188,13 +188,13 @@ if ($total_com_desconto < 0) {
     <div class="container">
         <h1 class="title">Carrinho de Compras</h1>
 
-        <?php if ($cupom_mensagem): ?>
-        <div id="cupom-mensagem" class="<?php echo $cupom_mensagem_classe; ?>">
-            <?php echo htmlspecialchars($cupom_mensagem); ?>
+        <?php if ($cupao_mensagem): ?>
+        <div id="cupao-mensagem" class="<?php echo $cupao_mensagem_classe; ?>">
+            <?php echo htmlspecialchars($cupao_mensagem); ?>
         </div>
         <script>
         setTimeout(() => {
-            document.getElementById('cupom-mensagem').style.display = 'none';
+            document.getElementById('cupao-mensagem').style.display = 'none';
         }, 3000);
         </script>
         <?php endif; ?>
@@ -268,7 +268,7 @@ if ($total_com_desconto < 0) {
                 </div>
                 <?php if ($desconto > 0): ?>
                 <div class="subtotal-row">
-                    <span class="subtotal-label"><b>Desconto (Cupom)</b></span>
+                    <span class="subtotal-label"><b>Desconto (Cupão)</b></span>
                     <span class="subtotal-value"><b>-€<?php echo number_format($desconto, 2, ',', '.'); ?></b></span>
                 </div>
                 <?php endif; ?>
@@ -302,7 +302,7 @@ if ($total_com_desconto < 0) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     const response = JSON.parse(xhr.responseText);
-                    const mensagemDiv = document.getElementById('cupom-mensagem');
+                    const mensagemDiv = document.getElementById('cupao-mensagem');
                     mensagemDiv.innerHTML = response.mensagem;
                     mensagemDiv.className = response.classe;
                     mensagemDiv.style.display = 'block';

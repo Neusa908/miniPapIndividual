@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
     // Verifica se o email já existe
-    $sql = "SELECT id FROM usuarios WHERE email = ?";
+    $sql = "SELECT id FROM utilizadores WHERE email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Insere o novo utilizador
-    $sql = "INSERT INTO usuarios (nome, email, senha, telefone, morada) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO utilizadores (nome, email, senha, telefone, morada) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssss", $nome, $email, $senha_hash, $telefone, $morada);
 

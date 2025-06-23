@@ -4,20 +4,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
-error_log("Cliente logado com ID: $usuario_id");
+error_log("Cliente logado com ID: $utilizador_id");
 
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
     $sql = "DELETE FROM notificacoes WHERE id = ? AND usuario_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $delete_id, $usuario_id);
+    $stmt->bind_param("ii", $delete_id, $utilizador_id);
     if ($stmt->execute()) {
         header("Location: notificacoes.php");
         exit;
@@ -28,9 +28,9 @@ if (isset($_GET['delete_id'])) {
 }
 
 // Consultar notificações para o cliente
-$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida FROM notificacoes WHERE usuario_id = ? ORDER BY data_criacao DESC";
+$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida FROM notificacoes WHERE utilizador_id = ? ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
-$stmt_notificacoes->bind_param("i", $usuario_id);
+$stmt_notificacoes->bind_param("i", $utilizador_id);
 $stmt_notificacoes->execute();
 $result_notificacoes = $stmt_notificacoes->get_result();
 ?>
@@ -56,7 +56,6 @@ $result_notificacoes = $stmt_notificacoes->get_result();
                 <p class="notification-message">
                     <?php
                     $mensagem = htmlspecialchars($notificacao['mensagem']);
-                    // Remove a parte com (ID X) da mensagem para o cliente
                     $mensagem = preg_replace('/\(ID \d+\)/', '', $mensagem);
                     echo trim($mensagem);
                     ?>

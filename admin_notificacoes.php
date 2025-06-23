@@ -4,20 +4,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php';
 
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
-$usuario_id = $_SESSION['usuario_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
-error_log("Admin logado com ID: $usuario_id");
+error_log("Admin logado com ID: $utilizador_id");
 
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
     $sql = "DELETE FROM notificacoes WHERE id = ? AND admin_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $delete_id, $usuario_id);
+    $stmt->bind_param("ii", $delete_id, $utilizador_id);
     if ($stmt->execute()) {
         header("Location: admin_notificacoes.php");
         exit;
@@ -31,16 +31,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
     $suporte_id = (int)$_POST['suporte_id'];
     $resposta = trim($_POST['resposta']);
 
-    // Obter o usuario_id associado ao suporte
-    $sql_usuario = "SELECT usuario_id FROM suporte WHERE id = ?";
-    $stmt_usuario = $conn->prepare($sql_usuario);
-    $stmt_usuario->bind_param("i", $suporte_id);
-    $stmt_usuario->execute();
-    $result_usuario = $stmt_usuario->get_result();
-    $usuario_id_cliente = $result_usuario->fetch_assoc()['usuario_id'];
-    $stmt_usuario->close();
+    // Obter o utilizador_id associado ao suporte
+    $sql_utilizador = "SELECT utilizador_id FROM suporte WHERE id = ?";
+    $stmt_utilizador = $conn->prepare($sql_utilizador);
+    $stmt_utilizador->bind_param("i", $suporte_id);
+    $stmt_utilizador->execute();
+    $result_utilizador = $stmt_utilizador->get_result();
+    $utilizador_id_cliente = $result_utilizador->fetch_assoc()['utilizador_id'];
+    $stmt_utilizador->close();
 
-    if ($usuario_id_cliente) {
+    if ($utilizador_id_cliente) {
         // Atualizar o suporte com a resposta
         $sql_update = "UPDATE suporte SET resposta = ?, status = 'resolvido', data_resposta = NOW() WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
@@ -49,8 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
         if ($stmt_update->execute()) {
             // Criar notificação para o cliente
             $mensagem_notif = "Sua mensagem de suporte (ID $suporte_id) foi respondida em " . date('d/m/Y H:i');
-            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (usuario_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
-            $stmt_notif->bind_param("is", $usuario_id_cliente, $mensagem_notif);
+            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
+            $stmt_notif->bind_param("is", $utilizador_id_cliente, $mensagem_notif);
             $stmt_notif->execute();
             $stmt_notif->close();
 
@@ -82,7 +82,7 @@ $result_notificacoes = $stmt_notificacoes->get_result();
     <link rel="stylesheet" href="./css/style.css">
     <script>
     function verificarNotificacoes() {
-        fetch('verificar_notificacoes.php?admin_id=<?php echo $usuario_id; ?>')
+        fetch('verificar_notificacoes.php?admin_id=<?php echo $utilizador_id; ?>')
             .then(response => response.json())
             .then(data => {
                 if (data.novas) {

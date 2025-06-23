@@ -6,23 +6,23 @@ if (session_status() === PHP_SESSION_NONE) {
 require 'conexao.php'; // Inclui a conexão com o banco de dados
 
 // Verifica se o usuário é administrador
-if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 // Obtém o ID do admin a ser visualizado (passado via GET)
-$perfil_id = isset($_GET['id']) ? intval($_GET['id']) : $_SESSION['usuario_id'];
-$usuario_id = $_SESSION['usuario_id'];
+$perfil_id = isset($_GET['id']) ? intval($_GET['id']) : $_SESSION['utilizador_id'];
+$utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do admin a ser visualizado
-$sql_usuario = "SELECT nome, tipo, foto_perfil, descricao FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $perfil_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$sql_utilizador = "SELECT nome, tipo, foto_perfil, descricao FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $perfil_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 if (!$admin) {
     echo "<script>alert('Administrador não encontrado.'); window.location.href='admin_panel.php';</script>";
@@ -34,7 +34,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 $admin['descricao'] = $admin['descricao'] ?? 'Nenhuma descrição fornecida.';
 
 // Verifica se o usuário logado é o dono do perfil
-$is_own_profile = ($perfil_id === $usuario_id);
+$is_own_profile = ($perfil_id === $utilizador_id);
 
 $conn->close();
 ?>
