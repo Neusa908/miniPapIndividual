@@ -14,7 +14,7 @@ $perfil_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['utilizador_id'];
 $utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do usuário a ser visualizado
-$sql_utilizador = "SELECT nome, tipo, foto_perfil, descricao FROM usuarios WHERE id = ?";
+$sql_utilizador = "SELECT nome, tipo, foto_perfil, descricao FROM utilizadores WHERE id = ?";
 $stmt_utilizador = $conn->prepare($sql_utilizador);
 $stmt_utilizador->bind_param("i", $perfil_id);
 $stmt_utilizador->execute();
@@ -43,7 +43,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de <?php echo htmlspecialchars($usuario['nome']); ?> - Mercado Bom Preço</title>
+    <title>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?> - Mercado Bom Preço</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/verPerfil.css">
 </head>
@@ -51,19 +51,19 @@ $conn->close();
 <body class="profile-body">
     <div class="container">
         <header class="profile-header">
-            <h1>Perfil de <?php echo htmlspecialchars($usuario['nome']); ?></h1>
+            <h1>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?></h1>
             <a href="index.php" class="back-link">Voltar</a>
         </header>
 
         <div class="profile-container">
             <div class="profile-photo">
-                <img src="<?php echo htmlspecialchars($usuario['foto_perfil']); ?>" alt="Foto de perfil">
+                <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de perfil">
             </div>
-            <h2><?php echo htmlspecialchars($usuario['nome']); ?></h2>
-            <p class="profile-type"><?php echo $usuario['tipo'] === 'admin' ? 'Administrador' : 'Cliente'; ?></p>
+            <h2><?php echo htmlspecialchars($utilizador['nome']); ?></h2>
+            <p class="profile-type"><?php echo $utilizador['tipo'] === 'admin' ? 'Administrador' : 'Cliente'; ?></p>
             <div class="profile-description">
                 <label>Descrição:</label>
-                <p><?php echo htmlspecialchars($usuario['descricao']); ?></p>
+                <p><?php echo htmlspecialchars($utilizador['descricao']); ?></p>
             </div>
 
             <?php if ($is_own_profile): ?>

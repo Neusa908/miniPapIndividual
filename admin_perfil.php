@@ -12,7 +12,7 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 }
 
 $utilizador_id = $_SESSION['utilizador_id'];
-$sql_utilizador = "SELECT nome, apelido, email, telefone, foto_perfil FROM usuarios WHERE id = ?";
+$sql_utilizador = "SELECT nome, apelido, email, telefone, foto_perfil FROM utilizadores WHERE id = ?";
 $stmt_utilizador = $conn->prepare($sql_utilizador);
 $stmt_utilizador->bind_param("i", $utilizador_id);
 $stmt_utilizador->execute();

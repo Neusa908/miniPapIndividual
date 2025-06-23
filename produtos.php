@@ -60,11 +60,10 @@ $result = $stmt->get_result();
                 <h1>Produtos</h1>
                 <p>Preços bons!</p>
             </div>
-            <?php if (isset($_SESSION['usuario_id'])): ?>
-
+            <?php if (isset($_SESSION['utilizador_id'])): ?>
             <a href="favoritos.php" class="favoritos-link">Meus Favoritos</a>
-            <?php else: ?>
-            < <?php endif; ?> </div>
+            <?php endif; ?>
+        </div>
     </header>
 
     <div class="box-container">
@@ -89,10 +88,13 @@ $result = $stmt->get_result();
             <div class="pagination">
                 <a href="?pagina=<?php echo max(1, $pagina_atual - 1); ?>&categoria_id=<?php echo $categoria_id; ?>"
                     class="pagination-arrow <?php echo $pagina_atual == 1 ? 'disabled' : ''; ?>">
-                    < <span class="pagination-info"><?php echo "$pagina_atual / $total_paginas"; ?></span>
+                    &lt;
                 </a>
+                <span class="pagination-info"><?php echo "$pagina_atual / $total_paginas"; ?></span>
                 <a href="?pagina=<?php echo min($total_paginas, $pagina_atual + 1); ?>&categoria_id=<?php echo $categoria_id; ?>"
-                    class="pagination-arrow <?php echo $pagina_atual == $total_paginas ? 'disabled' : ''; ?>">></a>
+                    class="pagination-arrow <?php echo $pagina_atual == $total_paginas ? 'disabled' : ''; ?>">
+                    &gt;
+                </a>
             </div>
         </div>
 
@@ -109,7 +111,7 @@ $result = $stmt->get_result();
                     <span class="preco">€<?php echo number_format($produto['preco'], 2, ',', '.'); ?></span>
                     <p class="produto-estoque">Em estoque: <?php echo $produto['quantidade_estoque']; ?> Unidades</p>
 
-                    <?php if (isset($_SESSION['usuario_id'])): ?>
+                    <?php if (isset($_SESSION['utilizador_id'])): ?>
                     <form method="POST" action="carrinho.php" class="produto-form">
                         <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
                         <div class="quantidade-container">
@@ -121,23 +123,25 @@ $result = $stmt->get_result();
                         </div>
                         <button class="produto-button" type="submit" name="adicionar_carrinho">Adicionar</button>
                     </form>
+
                     <form method="POST" action="favoritos_adicionar.php" class="favorito-form">
                         <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
                         <button class="favorito-button" type="submit" name="adicionar_favorito">
                             <?php
-                                        $utilizador_id = $_SESSION['usuario_id'];
-                                        $produto_id = $produto['id'];
-                                        $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE utilizador_id = ? AND produto_id = ?");
-                                        $stmt_fav->bind_param("ii", $utilizador_id, $produto_id);
-                                        $stmt_fav->execute();
-                                        $is_favorito = $stmt_fav->get_result()->num_rows > 0;
-                                        $stmt_fav->close();
-                                        echo $is_favorito ? '🌟' : '⭐';
+                                            $utilizador_id = $_SESSION['utilizador_id'];
+                                            $produto_id = $produto['id'];
+                                            $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE utilizador_id = ? AND produto_id = ?");
+                                            $stmt_fav->bind_param("ii", $utilizador_id, $produto_id);
+                                            $stmt_fav->execute();
+                                            $is_favorito = $stmt_fav->get_result()->num_rows > 0;
+                                            $stmt_fav->close();
+                                            echo $is_favorito ? '🌟' : '⭐';
                                         ?>
                         </button>
                     </form>
-                    <a href="comentarios.php?produto_id=<?php echo $produto['id']; ?>"
-                        class="btn btn-cancel">Ver/Comentar</a>
+
+                    <a href="comentarios.php?produto_id=<?php echo $produto['id']; ?>" class="btn btn-cancel">Ver
+                        comentários</a>
                     <?php else: ?>
                     <p class="erro">Faça login para adicionar ao carrinho ou favoritar.</p>
                     <?php endif; ?>

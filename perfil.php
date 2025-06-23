@@ -15,17 +15,17 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Obtém dados do usuário
+// Obtém dados do utilizador
 $sql = "SELECT nome, apelido, foto_perfil FROM utilizadores WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
 $utilizador = $stmt->get_result()->fetch_assoc();
 
-// Inicializa $apelido com o valor do banco de dados
 $apelido = $utilizador['apelido'] ?? '';
+$nome = $utilizador['nome'] ?? '';
 
-// Processa remoção da foto de perfil
+// Remoção da foto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remover_foto'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem = "Erro de validação. Tente novamente.";
@@ -40,19 +40,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['remover_foto'])) {
         $_SESSION['foto_perfil'] = null;
         $mensagem = "Foto de perfil removida com sucesso!";
         $utilizador['foto_perfil'] = null;
-        $_SESSION['utilizador_apelido'] = $apelido; // Usa o apelido atual do usuário
+        $_SESSION['utilizador_apelido'] = $apelido;
     }
 }
 
-// Processa atualização de apelido e foto
+// Atualização do perfil
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_perfil'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem = "Erro de validação. Tente novamente.";
     } else {
         $apelido = trim(filter_input(INPUT_POST, 'apelido', FILTER_SANITIZE_STRING));
+        $nome = trim(filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_STRING));
         $foto_perfil = $_FILES['foto_perfil'] ?? null;
 
-        // Validações
         $erros = [];
         if (empty($apelido)) {
             $erros[] = "O nome de utilizador é obrigatório.";
@@ -66,14 +66,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_perfil'])) {
             }
         }
 
+        if (empty($nome)) {
+            $erros[] = "O nome completo é obrigatório.";
+        }
+
         if (empty($erros)) {
-            // Atualiza apelido
-            $sql = "UPDATE utilizadores SET apelido = ? WHERE id = ?";
+            // Atualiza nome e apelido
+            $sql = "UPDATE utilizadores SET nome = ?, apelido = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("si", $apelido, $utilizador_id);
+            $stmt->bind_param("ssi", $nome, $apelido, $utilizador_id);
             $stmt->execute();
 
-            // Processa upload da foto
+            // Upload da foto
             if ($foto_perfil && $foto_perfil['error'] == UPLOAD_ERR_OK) {
                 $target_dir = "img/perfil/";
                 if (!file_exists($target_dir)) {
@@ -107,13 +111,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_perfil'])) {
                 $mensagem = "Perfil atualizado com sucesso!";
             }
 
-            // Atualiza dados do utilizador
+            // Atualiza dados locais e sessão
             $sql = "SELECT nome, apelido, foto_perfil FROM utilizadores WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $utilizador_id);
             $stmt->execute();
             $utilizador = $stmt->get_result()->fetch_assoc();
-            $_SESSION['utilizador_apelido'] = $apelido;
+
+            $_SESSION['utilizador_apelido'] = $utilizador['apelido'] ?? '';
+            $_SESSION['utilizador_nome'] = $utilizador['nome'] ?? '';
         } else {
             $mensagem = implode("<br>", $erros);
         }
@@ -138,11 +144,12 @@ $conn->close();
 <body class="client-perfil-body">
     <div class="client-perfil-container">
         <h1 class="client-perfil-title">Meu Perfil</h1>
+
         <?php if ($mensagem): ?>
         <p class="client-perfil-message"><?php echo htmlspecialchars($mensagem); ?></p>
         <?php endif; ?>
 
-        <!-- Seção de Foto de Perfil -->
+        <!-- Foto de perfil -->
         <div class="client-perfil-photo-section">
             <?php if ($utilizador['foto_perfil']): ?>
             <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de Perfil"
@@ -157,13 +164,19 @@ $conn->close();
         </div>
 
         <p class="client-perfil-name"><b>Nome:</b> <?php echo htmlspecialchars($utilizador['nome'] ?? ''); ?></p>
-        <p class="client-perfil-username"><strong><b>Nome de utilizador:</b></strong>
+        <p class="client-perfil-username"><b>Nome de utilizador:</b>
             <?php echo htmlspecialchars($utilizador['apelido'] ?? ''); ?></p>
 
         <form method="POST" enctype="multipart/form-data" class="client-perfil-form">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
             <label for="foto_perfil" class="client-perfil-label">Selecionar uma Foto de Perfil:</label>
             <input type="file" name="foto_perfil" id="foto_perfil" accept="image/*" class="client-perfil-input">
+
+
+            <label for="nome" class="client-perfil-label">Nome Completo:</label>
+            <input type="text" name="nome" id="nome" value="<?php echo htmlspecialchars($utilizador['nome'] ?? ''); ?>"
+                placeholder="Digite o seu nome completo" required class="client-perfil-input">
 
             <label for="apelido" class="client-perfil-label">Nome de Utilizador:</label>
             <input type="text" name="apelido" id="apelido"
@@ -173,7 +186,7 @@ $conn->close();
             <button type="submit" name="salvar_perfil" class="client-perfil-submit">Salvar Alterações</button>
         </form>
 
-        <a href="configuracoes.php" class="client-perfil-link">Editar Configurações</a>
+        <a href="configuracoes.php" class="client-perfil-link">Editar Endereços</a>
         <a href="index.php" class="client-perfil-link">Voltar ao Início</a>
     </div>
 </body>

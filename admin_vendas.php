@@ -1,9 +1,7 @@
 <?php
-// Inicia a sessão apenas se ainda não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
 require 'conexao.php';
 
 // Verifica se o utilizador é administrador
@@ -15,12 +13,27 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 // Excluir pedido, se solicitado
 if (isset($_GET['excluir']) && is_numeric($_GET['excluir'])) {
     $id = $_GET['excluir'];
-    $sql = "DELETE FROM pedidos WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-    echo "<script>alert('Pedido excluído com sucesso!'); window.location.href='admin_vendas.php';</script>";
+
+    $conn->begin_transaction();
+    try {
+        // Apaga primeiro os itens do pedido
+        $stmt = $conn->prepare("DELETE FROM itens_pedido WHERE pedido_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Depois apaga o pedido
+        $stmt = $conn->prepare("DELETE FROM pedidos WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+
+        $conn->commit();
+        echo "<script>alert('Pedido excluído com sucesso!'); window.location.href='admin_vendas.php';</script>";
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "<script>alert('Erro ao excluir pedido: " . addslashes($e->getMessage()) . "'); window.location.href='admin_vendas.php';</script>";
+    }
 }
 
 // Resumo de vendas

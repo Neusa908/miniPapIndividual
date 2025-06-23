@@ -89,7 +89,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
                     <p>Veja alertas de atividades.</p>
                 </a>
 
-                <a href="admin_cupoes.php" class="card">
+                <a href="admin_cupao.php" class="card">
                     <h3>Gestão de Cupões</h3>
                     <p>Crie e gerencie cupões promocionais.</p>
                 </a>

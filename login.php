@@ -19,12 +19,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($password, $utilizador['senha'])) {
             $_SESSION['utilizador_id'] = $utilizador['id'];
-            $_SESSION['utilizador_nome'] = $utilizador['apelido'] ?? $utilizador['nome']; // Usa apelido se disponível
+            $_SESSION['utilizador_nome'] = $utilizador['apelido'] ?? $utilizador['nome'];
+            $_SESSION['utilizador_apelido'] = $utilizador['apelido'] ?? ''; // <-- Esta linha foi adicionada
             $_SESSION['tipo'] = $utilizador['tipo'];
-            $_SESSION['foto_perfil'] = $utilizador['foto_perfil'] ?? null; // Armazena a foto na sessão
+            $_SESSION['foto_perfil'] = $utilizador['foto_perfil'] ?? null;
 
             $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['utilizador_nome']) . "!";
             $_SESSION['mensagem_sucesso'] = true;
+
             $redirect = $utilizador['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
             header("Location: $redirect");
             exit();
@@ -81,4 +83,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </body>
 
 </html>
+
 <?php $conn->close(); ?>

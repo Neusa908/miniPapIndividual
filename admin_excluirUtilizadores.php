@@ -1,5 +1,4 @@
 <?php
-// Inicia a sessão apenas se ainda não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -19,17 +18,49 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id = $_GET['id'];
 
-// Exclui o utilizador
+// Exclui o utilizador e registros dependentes
 if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
-    $sql = "DELETE FROM utilizadores WHERE id = ? AND tipo = 'cliente'";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $conn->begin_transaction();
 
-    if ($stmt->execute()) {
+    try {
+        // Tabelas que usam 'utilizador_id' como FK
+        $tabelasComUtilizadorID = [
+            'avaliacoes', 'carrinho', 'enderecos', 'favoritos',
+            'feedback_site', 'logs', 'notificacoes', 
+            'pagamentos', 'pedidos', 'suporte', 'visitas'
+        ];
+
+        foreach ($tabelasComUtilizadorID as $tabela) {
+            $sql = "DELETE FROM `$tabela` WHERE utilizador_id = ?";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Erro ao preparar a query para $tabela: " . $conn->error);
+            }
+            $stmt->bind_param("i", $id);
+            if (!$stmt->execute()) {
+                throw new Exception("Erro ao excluir registros de $tabela: " . $stmt->error);
+            }
+            $stmt->close();
+        }
+
+        // Excluir o utilizador
+        $sql = "DELETE FROM utilizadores WHERE id = ? AND tipo = 'cliente'";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Erro ao preparar a query para utilizadores: " . $conn->error);
+        }
+        $stmt->bind_param("i", $id);
+        if (!$stmt->execute()) {
+            throw new Exception("Erro ao excluir utilizador: " . $stmt->error);
+        }
+
+        $conn->commit();
         echo "<script>alert('Utilizador excluído com sucesso!'); window.location.href='admin_utilizadores.php';</script>";
-    } else {
-        echo "<script>alert('Erro ao excluir utilizador.'); window.location.href='admin_utilizadores.php';</script>";
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "<script>alert('Erro ao excluir utilizador: " . addslashes($e->getMessage()) . "'); window.location.href='admin_utilizadores.php';</script>";
     }
+
     $stmt->close();
     $conn->close();
     exit();
@@ -42,7 +73,7 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deletar Usuário - Mercado Bom Preço</title>
+    <title>Eliminar Utilizador - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
@@ -54,9 +85,8 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
             </div>
             <nav class="sidebar-nav">
                 <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
-                <a href="admin_usuarios.php" class="nav-item"><span class="icon">⬅️</span>Utilizadores</a>
+                <a href="admin_utilizadores.php" class="nav-item"><span class="icon">⬅️</span>Utilizadores</a>
             </nav>
-
         </div>
         <div class="main-content">
             <header class="admin-header">
@@ -64,9 +94,10 @@ if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
             </header>
             <div class="delete-user-container">
                 <p>Tem certeza que deseja eliminar este utilizador? Esta ação não pode ser desfeita.</p>
-                <a href="admin_excluirUtilizadores.php?id=<?php echo $id; ?>&confirm=yes" class="delete-btn-excluir">
-                    Eliminar</a>
-                <p></p> <a href="admin_utilizadores.php" class="cancel-btn-excluir">Cancelar</a>
+                <a href="admin_excluirUtilizadores.php?id=<?php echo $id; ?>&confirm=yes"
+                    class="delete-btn-excluir">Eliminar</a>
+                <p></p>
+                <a href="admin_utilizadores.php" class="cancel-btn-excluir">Cancelar</a>
             </div>
         </div>
     </div>

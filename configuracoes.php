@@ -29,7 +29,7 @@ $stmt->execute();
 $utilizador = $stmt->get_result()->fetch_assoc();
 
 // Obtém endereços do usuário
-$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao FROM enderecos WHERE usuario_id = ?";
+$sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal, padrao FROM enderecos WHERE utilizador_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $utilizador_id);
 $stmt->execute();
@@ -217,17 +217,17 @@ $conn->close();
         <form method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
             <label for="email">Email:</label>
-            <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($usuario['email']); ?>"
+            <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($utilizador['email']); ?>"
                 placeholder="Digite o seu email" required>
             <label for="telefone">Telefone:</label>
             <input type="tel" name="telefone" id="telefone"
-                value="<?php echo htmlspecialchars($usuario['telefone']); ?>" placeholder="Digite o seu número"
+                value="<?php echo htmlspecialchars($utilizador['telefone']); ?>" placeholder="Digite o seu número"
                 required>
             <label for="morada">Morada:</label>
-            <input type="text" name="morada" id="morada" value="<?php echo htmlspecialchars($usuario['morada']); ?>"
+            <input type="text" name="morada" id="morada" value="<?php echo htmlspecialchars($utilizador['morada']); ?>"
                 placeholder="Digite a sua morada" required>
             <label for="cidade">Cidade:</label>
-            <input type="text" name="cidade" id="cidade" value="<?php echo htmlspecialchars($usuario['cidade']); ?>"
+            <input type="text" name="cidade" id="cidade" value="<?php echo htmlspecialchars($utilizador['cidade']); ?>"
                 placeholder="Digite a sua cidade" required>
             <button type="submit" name="salvar_dados">Salvar Dados Pessoais</button>
         </form>
@@ -242,12 +242,12 @@ $conn->close();
             <?php echo htmlspecialchars($endereco['freguesia'] . ', ' . $endereco['cidade'] . ', ' . $endereco['distrito']); ?><br>
             <?php echo htmlspecialchars($endereco['codigo_postal']); ?><br>
             <?php if ($endereco['padrao']): ?>
-            <span class="endereco-padrao">Endereço Padrão</span>
+            <span class="endereco-padrao"><b>Endereço Padrão</b></span>
             <?php endif; ?>
             <form method="POST" style="display:inline;">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <input type="hidden" name="endereco_id" value="<?php echo $endereco['id']; ?>">
-                <button type="submit" name="excluir_endereco" class="apagar-endereco-btn"
+                <button type="submit" name="apagar_endereco" class="apagar-endereco-btn"
                     onclick="return confirm('Tem certeza que deseja apagar este endereço?');">Apagar</button>
             </form>
         </div>
