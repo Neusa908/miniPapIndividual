@@ -2,6 +2,8 @@
 session_start();
 require_once 'conexao.php';
 
+
+
 if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
@@ -119,6 +121,10 @@ $nome_utilizador = $utilizador_dados['nome'] ?? 'Utilizador';
 $stmt_utilizador->close();
 ?>
 
+
+
+
+
 <!DOCTYPE html>
 <html lang="pt-pt">
 
@@ -147,7 +153,6 @@ $stmt_utilizador->close();
             </div>
         </header>
 
-
         <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tipoSelect = document.getElementById('tipo');
@@ -172,7 +177,6 @@ $stmt_utilizador->close();
             atualizarPlaceholderEValidacao();
         });
         </script>
-
 
         <main class="carteira-main">
             <?php if ($mensagem): ?>

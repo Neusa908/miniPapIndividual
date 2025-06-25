@@ -161,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['atualizar_endereco'])
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['excluir_endereco'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['apagar_endereco'])) {
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem = "Erro de validação. Tente novamente.";
     } else {

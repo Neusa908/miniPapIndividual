@@ -1,5 +1,6 @@
 <header class="header-index">
     <link rel="stylesheet" href="./css/style.css">
+    <img src="img/mercado_logo.png" alt="Logo do Mercado Bom Preço" class="logo-header-img">
 
     <div class="header-content">
         <div class="title-section">
@@ -76,6 +77,7 @@
         <a href="sobre.php">Sobre</a>
     </div>
 </nav>
+
 
 <body>
     <footer class="footer-index">
