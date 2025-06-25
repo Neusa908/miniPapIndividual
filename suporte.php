@@ -18,7 +18,7 @@ $email_utilizador = '';
 $nome_utilizador = '';
 if (isset($_SESSION['utilizador_id'])) {
     $utilizador_id = $_SESSION['utilizador_id'];
-    $sql = "SELECT email, nome FROM usuarios WHERE id = ?";
+    $sql = "SELECT email, nome FROM utilizadores WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $utilizador_id);
     $stmt->execute();
@@ -103,12 +103,12 @@ $conn->close();
         <form class="support-form" method="POST" action="suporte.php">
             <label for="nome">NOME</label>
             <input type="text" id="nome" name="nome" placeholder="Digite o seu nome de utilizador"
-                value="<?php echo isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome']) : htmlspecialchars($nome_usuario); ?>"
+                value="<?php echo isset($_SESSION['utilizador_nome']) ? htmlspecialchars($_SESSION['utilizador_nome']) : htmlspecialchars($nome_usuario); ?>"
                 required>
 
             <label for="email">EMAIL</label>
             <input type="email" id="email" name="email" placeholder="Selecione um email válido"
-                value="<?php echo htmlspecialchars($email_usuario); ?>" required>
+                value="<?php echo htmlspecialchars($email_utilizador); ?>" required>
 
             <label for="mensagem">MENSAGEM</label>
             <textarea id="mensagem" name="mensagem" placeholder="Digite a sua mensagem" required></textarea>

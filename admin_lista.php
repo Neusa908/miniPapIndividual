@@ -13,13 +13,13 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 
 // Busca os dados do admin logado
 $utilizador_id = $_SESSION['utilizador_id'];
-$sql_usuario = "SELECT nome, tipo, foto_perfil FROM usuarios WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $utilizador_id);
-$stmt_usuario->execute();
-$result_usuario = $stmt_usuario->get_result();
-$admin = $result_usuario->fetch_assoc();
-$stmt_usuario->close();
+$sql_utilizador = "SELECT nome, tipo, foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$result_utilizador = $stmt_utilizador->get_result();
+$admin = $result_utilizador->fetch_assoc();
+$stmt_utilizador->close();
 
 // Se foto_perfil for nulo, usa uma imagem padrão
 $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
@@ -39,7 +39,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Administradores - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/admin_lista.css">
+
 </head>
 
 <body class="admin-panel-body">
@@ -50,7 +50,9 @@ $conn->close();
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
+                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span>Voltar ao Painel</a>
+
+
             </nav>
         </div>
 

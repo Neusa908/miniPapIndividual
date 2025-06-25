@@ -2,6 +2,15 @@
 session_start();
 require_once 'conexao.php';
 
+
+
+// Verifica se o utilizador é cliente
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    exit();
+}
+
+
 // Verifica se o usuário está logado
 if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para finalizar a compra.";
@@ -268,7 +277,7 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
                 </option>
                 <?php endforeach; ?>
             </select>
-            <a href="adicionar_endereco.php" class="btn">Adicionar Novo Endereço</a>
+            <a href="configuracoes.php" class="btn">Adicionar Novo Endereço</a>
             <p></p>
             <?php if ($saldo >= $total_com_desconto): ?>
             <h2>Pagamento com Saldo Virtual</h2>

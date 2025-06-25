@@ -2,10 +2,9 @@
 session_start();
 require_once 'conexao.php';
 
-if (!isset($_SESSION['utilizador_id'])) {
-    $_SESSION['mensagem'] = "Faça login para acessar sua carteira.";
-    header("Location: login.php");
-    exit;
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    exit();
 }
 
 $utilizador_id = $_SESSION['utilizador_id'];
@@ -13,6 +12,7 @@ $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem';
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
+// Obter saldo
 $sql_saldo = "SELECT saldo FROM utilizadores WHERE id = ?";
 $stmt_saldo = $conn->prepare($sql_saldo);
 $stmt_saldo->bind_param("i", $utilizador_id);
@@ -20,44 +20,55 @@ $stmt_saldo->execute();
 $saldo = $stmt_saldo->get_result()->fetch_assoc()['saldo'] ?? 0.00;
 $stmt_saldo->close();
 
-$sql_pagamentos = "SELECT id, tipo, detalhes, data_cadastro FROM pagamentos WHERE utilizador_id = ?";
-$stmt_pagamentos = $conn->prepare($sql_pagamentos);
-$stmt_pagamentos->bind_param("i", $utilizador_id);
-$stmt_pagamentos->execute();
-$pagamentos = $stmt_pagamentos->get_result();
+// Adicionar saldo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_dinheiro'])) {
+    $pagamento_id = intval($_POST['metodo_pagamento']);
+    $valor = floatval(str_replace(',', '.', $_POST['valor']));
 
-$sql_pedidos = "SELECT p.id, p.data_pedido, p.status, p.total, GROUP_CONCAT(CONCAT(ip.quantidade, ' x ', pr.nome, ' (€', ip.preco_unitario, ')') SEPARATOR '<br>') as itens
-                FROM pedidos p
-                JOIN itens_pedido ip ON p.id = ip.pedido_id
-                JOIN produtos pr ON ip.produto_id = pr.id
-                WHERE p.utilizador_id = ?
-            GROUP BY p.id
-            ORDER BY p.data_pedido DESC";
-$stmt_pedidos = $conn->prepare($sql_pedidos);
-$stmt_pedidos->bind_param("i", $utilizador_id);
-$stmt_pedidos->execute();
-$pedidos = $stmt_pedidos->get_result();
+    if ($valor > 0) {
+        $sql = "UPDATE utilizadores SET saldo = saldo + ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("di", $valor, $utilizador_id);
+        if ($stmt->execute()) {
+            $_SESSION['mensagem'] = "Saldo adicionado com sucesso!";
+            $_SESSION['mensagem_sucesso'] = true;
+        } else {
+            $_SESSION['mensagem'] = "Erro ao adicionar saldo.";
+        }
+        $stmt->close();
+    } else {
+        $_SESSION['mensagem'] = "Valor inválido.";
+    }
+    header("Location: carteira.php");
+    exit;
+}
 
-$sql_usuario = "SELECT foto_perfil, nome FROM utilizadores WHERE id = ?";
-$stmt_usuario = $conn->prepare($sql_usuario);
-$stmt_usuario->bind_param("i", $utilizador_id);
-$stmt_usuario->execute();
-$utilizador_dados = $stmt_usuario->get_result()->fetch_assoc();
-$foto_perfil = $utilizador_dados['foto_perfil'] ?? null;
-$nome_utilizador = $utilizador_dados['nome'] ?? 'Utilizador';
-$stmt_usuario->close();
+// Remover pagamento
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['remover_pagamento'])) {
+    $pagamento_id = intval($_POST['pagamento_id']);
+    $stmt = $conn->prepare("DELETE FROM pagamentos WHERE id = ? AND utilizador_id = ?");
+    $stmt->bind_param("ii", $pagamento_id, $utilizador_id);
+    if ($stmt->execute()) {
+        $_SESSION['mensagem'] = "Método de pagamento removido com sucesso.";
+        $_SESSION['mensagem_sucesso'] = true;
+    }
+    header("Location: carteira.php");
+    exit;
+}
 
+// Adicionar pagamento
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])) {
     $tipo = trim($_POST['tipo']);
     $detalhes = trim($_POST['detalhes']);
     $erros = [];
 
-    if (empty($tipo)) {
-        $erros[] = "O tipo de pagamento é obrigatório.";
-    }
-    if (empty($detalhes)) {
-        $erros[] = "Os detalhes do pagamento são obrigatórios.";
-    }
+    if (empty($tipo)) $erros[] = "O tipo de pagamento é obrigatório.";
+    if (empty($detalhes)) $erros[] = "Os detalhes do pagamento são obrigatórios.";
+
+    if ($tipo === 'mbway' && !preg_match('/^\d{9}$/', $detalhes)) {
+    $erros[] = "O número de telemóvel MBWay deve ter exatamente 9 dígitos.";
+}
+
 
     if (empty($erros)) {
         $sql = "INSERT INTO pagamentos (utilizador_id, tipo, detalhes) VALUES (?, ?, ?)";
@@ -78,6 +89,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])
         $mensagem_classe = 'mensagem';
     }
 }
+
+// Obter dados
+$sql_pagamentos = "SELECT id, tipo, detalhes, data_cadastro FROM pagamentos WHERE utilizador_id = ?";
+$stmt_pagamentos = $conn->prepare($sql_pagamentos);
+$stmt_pagamentos->bind_param("i", $utilizador_id);
+$stmt_pagamentos->execute();
+$pagamentos = $stmt_pagamentos->get_result();
+
+$sql_pedidos = "SELECT p.id, p.data_pedido, p.status, p.total, GROUP_CONCAT(CONCAT(ip.quantidade, ' x ', pr.nome, ' (€', ip.preco_unitario, ')') SEPARATOR '<br>') as itens
+                FROM pedidos p
+                JOIN itens_pedido ip ON p.id = ip.pedido_id
+                JOIN produtos pr ON ip.produto_id = pr.id
+                WHERE p.utilizador_id = ?
+                GROUP BY p.id
+                ORDER BY p.data_pedido DESC";
+$stmt_pedidos = $conn->prepare($sql_pedidos);
+$stmt_pedidos->bind_param("i", $utilizador_id);
+$stmt_pedidos->execute();
+$pedidos = $stmt_pedidos->get_result();
+
+$sql_utilizador = "SELECT foto_perfil, nome FROM utilizadores WHERE id = ?";
+$stmt_utilizador = $conn->prepare($sql_utilizador);
+$stmt_utilizador->bind_param("i", $utilizador_id);
+$stmt_utilizador->execute();
+$utilizador_dados = $stmt_utilizador->get_result()->fetch_assoc();
+$foto_perfil = $utilizador_dados['foto_perfil'] ?? null;
+$nome_utilizador = $utilizador_dados['nome'] ?? 'Utilizador';
+$stmt_utilizador->close();
 ?>
 
 <!DOCTYPE html>
@@ -85,87 +124,142 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carteira - Mercado Bom Preço</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body class="carteira">
-    <div class="sidebar">
-        <div class="sidebar-header">
+<body class="carteira-body">
+    <div class="carteira-sidebar">
+        <div class="carteira-sidebar-header">
             <h3>Mercado Bom Preço</h3>
         </div>
-        <nav class="sidebar-nav">
-            <a href="index.php" class="nav-item">Voltar ao Site</a>
+        <nav class="carteira-sidebar-nav">
+            <a href="index.php">Voltar ao Site</a>
         </nav>
     </div>
 
-    <div class="content-wrapper">
-        <header class="header-carteira">
-            <span class="profile-name"><b><?php echo htmlspecialchars($nome_usuario); ?></b></span>
-            <?php if ($foto_perfil): ?>
-            <div class="profile-pic" style="background-image: url('<?php echo htmlspecialchars($foto_perfil); ?>');">
+    <div class="carteira-content">
+        <header class="carteira-header">
+            <span class="carteira-profile-name"><b><?php echo htmlspecialchars($nome_utilizador); ?></b></span>
+            <div class="carteira-profile-pic"
+                style="background-image: url('<?php echo $foto_perfil ? htmlspecialchars($foto_perfil) : 'img/default-profile.jpg'; ?>');">
             </div>
-            <?php else: ?>
-            <div class="profile-pic" style="background-image: url('img/default-profile.jpg');"></div>
-            <?php endif; ?>
         </header>
 
-        <main class="main-carteira">
+
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tipoSelect = document.getElementById('tipo');
+            const detalhesInput = document.getElementById('detalhes');
+
+            function atualizarPlaceholderEValidacao() {
+                const tipoSelecionado = tipoSelect.value;
+                if (tipoSelecionado === 'mbway') {
+                    detalhesInput.placeholder = 'Ex.: 912345678';
+                    detalhesInput.type = 'tel';
+                    detalhesInput.pattern = '[0-9]{9}';
+                    detalhesInput.title = 'Número de telemóvel com 9 dígitos';
+                } else {
+                    detalhesInput.placeholder = 'Ex.: **** **** **** 1234';
+                    detalhesInput.type = 'text';
+                    detalhesInput.removeAttribute('pattern');
+                    detalhesInput.removeAttribute('title');
+                }
+            }
+
+            tipoSelect.addEventListener('change', atualizarPlaceholderEValidacao);
+            atualizarPlaceholderEValidacao();
+        });
+        </script>
+
+
+        <main class="carteira-main">
             <?php if ($mensagem): ?>
-            <div id="mensagem" class="<?php echo $mensagem_classe; ?>">
+            <div id="carteira-mensagem" class="<?php echo $mensagem_classe; ?>">
                 <?php echo htmlspecialchars($mensagem); ?>
             </div>
             <script>
             setTimeout(() => {
-                document.getElementById('mensagem').style.display = 'none';
-            }, 2000);
+                document.getElementById('carteira-mensagem').style.display = 'none';
+            }, 3000);
             </script>
             <?php endif; ?>
 
-            <div class="cards-container">
-                <div class="card">
-                    <h2 class="card-title">Saldo Atual</h2>
-                    <p class="card-description">Seu saldo disponível é:
-                        <strong>€<?php echo number_format($saldo, 2, ',', '.'); ?></strong>
-                    </p>
+            <div class="carteira-cards">
+                <div class="carteira-card">
+                    <h2>Saldo Atual</h2>
+                    <p>Seu saldo disponível é: <strong>€<?php echo number_format($saldo, 2, ',', '.'); ?></strong></p>
                 </div>
 
-                <div class="card">
-                    <h2 class="card-title">Métodos de Pagamento</h2>
+                <div class="carteira-card">
+                    <h2>Métodos de Pagamento</h2>
                     <?php if ($pagamentos->num_rows > 0): ?>
-                    <ul class="card-list">
+                    <ul>
                         <?php while ($pagamento = $pagamentos->fetch_assoc()): ?>
-                        <li class="card-item">
+                        <li class="carteira-metodo-item">
                             <strong><?php echo htmlspecialchars($pagamento['tipo']); ?>:</strong>
                             <?php echo htmlspecialchars($pagamento['detalhes']); ?>
                             <br><small>Adicionado em:
                                 <?php echo date('d/m/Y H:i', strtotime($pagamento['data_cadastro'])); ?></small>
+                            <form method="POST"
+                                onsubmit="return confirm('Tem a certeza que deseja remover este método de pagamento?');">
+                                <input type="hidden" name="pagamento_id" value="<?php echo $pagamento['id']; ?>">
+                                <button type="submit" name="remover_pagamento"
+                                    class="carteira-btn-remover">Remover</button>
+                            </form>
                         </li>
                         <?php endwhile; ?>
                     </ul>
                     <?php else: ?>
-                    <p class="card-description">Nenhum método de pagamento registrado.</p>
+                    <p>Não há métodos de pagamento registados.</p>
                     <?php endif; ?>
-                    <form method="POST" action="carteira.php" class="card-form">
+
+                    <form method="POST" class="carteira-form">
                         <label for="tipo">Tipo:</label>
                         <select id="tipo" name="tipo" required>
                             <option value="cartão de crédito">Cartão de Crédito</option>
                             <option value="cartão de débito">Cartão de Débito</option>
                             <option value="mbway">MBWay</option>
-                            <option value="paypal">PayPal</option>
                         </select>
                         <label for="detalhes">Detalhes:</label>
                         <input type="text" id="detalhes" name="detalhes" placeholder="Ex.: **** **** **** 1234"
                             required>
                         <button type="submit" name="adicionar_pagamento">Adicionar</button>
                     </form>
+
+                    <?php if ($pagamentos->num_rows > 0): ?>
+                    <hr>
+                    <h3>Adicionar Dinheiro</h3>
+                    <form method="POST" class="carteira-form">
+                        <label for="metodo_pagamento">Método:</label>
+                        <select name="metodo_pagamento" id="metodo_pagamento" required>
+
+                            <?php
+                            // Reexecutar a query porque já percorremos os resultados antes
+                            $stmt_pagamentos->execute();
+                            $pagamentos_novos = $stmt_pagamentos->get_result();
+                            while ($pag = $pagamentos_novos->fetch_assoc()):
+                            ?>
+
+                            <option value="<?= $pag['id'] ?>">
+                                <?= htmlspecialchars($pag['tipo']) ?> - <?= htmlspecialchars($pag['detalhes']) ?>
+                            </option>
+                            <?php endwhile; ?>
+                        </select>
+                        <label for="valor">Valor (€):</label>
+                        <input type="number" step="0.01" name="valor" id="valor" placeholder="Ex.: 10.00" required>
+                        <button type="submit" name="adicionar_dinheiro">Adicionar Dinheiro</button>
+                    </form>
+
+                    <?php endif; ?>
+
                 </div>
 
-                <div class="card">
-                    <h2 class="card-title">Histórico de Compras</h2>
+                <div class="carteira-card">
+                    <h2>Histórico de Compras</h2>
                     <?php if ($pedidos->num_rows > 0): ?>
-                    <table class="card-table">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Pedido</th>
@@ -188,7 +282,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_pagamento'])
                         </tbody>
                     </table>
                     <?php else: ?>
-                    <p class="card-description">Nenhum pedido registrado.</p>
+                    <p>Não há pedidos registados.</p>
                     <?php endif; ?>
                 </div>
             </div>

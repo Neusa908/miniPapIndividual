@@ -1,7 +1,8 @@
-/* ==================== MUDA PARA TODOS OS STYLES ==================== */
+/* ==================== PARA TODOS OS STYLES ==================== */
 a {
     text-decoration: none;
 }
+
 
 /* ==================== STYLE ADD_ADMIN ==================== */
 .add-admin-container {
@@ -456,10 +457,122 @@ a {
 
 
 
+/* ==================== STYLE ADMIN_EditarProdutos ==================== */
+.admin-editar-body {
+    background-color: #f3fdf5;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-editar-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: #e4f7e7;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 128, 0, 0.2);
+}
+
+.admin-editar-title {
+    font-size: 26px;
+    color: #2d6a4f;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.admin-editar-mensagem {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.admin-editar-selecao {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-editar-selecao select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.admin-editar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-editar-form label {
+    font-weight: bold;
+    color: #344e41;
+}
+
+.admin-editar-form input,
+.admin-editar-form select {
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+.admin-editar-btn {
+    padding: 12px;
+    font-size: 16px;
+    background-color: #07833f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.admin-editar-btn:hover {
+    background-color: #034624;
+}
+
+.admin-editar-links {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.admin-editar-link {
+    text-decoration: none;
+    background-color: #95d5b2;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #1b4332;
+    transition: background-color 0.3s;
+}
+
+.admin-editar-link:hover {
+    background-color: #74c69d;
+}
 
 
 
-/* ==================== STYLE ADMIN_EditarUsuario ==================== */
+
+
+
+
+
+
+
+
+
+/* ==================== STYLE ADMIN_EditarUtilizador ==================== */
 
 .edit-user-wrapper {
     display: flex;
@@ -570,7 +683,7 @@ a {
 
 
 
-/* ==================== STYLE ADMIN_ExcluirUsuario ==================== */
+/* ==================== STYLE ADMIN_DeletarUtilizador ==================== */
 .delete-user-container {
     display: flex;
     justify-content: center;
@@ -773,6 +886,137 @@ a {
         font-size: 14px;
     }
 }
+
+
+
+
+
+
+
+
+/* ==================== STYLE ADMIN_LISTA_PRODUTOS ==================== */
+.admin-lista-body {
+    background-color: #f0fff0;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-lista-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #e8fbe8;
+    border-radius: 12px;
+    box-shadow: 0 0 5px rgba(6, 105, 6, 0.5);
+}
+
+.admin-lista-title {
+    text-align: center;
+    color: #2d6a4f;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.admin-lista-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 25px;
+}
+
+.admin-lista-card {
+    background-color: #ffffff;
+    border: 1px solid #d1e7dd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-lista-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #ccc;
+}
+
+.admin-lista-info {
+    padding: 15px;
+    font-size: 15px;
+    color: #000000;
+}
+
+.admin-lista-info p {
+    margin: 5px 0;
+}
+
+.admin-lista-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+}
+
+.admin-lista-btn {
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.admin-lista-btn.editar {
+    background-color: #74c69d;
+    color: #ffffff;
+    border: 2px solid #000000;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+
+.admin-lista-btn.editar:hover {
+    background-color: #52b788;
+}
+
+.admin-lista-btn.excluir {
+    background-color: #e63946;
+    color: #ffffff;
+    border: 2px solid #000000;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.admin-lista-btn.excluir:hover {
+    background-color: #d62828;
+}
+
+.admin-lista-empty {
+    text-align: center;
+    padding: 20px;
+    color: #000000;
+}
+
+.admin-lista-links {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.admin-lista-link {
+    text-decoration: none;
+    background-color: #2d6a4f;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+}
+
+.admin-lista-link:hover {
+    background-color: #1b4332;
+}
+
+
 
 
 
@@ -1410,7 +1654,7 @@ a {
 .admin-perfil-container a {
     display: block;
     margin-top: 10px;
-    color: #e74c3c;
+    color: #3ca8e7;
     text-decoration: none;
     font-size: 14px;
 }
@@ -1444,11 +1688,37 @@ a {
     }
 }
 
+.reset-button-admin-perfil {
+    background-color: #e74c3c !important;
+    display: inline-block;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 10px;
+}
 
+.reset-button-admin-perfil:hover {
+    background-color: #852419 !important;
+}
 
+.voltar-button-admin-perfil {
+    background-color: #0992b4 !important;
+    display: inline-block;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 10px;
+}
 
+.voltar-button-admin-perfil:hover {
+    background-color: #105566 !important;
+}
 
-
+s
 
 /* ==================== STYLE ADMIN_PRODUTOS ==================== */
 /* Estilos gerais */
@@ -2405,263 +2675,207 @@ footer {
 
 
 /* ==================== STYLE Carteira ==================== */
-body.carteira {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-color: #f7f9fc;
+.carteira-header {
     display: flex;
-    color: #000000;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
-.sidebar {
+.carteira-body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    margin: 0;
+    background-color: #f7f9fc;
+    color: #000;
+}
+
+.carteira-sidebar {
     width: 250px;
     background-color: #2c3e50;
     color: white;
-    display: flex;
-    flex-direction: column;
     min-height: 100vh;
-    margin: 0;
 }
 
-.sidebar-header {
+.carteira-sidebar-header {
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid rgb(0, 0, 0);
-    margin: 0;
+    border-bottom: 1px solid #000;
 }
 
-.sidebar-header h3 {
+.carteira-sidebar-header h3 {
     margin: 0;
-    font-size: 22px;
     color: #27ae60;
 }
 
-.sidebar-nav {
-    flex-grow: 1;
-    padding: 20px 0;
-    margin: 0;
-}
-
-.sidebar-nav a {
+.carteira-sidebar-nav a {
     display: block;
     padding: 15px 20px;
     color: white;
     text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    transition: background 0.3s;
 }
 
-.sidebar-nav a:hover {
+.carteira-sidebar-nav a:hover {
     background-color: #34495e;
 }
 
-.content-wrapper {
-    flex-grow: 1;
+.carteira-content {
+    flex: 1;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
 }
 
-.header-carteira {
-    background-color: #fff;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
+.carteira-header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
-.profile-pic {
+.carteira-profile-pic {
     width: 50px;
     height: 50px;
-    background-color: #ecf0f1;
+    background-color: #ddd;
     border-radius: 50%;
     background-size: cover;
     background-position: center;
 }
 
-.main-carteira {
-    flex-grow: 1;
-}
-
-.cards-container {
+.carteira-cards {
     display: flex;
-    gap: 20px;
     flex-wrap: wrap;
+    gap: 20px;
 }
 
-.card {
-    background-color: #fff;
+.carteira-card {
+    background: #fff;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    width: calc(33.33% - 13.33px);
+    box-shadow: 0 0px 3px rgba(0, 0, 0, 0.5);
+    flex: 1 1 300px;
     box-sizing: border-box;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-.card-title {
-    font-size: 18px;
+.carteira-card h2 {
     color: #27ae60;
     margin-bottom: 10px;
-    font-weight: 600;
 }
 
-.card-description {
-    font-size: 14px;
-    color: #000000;
-    margin-bottom: 15px;
-    line-height: 1.5;
-}
-
-.card-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 15px 0;
-}
-
-.card-item {
-    background-color: #f9fbfd;
-    padding: 10px;
+.carteira-form label,
+.carteira-form input,
+.carteira-form select,
+.carteira-form button {
+    width: 100%;
     margin-bottom: 10px;
-    border-radius: 5px;
-    border-left: 4px solid #27ae60;
-}
-
-.card-form {
-    display: flex;
-    flex-direction: column;
-}
-
-.card-form label {
     font-size: 14px;
-    color: #000000;
-    margin-bottom: 5px;
-    font-weight: 500;
 }
 
-.card-form input[type="text"],
-.card-form select {
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
+.carteira-form input,
+.carteira-form select {
+    padding: 8px;
     border-radius: 5px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
+    border: 1px solid #ccc;
 }
 
-.card-form select:focus,
-.card-form input:focus {
-    border-color: #27ae60;
-    outline: none;
-}
-
-.card-form button {
+.carteira-form button {
     padding: 10px;
-    background-color: #27ae60;
+    background: #27ae60;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
 }
 
-.card-form button:hover {
+.carteira-form button:hover {
     background-color: #219653;
 }
 
-.card-table {
+.carteira-metodo-item {
+    background: #f1f1f1;
+    border-left: 4px solid #27ae60;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.carteira-btn-remover {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.carteira-btn-remover:hover {
+    background-color: #c0392b;
+}
+
+.carteira-card table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
 }
 
-.card-table th,
-.card-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+.carteira-card table th,
+.carteira-card table td {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
 }
 
-.card-table th {
-    background-color: #f9fbfd;
-    color: #000000;
-    font-weight: 600;
+@media (max-width: 900px) {
+    .carteira-cards {
+        flex-direction: column;
+    }
+
+    .carteira-card {
+        width: 100%;
+    }
 }
 
-.card-table tr:hover {
-    background-color: #f1f3f5;
+.card-adicionar-saldo {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f3f9f3;
+    border: 1px solid #cde8cd;
+    border-radius: 8px;
 }
 
-.profile-info {
+.form-adicionar-saldo {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 10px;
 }
 
-.profile-pic {
-    width: 40px;
-    height: 40px;
-    background-color: #ccc;
-    background-size: cover;
-    background-position: center;
-    border-radius: 50%;
+.form-adicionar-saldo label {
+    font-weight: 500;
+    color: #000;
 }
 
-.profile-name {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000000;
-    margin-right: 10px;
+.form-adicionar-saldo input,
+.form-adicionar-saldo select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
-.card .saldo-btn {
-    margin-top: 15px;
-    padding: 8px 12px;
+.form-adicionar-saldo button {
+    padding: 10px;
     background-color: #27ae60;
-    color: white;
+    color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
-.card .saldo-btn:hover {
-    background-color: #1e8749;
-}
-
-.card .metodo-explicacao {
-    font-size: 13px;
-    color: #000000;
-    margin-bottom: 10px;
-    line-height: 1.4;
-}
-
-.card .metodo-explicacao::before {
-    content: "💡 ";
-}
-
-.card .historico-vazio {
-    font-style: italic;
-    color: #000000;
-    margin-top: 10px;
-}
-
-.card .historico-vazio::before {
-    content: "📦 ";
+.form-adicionar-saldo button:hover {
+    background-color: #219653;
 }
 
 
@@ -4549,6 +4763,54 @@ body.registar {
 }
 
 
+
+
+
+/* ==================== STYLE SOBRE ==================== */
+.body-sobre-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #07833f;
+    color: #ffffff;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.sobre-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.sobre-texto {
+    font-size: 18px;
+    max-width: 600px;
+    line-height: 1.6;
+    color: #ffffff;
+}
+
+.footer-sobre {
+
+    padding: 10px 0;
+    text-align: center;
+    background-color: #055d2d;
+    color: #ffffff;
+    text-align: center;
+
+}
+
+.btn-sobre-voltar {
+    background-color: #007bff;
+    border: 2px solid #000000;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn-sobre-voltar:hover {
+    background-color: #003d80;
+}
 
 
 

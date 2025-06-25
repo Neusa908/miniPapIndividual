@@ -47,7 +47,6 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil do Administrador - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/admin_verPerfil.css">
 </head>
 
 <body class="admin-panel-body">
@@ -58,7 +57,9 @@ $conn->close();
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar ao Painel</a>
+                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span>Painel</a>
+                <a href="admin_lista.php" class="nav-item"><span class="icon">⬅️</span>Lista de
+                    Admins</a>
             </nav>
         </div>
 

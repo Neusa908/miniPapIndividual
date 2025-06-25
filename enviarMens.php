@@ -25,7 +25,6 @@ $message = filter_var($data['message'], FILTER_SANITIZE_STRING);
 session_start();
 $utilizador_id = isset($_SESSION['utilizador_id']) ? $_SESSION['utilizador_id'] : null;
 
-// Inserir no banco de dados (assumindo que a tabela suporte tem um campo nome)
 $sql = "INSERT INTO suporte (utilizador_id, nome, email, mensagem, data_envio, status) 
         VALUES (:utilizador_id, :nome, :email, :mensagem, NOW(), 'pendente')";
 $stmt = $pdo->prepare($sql);

@@ -50,7 +50,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
                         <img src="<?php echo htmlspecialchars($admin['foto_perfil']); ?>" alt="Foto de perfil">
                         <div class="profile-dropdown">
                             <a href="admin_perfil.php">Configurações de Perfil</a>
-                            <a href="admin_verPerfil.php?id=<?php echo $usuario_id; ?>">Ver Perfil</a>
+                            <a href="admin_verPerfil.php?id=<?php echo $utilizador_id; ?>">Ver Perfil</a>
                             <a href="admin_lista.php">Lista de Administradores</a>
                             <a href="logout.php">Sair</a>
                         </div>

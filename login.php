@@ -19,12 +19,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($password, $utilizador['senha'])) {
             $_SESSION['utilizador_id'] = $utilizador['id'];
-            $_SESSION['utilizador_nome'] = $utilizador['apelido'] ?? $utilizador['nome'];
-            $_SESSION['utilizador_apelido'] = $utilizador['apelido'] ?? ''; // <-- Esta linha foi adicionada
+            $_SESSION['utilizador_nome'] = $utilizador['nome'];
+            $_SESSION['utilizador_apelido'] = $utilizador['apelido'] ?? '';
             $_SESSION['tipo'] = $utilizador['tipo'];
             $_SESSION['foto_perfil'] = $utilizador['foto_perfil'] ?? null;
 
-            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['utilizador_nome']) . "!";
+            // Define o nome visível para o header
+            if ($utilizador['tipo'] === 'admin') {
+                $_SESSION['utilizador_nome_visivel'] = $utilizador['nome'];
+            } else {
+                $_SESSION['utilizador_nome_visivel'] = !empty($utilizador['apelido']) ? $utilizador['apelido'] : $utilizador['nome'];
+            }
+
+            $_SESSION['mensagem'] = "Login bem-sucedido! Bem-vindo(a), " . htmlspecialchars($_SESSION['utilizador_nome_visivel']) . "!";
             $_SESSION['mensagem_sucesso'] = true;
 
             $redirect = $utilizador['tipo'] === 'admin' ? 'admin_panel.php' : 'index.php';
@@ -75,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <br>
             <button type="submit" class="button-login">Entrar</button>
         </form>
+
         <div>
             <br>Não tem uma conta? <a href="registar.php" class="link-login"> Crie uma agora!</a>
             <br>Voltar para a página <a href="index.php" class="link-login"> principal!</a>
