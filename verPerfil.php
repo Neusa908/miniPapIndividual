@@ -52,7 +52,9 @@ $conn->close();
     <div class="container">
         <header class="profile-header">
             <h1>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?></h1>
-            <a href="index.php" class="back-link">Voltar</a>
+            <br><a href="index.php" class="back-link">Voltar para o início</a>
+            <a href="index.php" class="back-link2">Voltar atrás</a>
+
         </header>
 
         <div class="profile-container">

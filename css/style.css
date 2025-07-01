@@ -683,6 +683,165 @@ a {
 
 
 
+/* ==================== STYLE ADMIN_ENTREGAS ==================== */
+.admin-entregas-body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    padding: 30px;
+}
+
+.admin-entregas-container {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-entregas-titulo {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.admin-entregas-msg {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.admin-entrega-form {
+    background: #fafafa;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.admin-entrega-info p {
+    margin: 5px 0;
+}
+
+.admin-entrega-btn {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.admin-entrega-btn:hover {
+    background-color: #45a049;
+}
+
+
+
+
+
+
+/*atualizar entrega*/
+.entregas-page {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 2rem;
+}
+
+.entregas-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.entregas-titulo {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.entregas-sem-resultados {
+    font-size: 1.2rem;
+    color: #777;
+}
+
+.entregas-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+.entregas-tabela th,
+.entregas-tabela td {
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.entrega-status {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.entrega-status-preparando {
+    background-color: #f0ad4e;
+    color: #fff;
+}
+
+.entrega-status-em\ trânsito {
+    background-color: #5bc0de;
+    color: #fff;
+}
+
+.entrega-status-entregue {
+    background-color: #5cb85c;
+    color: #fff;
+}
+
+.entrega-formulario {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.entrega-select,
+.entrega-botao {
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.entrega-botao {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.entrega-botao:hover {
+    background-color: #0056b3;
+}
+
+.entregas-voltar {
+    display: inline-block;
+    margin-top: 1rem;
+    text-decoration: none;
+    color: #007bff;
+}
+
+
+
+
+
+
+
+
+
+
+
 /* ==================== STYLE ADMIN_DeletarUtilizador ==================== */
 .delete-user-container {
     display: flex;
@@ -3447,6 +3606,87 @@ footer {
     margin-top: 1px;
 }
 
+
+
+
+
+
+
+/* ==================== STYLE ENTREGAS ==================== */
+/* Base */
+body.cliente-entrega-body {
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+.cliente-entrega-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.cliente-entrega-titulo {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #0d6efd;
+}
+
+/* Status */
+.cliente-entrega-status {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.cliente-entrega-status.entregue {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.cliente-entrega-status.preparando {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.cliente-entrega-tempo {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #000000;
+}
+
+/* Link voltar */
+.cliente-entrega-voltar {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #0d6efd;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.cliente-entrega-voltar:hover {
+    background-color: #062655;
+}
+
+
+
+
+
+
+
+
+
 /* ==================== STYLE FAVORITOS ==================== */
 
 .favorito-form {
@@ -4015,13 +4255,21 @@ body.index {
 
 
 .header-index {
-    background: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
-    color: white;
+    position: relative;
     text-align: center;
     padding: 15px 20px;
-    position: relative;
+    background: linear-gradient(to right, rgba(40, 167, 69, 0.9), rgba(19, 90, 35, 0.9));
+    color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
+
+.logo-header-img {
+    height: 180px;
+    position: absolute;
+    top: -20px;
+    left: 15px;
+}
+
 
 .header-index h1 {
     font-size: 2rem;
@@ -4101,11 +4349,7 @@ footer {
     font-size: 0.9rem;
 }
 
-.logo-header-img {
-    height: 200px;
-    width: auto;
-    object-fit: contain;
-}
+
 
 
 
@@ -4932,7 +5176,7 @@ body.registar {
 
 /* ==================== STYLE VER_PERFIL ==================== */
 .profile-body {
-    background-color: #f4f4f4;
+    background-color: #07833f;
 }
 
 .profile-header {
@@ -4954,6 +5198,16 @@ body.registar {
 }
 
 .back-link:hover {
+    text-decoration: underline;
+}
+
+.back-link2 {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.back-link2:hover {
     text-decoration: underline;
 }
 

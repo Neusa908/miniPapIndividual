@@ -95,8 +95,10 @@ if ($conn) {
         <?php endif; ?>
 
         <div class="checkout-container">
+            <a href="index.php" class="checkout-btn continue-shopping">Voltar ao Início</a>
             <a href="carrinho.php" class="checkout-btn continue-shopping">Voltar ao Carrinho</a>
-            <a href="produtos.php" class="checkout-btn">Continuar Comprando</a>
+
+            <a href="produtos.php" class="checkout-btn">Continuar as compras</a>
         </div>
     </div>
     <footer class="carrinho-footer">

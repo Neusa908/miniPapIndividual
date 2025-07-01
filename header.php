@@ -1,6 +1,6 @@
 <header class="header-index">
     <link rel="stylesheet" href="./css/style.css">
-    <img src="img/mercado_logo.png" alt="Logo do Mercado Bom Preço" class="logo-header-img">
+    <img src="img/logo.png" alt="Logo do Mercado Bom Preço" class="logo-header-img">
 
     <div class="header-content">
         <div class="title-section">
@@ -68,13 +68,17 @@
         <?php if (!isset($_SESSION['utilizador_id']) || ($_SESSION['tipo'] ?? '') === 'cliente'): ?>
         <a href="index.php">Home</a>
         <a href="registar.php">Criar Conta</a>
+        <a href="entregas.php">Entregas</a>
         <a href="feedback.php">Feedback</a>
         <a href="carrinho.php">Meu carrinho de compras</a>
         <a href="produtos.php">Produtos</a>
+        <a href="sobre.php">Sobre</a>
         <a href="suporte.php">Suporte</a>
         <?php endif; ?>
 
+        <?php if (!isset($_SESSION['utilizador_id']) || ($_SESSION['tipo'] ?? '') === 'admin'): ?>
         <a href="sobre.php">Sobre</a>
+        <?php endif; ?>
     </div>
 </nav>
 

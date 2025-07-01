@@ -62,8 +62,10 @@ $stmt->close();
             <?php endif; ?>
         </div>
         <div class="support-links">
-            <a href="index.php"><b>Voltar para a Página Principal</b></a>
-            <a href="suporte.php"><b>Enviar Nova Mensagem de Suporte</b></a>
+            <a href="notificacoes.php"><b>Ir para as notificações</b></a>
+
+            <a href="index.php"><b>Ir para a Página Principal</b></a>
+            <a href="suporte.php"><b>Nova Mensagem de Suporte</b></a>
         </div>
     </div>
 </body>

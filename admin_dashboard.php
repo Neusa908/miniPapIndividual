@@ -13,9 +13,12 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 }
 
 // vendas
-$sql_vendas = "SELECT SUM(total) as total_vendas, COUNT(*) as total_pedidos FROM pedidos WHERE status = 'concluido'";
+$sql_vendas = "SELECT SUM(total) as total_vendas, COUNT(*) as total_pedidos 
+               FROM pedidos 
+               WHERE status IN ('pago', 'concluido')";
 $result_vendas = $conn->query($sql_vendas);
 $vendas = $result_vendas->fetch_assoc();
+
 
 // vendas recentes
 $sql_pedidos = "SELECT p.id, p.data_pedido, p.total, p.status, u.nome FROM pedidos p JOIN utilizadores u ON p.utilizador_id = u.id ORDER BY p.data_pedido DESC LIMIT 10";
@@ -30,15 +33,11 @@ $visitas = $result_visitas->fetch_assoc();
 $sql_visitas_recentes = "SELECT v.pagina, v.data_visita, u.nome FROM visitas v LEFT JOIN utilizadores u ON v.utilizador_id = u.id ORDER BY v.data_visita DESC LIMIT 10";
 $result_visitas_recentes = $conn->query($sql_visitas_recentes);
 
-// Usuários ativos
-$sql_usuarios = "SELECT COUNT(*) as total_usuarios FROM utilizadores WHERE tipo = 'cliente'";
-$result_usuarios = $conn->query($sql_usuarios);
-$usuarios = $result_usuarios->fetch_assoc();
 
 // Usuários novos (últimos 30 dias)
-$sql_usuarios_novos = "SELECT COUNT(*) as total_usuarios_novos FROM utilizadores WHERE tipo = 'cliente' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
-$result_usuarios_novos = $conn->query($sql_usuarios_novos);
-$usuarios_novos = $result_usuarios_novos->fetch_assoc();
+$sql_utilizadores_novos = "SELECT COUNT(*) as total_utilizadores_novos FROM utilizadores WHERE tipo = 'cliente' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+$result_utilizadores_novos = $conn->query($sql_utilizadores_novos);
+$utilizadores_novos = $result_utilizadores_novos->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -102,9 +101,31 @@ $usuarios_novos = $result_usuarios_novos->fetch_assoc();
                 <h2>Resumo de Visitas</h2>
                 <p class="users-table">Total de Visitas: <?php echo $visitas['total_visitas'] ?? 0; ?></p>
 
-
-                <h2>Utilizadores Ativos</h2>
-                <p class="users-table">Total de Utilizadores: <?php echo $usuarios['total_utilizadores'] ?? 0; ?></p>
+                <!-- 🔽 ADICIONADO AGORA -->
+                <h2>Visitas recentes em páginas</h2>
+                <?php if ($result_visitas_recentes->num_rows > 0): ?>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Utilizador</th>
+                            <th>Página</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result_visitas_recentes->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['nome'] ?? 'Visitante'); ?></td>
+                            <td><?php echo htmlspecialchars($row['pagina']); ?></td>
+                            <td><?php echo date('d/m/Y H:i', strtotime($row['data_visita'])); ?></td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <p class="users-table">Nenhuma visita recente encontrada.</p>
+                <?php endif; ?>
+                <!-- 🔼 FIM DA ADIÇÃO -->
 
                 <h2>Utilizadores Novos</h2>
                 <p class="users-table">Total de Utilizadores Novos:

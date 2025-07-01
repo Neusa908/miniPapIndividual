@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Europe/Lisbon'); // Define o fuso horário para Portugal
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,7 +17,7 @@ error_log("Cliente logado com ID: $utilizador_id");
 
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
-    $sql = "DELETE FROM notificacoes WHERE id = ? AND usuario_id = ?";
+    $sql = "DELETE FROM notificacoes WHERE id = ? AND utilizador_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ii", $delete_id, $utilizador_id);
     if ($stmt->execute()) {

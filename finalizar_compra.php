@@ -9,7 +9,7 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 
 $utilizador_id = $_SESSION['utilizador_id'];
 
-// Saldo ainda é obtido, mas não usado para pagamento
+// Saldo (não usado, mas carregado)
 $sql = "SELECT saldo FROM utilizadores WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $utilizador_id);
@@ -27,7 +27,7 @@ $stmt->execute();
 $enderecos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Métodos de pagamento já salvos
+// Métodos de pagamento
 $sql = "SELECT id, tipo, detalhes FROM pagamentos WHERE utilizador_id = ? ORDER BY data_cadastro DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $utilizador_id);
@@ -36,7 +36,7 @@ $pagamentos_salvos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 // Carrinho
-$sql = "SELECT c.id, c.quantidade, p.id AS produto_id, p.nome, p.preco, p.descricao, p.quantidade_estoque 
+$sql = "SELECT c.quantidade, p.id AS produto_id, p.nome, p.preco, p.descricao, p.quantidade_estoque 
         FROM carrinho c 
         JOIN produtos p ON c.produto_id = p.id 
         WHERE c.utilizador_id = ?";
@@ -76,7 +76,7 @@ if (isset($_POST['endereco_id']) && is_numeric($_POST['endereco_id'])) {
     $stmt->close();
 }
 
-// Desconto (cupão)
+// Cupão de desconto
 $desconto = isset($_SESSION['cupao']) ? $_SESSION['cupao']['desconto'] : 0;
 $total_com_desconto = max(0, $total_carrinho - $desconto + $frete);
 
@@ -85,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
     $pagamento_id = $_POST['pagamento_id'] ?? '';
     $endereco_id = $_POST['endereco_id'];
 
-    // Verifica se pagamento é válido
     $sql = "SELECT tipo, detalhes FROM pagamentos WHERE id = ? AND utilizador_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ii", $pagamento_id, $utilizador_id);
@@ -113,9 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
         $pedido_id = $conn->insert_id;
         $stmt->close();
 
-        $sql = "INSERT INTO entregas (pedido_id, endereco_id, status_entrega) VALUES (?, ?, 'preparando')";
+        $tempo_entrega_min = rand(10, 20);
+        $data_entrega_estimada = date("Y-m-d H:i:s", strtotime("+$tempo_entrega_min minutes"));
+
+        $sql = "INSERT INTO entregas (pedido_id, endereco_id, status_entrega, data_entrega_estimada) VALUES (?, ?, 'preparando', ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $pedido_id, $endereco_id);
+        $stmt->bind_param("iis", $pedido_id, $endereco_id, $data_entrega_estimada);
         $stmt->execute();
         $stmt->close();
 
@@ -136,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
             $stmt->close();
         }
 
-        // Status pago
         $sql = "UPDATE pedidos SET status = 'pago' WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $pedido_id);
@@ -159,10 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
 
         $conn->commit();
         unset($_SESSION['cupao']);
-        $_SESSION['mensagem'] = "Compra finalizada com sucesso!";
-        $_SESSION['mensagem_sucesso'] = true;
 
-        echo "<script>alert('Compra finalizada com sucesso!'); window.location.href = 'carteira.php';</script>";
+        header("Location: entregas.php?minutos=$tempo_entrega_min&pedido_id=$pedido_id");
         exit();
 
     } catch (Exception $e) {
@@ -178,7 +177,6 @@ $mensagem_classe = $_SESSION['mensagem_sucesso'] ?? false ? 'mensagem-sucesso' :
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 ?>
 
-<!-- HTML -->
 
 <!DOCTYPE html>
 <html lang="pt-PT">
@@ -262,14 +260,14 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
                 <?php endforeach; ?>
             </select>
 
-            <p><a href="carteira.php" class="btn">Gerir Métodos de Pagamento</a></p>
+            <p><a href="carteira.php" class="btn">Métodos de Pagamento</a></p>
             <p><button type="submit" name="confirmar_compra" class="btn">Confirmar Compra</button></p>
         </form>
 
         <?php else: ?>
-        <p>Seu carrinho está vazio. <a href="index.php">Voltar para a loja</a>.</p>
+        <p>O seu carrinho está vazio. <a href="index.php">Voltar para a loja</a>.</p>
         <?php endif; ?>
-        <a href="produtos.php" class="btn-finalizarCompra">Continuar Comprando</a>
+
     </div>
 </body>
 

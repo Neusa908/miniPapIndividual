@@ -60,14 +60,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
         }
         $stmt_update->close();
     } else {
-        echo "<script>alert('Usuário não encontrado para este suporte.');</script>";
+        echo "<script>alert('Utilizador não encontrado para este suporte.');</script>";
     }
 }
 
 // Consultar notificações para o admin
 $sql_notificacoes = "SELECT id, mensagem, data_criacao, lida FROM notificacoes WHERE admin_id = ? ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
-$stmt_notificacoes->bind_param("i", $usuario_id);
+$stmt_notificacoes->bind_param("i", $utilizador_id);
 $stmt_notificacoes->execute();
 $result_notificacoes = $stmt_notificacoes->get_result();
 ?>

@@ -74,7 +74,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
                     <p>Responda às mensagens do suporte dos clientes.</p>
                 </a>
 
-                <a href="admin_relatorios.php" class="card">
+                <a href="admin_dashboard.php" class="card">
                     <h3>Dashboard</h3>
                     <p>Veja as estatísticas do sistema.</p>
                 </a>
@@ -101,6 +101,10 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
                 <a href="admin_feedback.php" class="card">
                     <h3>Feedback dos Clientes</h3>
                     <p>Veja e gerencie o feedback dos clientes.</p>
+                </a>
+                <a href="admin_entregas.php" class="card">
+                    <h3>Gestão de Entregas</h3>
+                    <p>Veja e gerencie as entregas dos pedidos.</p>
                 </a>
             </div>
         </div>

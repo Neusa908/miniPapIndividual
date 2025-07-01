@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Europe/Lisbon');
+    
 $servername = "localhost";
 $username = "root";
 $password = "root";

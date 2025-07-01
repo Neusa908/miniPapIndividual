@@ -40,7 +40,7 @@ if (isset($_GET['limpar_carrinho'])) {
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupom'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupao'])) {
     $codigo = trim($_POST['promo_code']);
 
     $sql = "SELECT desconto FROM promocoes WHERE codigo = ? AND ativa = 1 AND data_inicio <= NOW() AND data_fim >= NOW()";
@@ -257,7 +257,7 @@ if ($total_com_desconto < 0) {
                 <label for="promo-code" class="promo-label">Código Promocional</label>
                 <input type="text" id="promo-code" name="promo_code" class="promo-input"
                     placeholder="Código de Cupão" />
-                <button type="submit" name="aplicar_cupom" class="promo-btn">Aplicar Cupão</button>
+                <button type="submit" name="aplicar_cupao" class="promo-btn">Aplicar Cupão</button>
             </form>
             <div class="cart-totals">
                 <div class="subtotal-row">

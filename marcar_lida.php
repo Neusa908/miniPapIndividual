@@ -2,7 +2,7 @@
 session_start();
 require 'conexao.php';
 
-if (!isset($_SESSION['itilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta ação.'); window.location.href='index.php';</script>";
     exit();
 }

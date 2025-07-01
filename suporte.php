@@ -51,14 +51,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->execute()) {
             // Inserir notificação para o cliente sem ID
             $mensagem_notif_cliente = "Sua mensagem de suporte foi enviada em " . date('d/m/Y H:i');
-            $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, usuario_id) VALUES (?, ?)");
+            $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, utilizador_id) VALUES (?, ?)");
             $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $utilizador_id);
             $stmt_notif_cliente->execute();
             $stmt_notif_cliente->close();
 
             // Inserir notificação para todos os administradores
             $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $utilizador_id) recebida em " . date('d/m/Y H:i');
-            $sql_admins = "SELECT id FROM usuarios WHERE tipo = 'admin'";
+            $sql_admins = "SELECT id FROM utilizadores WHERE tipo = 'admin'";
             $result_admins = $conn->query($sql_admins);
             
             if ($result_admins->num_rows > 0) {
