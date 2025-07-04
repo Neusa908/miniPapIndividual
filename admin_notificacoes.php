@@ -13,6 +13,16 @@ $utilizador_id = $_SESSION['utilizador_id'];
 
 error_log("Admin logado com ID: $utilizador_id");
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $utilizador_id);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
     $sql = "DELETE FROM notificacoes WHERE id = ? AND admin_id = ?";
@@ -108,6 +118,9 @@ $result_notificacoes = $stmt_notificacoes->get_result();
         <div class="main-content">
             <header class="admin-header">
                 <h1>Notificações</h1>
+                <div class="usuario-foto-container">
+                    <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+                </div>
             </header>
             <div class="notifications-container">
                 <?php if ($result_notificacoes->num_rows > 0): ?>

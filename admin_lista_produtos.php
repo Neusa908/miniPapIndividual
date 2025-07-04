@@ -4,8 +4,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require 'conexao.php';
 
-
-
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
 
 // Apagar produto se enviado via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_produto_id'])) {
@@ -32,8 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_produto_id']))
     exit();
 }
 
-
-
 if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso negado!'); window.location.href='index.php';</script>";
     exit();
@@ -58,6 +63,9 @@ $result_produtos = $conn->query($sql_produtos);
 
 <body class="admin-lista-body">
     <div class="admin-lista-container">
+        <div class="usuario-foto-container">
+            <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+        </div>
         <h2 class="admin-lista-title">Produtos Registados</h2>
 
         <?php if ($result_produtos->num_rows > 0): ?>
@@ -87,7 +95,6 @@ $result_produtos = $conn->query($sql_produtos);
                         <input type="hidden" name="delete_produto_id" value="<?php echo $row['id']; ?>">
                         <button type="submit" class="admin-lista-btn excluir">Excluir</button>
                     </form>
-
                 </div>
             </div>
             <?php endwhile; ?>

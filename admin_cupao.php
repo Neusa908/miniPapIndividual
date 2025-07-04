@@ -7,6 +7,16 @@ if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 $mensagem = '';
 
 // Atualiza cupões vencidos para inativos
@@ -70,6 +80,9 @@ $conn->close();
 
 <body class="admin-cupao-body">
     <div class="admin-cupao-container">
+        <div class="usuario-foto-container">
+            <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+        </div>
         <h1 class="admin-cupao-title">Gestão de Cupões</h1>
 
         <?php if ($mensagem): ?>

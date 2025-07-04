@@ -76,7 +76,7 @@
         <a href="suporte.php">Suporte</a>
         <?php endif; ?>
 
-        <?php if (!isset($_SESSION['utilizador_id']) || ($_SESSION['tipo'] ?? '') === 'admin'): ?>
+        <?php if (isset($_SESSION['utilizador_id']) && $_SESSION['tipo'] === 'admin'): ?>
         <a href="sobre.php">Sobre</a>
         <?php endif; ?>
     </div>

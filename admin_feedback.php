@@ -9,6 +9,16 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 $admin_id = $_SESSION['utilizador_id'];
 
 // Exclusão de feedback
@@ -108,6 +118,9 @@ foreach ($feedbacks as &$feedback) {
         <div class="main-content">
             <header class="admin-header">
                 <h1>Feedbacks do Site</h1>
+                <div class="usuario-foto-container">
+                    <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+                </div>
             </header>
 
             <div class="feedback-container">

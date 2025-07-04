@@ -11,6 +11,16 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 // Processa a adição de um novo produto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_produto'])) {
     $nome = trim($_POST['nome']);
@@ -68,6 +78,9 @@ $result_categorias = $conn->query($sql_categorias);
 <body>
     <div class="admin-container">
         <h2 class="admin-title">Adicionar Produto</h2>
+        <div class="usuario-foto-container">
+            <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+        </div>
 
         <!-- Formulário de Adição de Produto -->
         <div class="section add-product-section">

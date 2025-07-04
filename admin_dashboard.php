@@ -12,13 +12,22 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 // vendas
 $sql_vendas = "SELECT SUM(total) as total_vendas, COUNT(*) as total_pedidos 
                FROM pedidos 
                WHERE status IN ('pago', 'concluido')";
 $result_vendas = $conn->query($sql_vendas);
 $vendas = $result_vendas->fetch_assoc();
-
 
 // vendas recentes
 $sql_pedidos = "SELECT p.id, p.data_pedido, p.total, p.status, u.nome FROM pedidos p JOIN utilizadores u ON p.utilizador_id = u.id ORDER BY p.data_pedido DESC LIMIT 10";
@@ -32,7 +41,6 @@ $visitas = $result_visitas->fetch_assoc();
 // visitas recentes
 $sql_visitas_recentes = "SELECT v.pagina, v.data_visita, u.nome FROM visitas v LEFT JOIN utilizadores u ON v.utilizador_id = u.id ORDER BY v.data_visita DESC LIMIT 10";
 $result_visitas_recentes = $conn->query($sql_visitas_recentes);
-
 
 // Usuários novos (últimos 30 dias)
 $sql_utilizadores_novos = "SELECT COUNT(*) as total_utilizadores_novos FROM utilizadores WHERE tipo = 'cliente' AND data_criacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
@@ -63,6 +71,9 @@ $utilizadores_novos = $result_utilizadores_novos->fetch_assoc();
         <div class="main-content">
             <header class="admin-header">
                 <h1>Relatórios e Análises</h1>
+                <div class="usuario-foto-container">
+                    <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+                </div>
             </header>
             <div class="report-container">
                 <h2>Resumo de Vendas</h2>
@@ -70,12 +81,12 @@ $utilizadores_novos = $result_utilizadores_novos->fetch_assoc();
                     €<?php echo number_format($vendas['total_vendas'] ?? 0, 2); ?></p>
                 <p class="users-table">Total de Pedidos Concluídos: <?php echo $vendas['total_pedidos'] ?? 0; ?></p>
 
-                <h2>Vendas Recentes</h2>
+                <h2>Pedidos Recentes</h2>
                 <?php if ($result_pedidos->num_rows > 0): ?>
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Número do Pedido</th>
                             <th>Cliente</th>
                             <th>Data</th>
                             <th>Total (€)</th>
@@ -101,7 +112,6 @@ $utilizadores_novos = $result_utilizadores_novos->fetch_assoc();
                 <h2>Resumo de Visitas</h2>
                 <p class="users-table">Total de Visitas: <?php echo $visitas['total_visitas'] ?? 0; ?></p>
 
-                <!-- 🔽 ADICIONADO AGORA -->
                 <h2>Visitas recentes em páginas</h2>
                 <?php if ($result_visitas_recentes->num_rows > 0): ?>
                 <table class="users-table">
@@ -125,7 +135,6 @@ $utilizadores_novos = $result_utilizadores_novos->fetch_assoc();
                 <?php else: ?>
                 <p class="users-table">Nenhuma visita recente encontrada.</p>
                 <?php endif; ?>
-                <!-- 🔼 FIM DA ADIÇÃO -->
 
                 <h2>Utilizadores Novos</h2>
                 <p class="users-table">Total de Utilizadores Novos:

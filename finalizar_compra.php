@@ -105,9 +105,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
     $conn->begin_transaction();
 
     try {
-        $sql = "INSERT INTO pedidos (utilizador_id, status, total, cidade_entrega) VALUES (?, 'pendente', ?, ?)";
+        // Gerar numero_pedido (ex.: USR2-001)
+        $sql = "SELECT COUNT(*) as total FROM pedidos WHERE utilizador_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ids", $utilizador_id, $total_com_desconto, $cidade_entrega);
+        $stmt->bind_param("i", $utilizador_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $sequencia = str_pad($row['total'] + 1, 3, '0', STR_PAD_LEFT); // Ex.: 001, 002
+        $numero_pedido = "USR" . $utilizador_id . "-" . $sequencia;
+        $stmt->close();
+
+        $sql = "INSERT INTO pedidos (utilizador_id, numero_pedido, status, total, cidade_entrega) VALUES (?, ?, 'pendente', ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("issd", $utilizador_id, $numero_pedido, $total_com_desconto, $cidade_entrega);
         $stmt->execute();
         $pedido_id = $conn->insert_id;
         $stmt->close();
@@ -152,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
 
         $sql = "INSERT INTO logs (utilizador_id, acao, detalhes, data_log) 
                 VALUES (?, 'Compra finalizada', ?, NOW())";
-        $detalhes = "Pedido ID $pedido_id com total €" . number_format($total_com_desconto, 2, ',', '.');
+        $detalhes = "Pedido ID $pedido_id (Ref: $numero_pedido) com total €" . number_format($total_com_desconto, 2, ',', '.');
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("is", $utilizador_id, $detalhes);
         $stmt->execute();

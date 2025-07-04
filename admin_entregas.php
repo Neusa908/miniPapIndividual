@@ -2,16 +2,27 @@
 session_start();
 require_once 'conexao.php';
 
+// Verifica se o utilizador é administrador
 if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     echo "<script>alert('Acesso restrito.'); window.location.href='index.php';</script>";
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; 
+$stmt_foto->close();
+
 $mensagem = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['entrega_id'], $_POST['status_entrega'])) {
     $entrega_id = intval($_POST['entrega_id']);
     $novo_status = $_POST['status_entrega'];
-    $minutos = isset($_POST['tempo_min']) ? intval($_POST['tempo_min']) : 5; // Valor padrão de 5 minutos se não for fornecido
+    $minutos = isset($_POST['tempo_min']) ? intval($_POST['tempo_min']) : 10; 
 
     $hora_estimada = (new DateTime())->modify("+$minutos minutes")->format('Y-m-d H:i:s');
 
@@ -50,6 +61,9 @@ $entregas = $result->fetch_all(MYSQLI_ASSOC);
 
 <body class="admin-entregas-body">
     <div class="admin-entregas-container">
+        <div class="usuario-foto-container">
+            <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+        </div>
         <h1 class="admin-entregas-titulo">Gestão de Entregas</h1>
 
         <?php if ($mensagem): ?>
@@ -85,7 +99,6 @@ $entregas = $result->fetch_all(MYSQLI_ASSOC);
         <hr>
         <?php endforeach; ?>
         <a href="admin_panel.php" class="add-admin-back-link">Voltar para o Painel Administrativo</a>
-
     </div>
 </body>
 

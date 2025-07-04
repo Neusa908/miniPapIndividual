@@ -1,20 +1,30 @@
 <?php
-   // Inicia a sessão apenas se ainda não estiver ativa
-   if (session_status() === PHP_SESSION_NONE) {
-       session_start();
-   }
-   require 'conexao.php';
+// Inicia a sessão apenas se ainda não estiver ativa
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require 'conexao.php';
 
-   // Verifica se o utilizador é administrador
-   if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
-       echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
-       exit();
-   }
+// Verifica se o utilizador é administrador
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
+    echo "<script>alert('Acesso negado! Apenas administradores podem acessar esta página.'); window.location.href='index.php';</script>";
+    exit();
+}
 
-   // Busca clientes
-   $sql_utilizadores = "SELECT id, nome, email FROM utilizadores WHERE tipo = 'cliente'";
-   $result_utilizadores = $conn->query($sql_utilizadores);
-   ?>
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
+// Busca clientes
+$sql_utilizadores = "SELECT nome, email FROM utilizadores WHERE tipo = 'cliente'";
+$result_utilizadores = $conn->query($sql_utilizadores);
+?>
 
 <!DOCTYPE html>
 <html lang="pt-pt">
@@ -40,31 +50,24 @@
         <div class="main-content">
             <header class="admin-header">
                 <h1>Gestão de Utilizadores</h1>
+                <div class="usuario-foto-container">
+                    <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+                </div>
             </header>
             <div class="users-container">
                 <?php if ($result_utilizadores->num_rows > 0): ?>
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Nome</th>
                             <th>Email</th>
-                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php while ($utilizador = $result_utilizadores->fetch_assoc()): ?>
                         <tr class="user-row">
-                            <td><?php echo $utilizador['id']; ?></td>
                             <td><?php echo htmlspecialchars($utilizador['nome']); ?></td>
                             <td><?php echo htmlspecialchars($utilizador['email']); ?></td>
-                            <td>
-                                <a href="admin_editarUtilizadores.php?id=<?php echo $utilizador['id']; ?>"
-                                    class="user-action edit">Editar</a>
-                                <a href="admin_excluirUtilizadores.php?id=<?php echo $utilizador['id']; ?>"
-                                    class="user-action delete"
-                                    onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
-                            </td>
                         </tr>
                         <?php endwhile; ?>
                     </tbody>
@@ -80,5 +83,5 @@
 </html>
 
 <?php
-   $conn->close();
-   ?>
+$conn->close();
+?>

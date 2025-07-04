@@ -39,16 +39,13 @@ a {
 .add-admin-content {
     display: flex;
     flex-direction: row;
-    /* Side-by-side layout */
     justify-content: space-between;
     width: 100%;
     gap: 20px;
-    /* Space between the two sections */
 }
 
 .add-admin-section {
     flex: 1;
-    /* Each section takes equal space */
     margin-bottom: 20px;
 }
 
@@ -113,7 +110,7 @@ a {
     background-color: #fff;
     padding: 10px;
     border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .add-admin-info p {
@@ -240,7 +237,7 @@ a {
     background-color: #ffffff;
     border-radius: 12px;
     padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0px 12px rgba(0, 0, 0, 0.3);
 }
 
 .admin-cupao-title {
@@ -296,7 +293,7 @@ a {
 
 .admin-cupao-subtitle {
     font-size: 1.5em;
-    color: #333;
+    color: #000000;
     margin-bottom: 15px;
 }
 
@@ -741,8 +738,6 @@ a {
 
 
 
-
-
 /*atualizar entrega*/
 .entregas-page {
     font-family: Arial, sans-serif;
@@ -756,7 +751,7 @@ a {
     background: white;
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .entregas-titulo {
@@ -899,7 +894,7 @@ a {
 
 .feedback-author {
     font-weight: bold;
-    color: #333;
+    color: #000000;
 }
 
 .author-link {
@@ -990,12 +985,12 @@ a {
 
 .response-author {
     font-weight: bold;
-    color: #333;
+    color: #000000;
     font-size: 14px;
 }
 
 .response-text {
-    color: #555;
+    color: #000000;
     font-size: 14px;
 }
 
@@ -1021,7 +1016,7 @@ a {
 }
 
 .no-feedback {
-    color: #555;
+    color: #000000;
     font-style: italic;
     text-align: center;
 }
@@ -1293,7 +1288,7 @@ a {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.7);
     max-width: 500px;
     margin: 0 auto;
 }
@@ -1334,7 +1329,7 @@ a {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.4);
 }
 
 .users-table {
@@ -1507,7 +1502,7 @@ a {
     top: 100%;
     right: 0;
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
     z-index: 1000;
 }
@@ -1528,7 +1523,7 @@ a {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
     max-width: 400px;
     margin: 20px auto;
     text-align: center;
@@ -1598,7 +1593,7 @@ a {
     padding: 15px;
     padding-top: 5px;
     border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0px 15px rgba(0, 0, 0, 0.3);
     max-width: 300px;
     width: 100%;
     color: white;
@@ -1624,7 +1619,7 @@ a {
 .sidebar-header {
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-header h3 {
@@ -1879,7 +1874,9 @@ a {
     background-color: #105566 !important;
 }
 
-s
+
+
+
 
 /* ==================== STYLE ADMIN_PRODUTOS ==================== */
 /* Estilos gerais */
@@ -1989,15 +1986,98 @@ body {
 
 
 
+/* ==================== STYLE ADMIN RECLAMAÇÕES ==================== */
+.admin-reclamacao-body {
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-reclamacao-container {
+    max-width: 800px;
+    margin: 4rem auto;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    text-align: left;
+    position: relative;
+}
+
+.admin-reclamacao-titulo {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #17a2b8;
+}
+
+.admin-reclamacao-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #f8f9fa;
+}
+
+.admin-reclamacao-no-data {
+    font-style: italic;
+    color: #6c757d;
+}
+
+.admin-reclamacao-form {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-reclamacao-select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.admin-reclamacao-submit {
+    padding: 0.5rem 1rem;
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.admin-reclamacao-submit:hover {
+    background-color: #138496;
+}
+
+.admin-reclamacao-voltar {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #0d6efd;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.admin-reclamacao-voltar:hover {
+    background-color: #062655;
+}
 
 
 
-/* ==================== STYLE ADMIN_RELATORIOS ==================== */
+
+
+
+
+/* ==================== STYLE ADMIN_Dashboard ==================== */
 .reports-container {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .report-section {
@@ -2005,7 +2085,7 @@ body {
 }
 
 .report-section h2 {
-    color: #333;
+    color: #000000;
     margin-bottom: 15px;
 }
 
@@ -2023,7 +2103,7 @@ body {
 
 .report-table th {
     background-color: #f4f4f9;
-    color: #333;
+    color: #000000;
 }
 
 .report-row:hover {
@@ -2052,32 +2132,32 @@ body {
 
 
 /* ==================== STYLE ADMIN_SUPORTE ==================== */
-/* Estilos gerais para a página */
+
 .admin-panel-body {
     margin: 0;
     padding: 0;
     display: flex;
     min-height: 100vh;
     background-color: #f4f4f4;
-    /* Adiciona rolagem geral se necessário */
+
 }
 
 .admin-panel-wrapper {
     display: flex;
     width: 100%;
     height: 100vh;
-    /* Garante altura total da viewport */
+
 }
 
 .sidebar {
     width: 250px;
-    background-color: #333;
+    background-color: #000000;
     color: #fff;
     position: fixed;
     height: 100vh;
     padding-top: 20px;
     z-index: 1;
-    /* Garante que a sidebar fique atrás do conteúdo */
+
 }
 
 .sidebar-header h3 {
@@ -2093,10 +2173,9 @@ body {
 }
 
 .sidebar-nav a:hover {
-    background-color: #555;
+    background-color: #000000;
 }
 
-/* Conteúdo principal */
 .main-content {
     margin-left: 250px;
     /* Ajusta para a largura da sidebar */
@@ -2106,7 +2185,6 @@ body {
     min-height: 100vh;
     /* Garante altura mínima */
     overflow-y: auto;
-    /* Adiciona rolagem vertical se o conteúdo exceder */
 }
 
 /* Container de suporte */
@@ -2753,7 +2831,7 @@ body {
 
 
 nav {
-    background-color: #333;
+    background-color: #000000;
     display: flex;
     justify-content: center;
 }
@@ -2766,7 +2844,7 @@ nav a {
 }
 
 nav a:hover {
-    background-color: #555;
+    background-color: #000000;
 }
 
 
@@ -3062,7 +3140,7 @@ footer {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
-    color: #333;
+    color: #000000;
 }
 
 .comment-form {
@@ -3118,7 +3196,7 @@ footer {
 
 .comment-author {
     font-weight: bold;
-    color: #333;
+    color: #000000;
 }
 
 .comment-rating {
@@ -3128,7 +3206,7 @@ footer {
 
 .comment-text {
     margin: 10px 0;
-    color: #555;
+    color: #000000;
 }
 
 .comment-date {
@@ -3374,7 +3452,7 @@ footer {
 
 .profile-header h1 {
     font-size: 24px;
-    color: #333;
+    color: #000000;
 }
 
 .back-link {
@@ -3391,7 +3469,7 @@ footer {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
     max-width: 500px;
     margin: 20px auto;
     text-align: center;
@@ -3400,7 +3478,7 @@ footer {
 .desc-container h2 {
     margin: 0 0 20px;
     font-size: 24px;
-    color: #333;
+    color: #000000;
 }
 
 .desc-form {
@@ -3410,7 +3488,7 @@ footer {
 .form-label {
     display: block;
     margin: 10px 0 5px;
-    color: #333;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -3493,14 +3571,14 @@ footer {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     width: 400px;
 }
 
 /* Título */
 .adEditar-title {
     text-align: center;
-    color: #333;
+    color: #000000;
     margin-bottom: 20px;
     font-size: 24px;
 }
@@ -3515,7 +3593,7 @@ footer {
 /* Labels */
 .adEditar-label {
     font-weight: bold;
-    color: #333;
+    color: #000000;
     margin-bottom: 5px;
 }
 
@@ -4924,6 +5002,126 @@ footer {
 
 
 
+/* ==================== STYLE RECLAMAÇÕES ==================== */
+.reclamacao-body {
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+}
+
+.reclamacao-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.reclamacao-titulo {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #dc3545;
+}
+
+.reclamacao-info {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #000000;
+}
+
+.reclamacao-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.reclamacao-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.reclamacao-enviar {
+    padding: 0.6rem 1.2rem;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reclamacao-enviar:hover {
+    background-color: #a71d2a;
+}
+
+.reclamacao-erro {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.reclamacao-voltar {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #0d6efd;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.reclamacao-voltar:hover {
+    background-color: #062655;
+}
+
+/* Para os containers de entrega */
+.cliente-entrega-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.reclamacao-botao {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #dc3545;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.reclamacao-botao:hover {
+    background-color: #a71d2a;
+}
+
+/* ==================== foto de usuario para entregas e reclamacoes ==================== */
+.usuario-foto-container {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.usuario-foto {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+
 
 
 /* ==================== STYLE REGISTAR ==================== */
@@ -5097,6 +5295,8 @@ body.registar {
 .btn-sobre-voltar:hover {
     background-color: #003d80;
 }
+
+
 
 
 

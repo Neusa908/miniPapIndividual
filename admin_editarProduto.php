@@ -8,6 +8,16 @@ if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     exit();
 }
 
+// Buscar foto de perfil do administrador
+$sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
+$stmt_foto = $conn->prepare($sql_foto);
+$stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
+$stmt_foto->execute();
+$result_foto = $stmt_foto->get_result();
+$utilizador = $result_foto->fetch_assoc();
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$stmt_foto->close();
+
 // Atualizar produto
 $mensagem = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_produto'])) {
@@ -52,16 +62,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_produto'])) 
     $stmt->close();
 }
 
-// Carrega lista de produtos
-$produtos = $conn->query("SELECT id, nome FROM produtos ORDER BY nome");
-
 // Carrega lista de categorias
 $categorias = $conn->query("SELECT id, nome FROM categorias ORDER BY nome");
 
 // Carrega dados de produto selecionado
 $produto_selecionado = null;
-if (isset($_GET['editar_id'])) {
-    $editar_id = intval($_GET['editar_id']);
+if (isset($_GET['id'])) {
+    $editar_id = intval($_GET['id']);
     $stmt = $conn->prepare("SELECT * FROM produtos WHERE id = ?");
     $stmt->bind_param("i", $editar_id);
     $stmt->execute();
@@ -83,25 +90,14 @@ $conn->close();
 
 <body class="admin-editar-body">
     <div class="admin-editar-container">
+        <div class="usuario-foto-container">
+            <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
+        </div>
         <h1 class="admin-editar-title">Editar Produto</h1>
 
         <?php if ($mensagem): ?>
         <p class="admin-editar-mensagem"><?php echo htmlspecialchars($mensagem); ?></p>
         <?php endif; ?>
-
-        <!-- Seleção de Produto -->
-        <form method="GET" class="admin-editar-selecao">
-            <label for="editar_id">Escolha o Produto:</label>
-            <select name="editar_id" id="editar_id" onchange="this.form.submit()" required>
-                <option value="">-- Selecione --</option>
-                <?php while ($p = $produtos->fetch_assoc()): ?>
-                <option value="<?php echo $p['id']; ?>"
-                    <?php echo (isset($produto_selecionado) && $produto_selecionado['id'] == $p['id']) ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($p['nome']); ?>
-                </option>
-                <?php endwhile; ?>
-            </select>
-        </form>
 
         <?php if ($produto_selecionado): ?>
         <!-- Formulário de Edição -->
@@ -137,6 +133,8 @@ $conn->close();
 
             <button type="submit" name="atualizar_produto" class="admin-editar-btn">Atualizar Produto</button>
         </form>
+        <?php else: ?>
+        <p class="admin-editar-mensagem">Nenhum produto selecionado para edição.</p>
         <?php endif; ?>
 
         <div class="admin-editar-links">
