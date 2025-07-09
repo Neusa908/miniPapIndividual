@@ -131,9 +131,10 @@ $conn->close();
                         <form method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este cupão?');">
                             <input type="hidden" name="codigo_excluir"
                                 value="<?php echo htmlspecialchars($cupao['codigo']); ?>">
-                            <button type="submit" name="excluir" class="admin-cupao-btn-excluir">Deletar</button>
                             <button type="button" class="admin-cupao-btn-editar"
                                 onclick="window.location.href='admin_editarCupao.php?codigo=<?php echo urlencode($cupao['codigo']); ?>'">Editar</button>
+                            <button type="submit" name="excluir" class="admin-cupao-btn-excluir">Deletar</button>
+
                         </form>
                     </td>
                 </tr>

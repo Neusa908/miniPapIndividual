@@ -81,30 +81,30 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
 
                 <a href="admin_utilizadores.php" class="card">
                     <h3>Gestão de Utilizadores</h3>
-                    <p>Edite e gerencie a lista de clientes.</p>
+                    <p>Veja todos os utilizadores registados.</p>
                 </a>
 
                 <a href="admin_notificacoes.php" class="card">
                     <h3>Notificações</h3>
-                    <p>Veja alertas de atividades.</p>
+                    <p>Veja as notificações de atividades.</p>
                 </a>
 
                 <a href="admin_cupao.php" class="card">
                     <h3>Gestão de Cupões</h3>
-                    <p>Crie e gerencie cupões promocionais.</p>
+                    <p>Crie, apague ou desative cupões.</p>
                 </a>
 
                 <a href="admin_feedback.php" class="card">
                     <h3>Feedback dos Clientes</h3>
-                    <p>Veja e gerencie o feedback dos clientes.</p>
+                    <p>Veja o feedback dos clientes.</p>
                 </a>
                 <a href="admin_entregas.php" class="card">
                     <h3>Gestão de Entregas</h3>
-                    <p>Veja e gerencie as entregas dos pedidos.</p>
+                    <p>Gerencie as entregas dos pedidos.</p>
                 </a>
                 <a href="admin_reclamacoes.php" class="card">
                     <h3>Gestão de Reclamações</h3>
-                    <p>Veja e gerencie as reclamações dos clientes.</p>
+                    <p>Veja e responda às reclamações dos clientes.</p>
                 </a>
             </div>
         </div>

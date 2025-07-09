@@ -16,7 +16,7 @@ $stmt_foto->bind_param("i", $utilizador_id);
 $stmt_foto->execute();
 $result_foto = $stmt_foto->get_result();
 $utilizador = $result_foto->fetch_assoc();
-$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
 // Buscar todos os pedidos do utilizador
@@ -51,7 +51,7 @@ $stmt->close();
         <?php if ($entregas): ?>
         <?php foreach ($entregas as $entrega): ?>
         <div class="cliente-entrega-item">
-            <p><strong>ID do Pedido:</strong> <?= htmlspecialchars($entrega['pedido_id']) ?></p>
+            <p><strong>Número do Pedido:</strong> <?= htmlspecialchars($entrega['pedido_id']) ?></p>
             <p><strong>Total:</strong> €<?= number_format($entrega['total'], 2, ',', '.') ?></p>
 
             <?php

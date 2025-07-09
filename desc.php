@@ -42,10 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_update->bind_param("si", $nova_descricao, $utilizador_id);
     if ($stmt_update->execute()) {
         echo "<script>alert('Descrição atualizada com sucesso!'); window.location.href='verPerfil.php?id=$utilizador_id';</script>";
+        $stmt_update->close();
+        exit();
     } else {
         echo "<script>alert('Erro ao atualizar descrição.'); window.location.href='desc.php';</script>";
+        $stmt_update->close();
+        exit();
     }
-    $stmt_update->close();
 }
 
 $conn->close();
@@ -55,30 +58,51 @@ $conn->close();
 <html lang="pt-PT">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Editar Descrição - Mercado Bom Preço</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
-<body class="profile-body">
-    <div class="container">
-        <header class="profile-header">
-            <h1>Editar Descrição</h1>
-            <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>" class="back-link">Voltar</a>
-        </header>
+<body class="vp-body">
+    <header class="vp-header">
+        <img src="img/logo.png" alt="Logo do Mercado Bom Preço" class="vp-logo" />
+        <h1 class="vp-titulo">Editar Descrição</h1>
+        <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>" class="vp-link">Voltar ao Perfil</a>
+        <a href="index.php" class="vp-link">Página Inicial</a>
+        <nav class="vp-nav">
+            <a href="index.php" class="vp-link">Página Inicial</a>
+            <a href="sobre.php" class="vp-link">Sobre</a>
+            <a href="suporte.php" class="vp-link">Suporte</a>
+        </nav>
+    </header>
 
-        <div class="desc-container">
-            <form method="POST" class="desc-form">
-                <h2>Editar Descrição do Perfil</h2>
-                <label for="descricao" class="form-label">Descrição:</label>
-                <textarea name="descricao" id="descricao" class="form-textarea"
-                    rows="5"><?php echo htmlspecialchars($utilizador['descricao']); ?></textarea>
-                <button type="submit" class="submit-button">Salvar Alterações</button>
-                <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>" class="cancel-button">Cancelar</a>
-            </form>
-        </div>
-    </div>
+    <main class="vp-container">
+        <section class="vp-card">
+            <div class="vp-left">
+                <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de perfil"
+                    class="vp-avatar" />
+                <h2 class="vp-name"><?php echo htmlspecialchars($utilizador['nome']); ?></h2>
+            </div>
+
+            <div class="vp-right edit-desc-right">
+                <h3 class="vp-desc-title">Editar Descrição</h3>
+                <form method="POST" class="desc-form">
+                    <textarea name="descricao" id="descricao" class="form-textarea" rows="6"
+                        required><?php echo htmlspecialchars($utilizador['descricao']); ?></textarea>
+                    <div class="btn-group">
+                        <button type="submit" class="vp-edit-btn submit-button">Salvar Alterações</button>
+                        <a href="verPerfil.php?id=<?php echo $utilizador_id; ?>"
+                            class="vp-edit-btn cancel-button">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-index">
+        <p>© 2024-2025 Mercado Bom Preço. Todos os direitos reservados.</p>
+    </footer>
 </body>
 
 </html>

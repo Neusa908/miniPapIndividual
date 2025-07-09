@@ -64,10 +64,9 @@ $stmt_foto->close();
         <?php if ($reclamacoes): ?>
         <?php foreach ($reclamacoes as $reclamacao): ?>
         <div class="admin-reclamacao-item">
-            <p><strong>ID Reclamação:</strong> <?= htmlspecialchars($reclamacao['id']) ?></p>
-            <p><strong>Pedido ID:</strong> <?= htmlspecialchars($reclamacao['pedido_id']) ?></p>
-            <p><strong>Usuário:</strong> <?= htmlspecialchars($reclamacao['apelido']) ?> (ID:
-                <?= htmlspecialchars($reclamacao['utilizador_id']) ?>)</p>
+            <p><strong>Reclamação:</strong> <?= htmlspecialchars($reclamacao['id']) ?></p>
+            <p><strong>Número do Pedido:</strong> <?= htmlspecialchars($reclamacao['pedido_id']) ?></p>
+            <p><strong>Usuário:</strong> <?= htmlspecialchars($reclamacao['apelido']) ?>
             <p><strong>Descrição:</strong> <?= htmlspecialchars($reclamacao['descricao']) ?></p>
             <p><strong>Data:</strong> <?= htmlspecialchars($reclamacao['data_reclamacao']) ?></p>
             <p><strong>Status:</strong> <?= htmlspecialchars($reclamacao['status']) ?></p>

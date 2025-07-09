@@ -361,6 +361,131 @@ a {
 
 
 
+
+/* ==================== STYLE ADMIN_Dashboard ==================== */
+.reports-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.report-section {
+    margin-bottom: 20px;
+}
+
+.report-section h2 {
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.report-table th {
+    background-color: #f4f4f9;
+    color: #000000;
+}
+
+.report-row:hover {
+    background-color: #f0f0f0;
+}
+
+.no-reports {
+    text-align: center;
+    color: #000000;
+}
+
+.nav-relatorios {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+/* ==================== STYLE ADMIN_Dashboard ==================== */
+.reports-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.report-section {
+    margin-bottom: 20px;
+}
+
+.report-section h2 {
+    color: #000000;
+    margin-bottom: 15px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.report-table th {
+    background-color: #f4f4f9;
+    color: #000000;
+}
+
+.report-row:hover {
+    background-color: #f0f0f0;
+}
+
+.no-reports {
+    text-align: center;
+    color: #000000;
+}
+
+.nav-relatorios {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+/*  Estilo para os gráficos */
+.chart-container {
+    max-width: 600px;
+    height: 350px;
+    margin: 0 auto;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ==================== STYLE ADMIN_DESC ==================== */
 .desc-container {
     background-color: white;
@@ -2072,57 +2197,7 @@ body {
 
 
 
-/* ==================== STYLE ADMIN_Dashboard ==================== */
-.reports-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
 
-.report-section {
-    margin-bottom: 20px;
-}
-
-.report-section h2 {
-    color: #000000;
-    margin-bottom: 15px;
-}
-
-.report-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.report-table th,
-.report-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.report-table th {
-    background-color: #f4f4f9;
-    color: #000000;
-}
-
-.report-row:hover {
-    background-color: #f0f0f0;
-}
-
-.no-reports {
-    text-align: center;
-    color: #000000;
-}
-
-.nav-relatorios {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    color: white;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-}
 
 
 
@@ -2375,6 +2450,8 @@ body {
         font-size: 11px;
     }
 }
+
+
 
 
 
@@ -3439,117 +3516,144 @@ footer {
 
 
 /* ==================== STYLE DESCRIÇÃO DO CLIENTE ==================== */
-.profile-body {
-    background-color: #f4f4f4;
+.vp-body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
 }
 
-.profile-header {
+.vp-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    justify-content: center;
+    margin: 40px 20px;
 }
 
-.profile-header h1 {
+.vp-card {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.vp-left {
+    background-color: #fff;
+    flex: 1;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.vp-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #28a745;
+}
+
+.vp-name {
+    margin-top: 25px;
     font-size: 24px;
-    color: #000000;
+    font-weight: 400;
+    color: #333;
 }
 
-.back-link {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.back-link:hover {
-    text-decoration: underline;
-}
-
-.desc-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
-    max-width: 500px;
-    margin: 20px auto;
+.edit-desc-right {
+    background-color: #28a745;
+    flex: 1;
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
 }
 
-.desc-container h2 {
-    margin: 0 0 20px;
+.vp-desc-title {
     font-size: 24px;
-    color: #000000;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 .desc-form {
+    width: 100%;
+    max-width: 400px;
     text-align: left;
-}
-
-.form-label {
-    display: block;
-    margin: 10px 0 5px;
-    color: #000000;
-    font-weight: bold;
 }
 
 .form-textarea {
     width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 14px;
-    resize: vertical;
-}
-
-.submit-button {
-    background-color: #2ecc71;
-    color: white;
-    padding: 8px 15px;
+    padding: 12px;
+    border-radius: 8px;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
+    resize: vertical;
+    font-size: 16px;
+    font-family: inherit;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    outline: none;
 }
 
-.submit-button:hover {
-    background-color: #27ae60;
+.form-textarea:focus {
+    box-shadow: 0 0 5px 2px #1e7d33;
 }
 
-.cancel-button {
-    display: inline-block;
-    background-color: #e74c3c;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
+.vp-edit-btn {
+    background-color: #ffffff;
+    color: #28a745;
     text-decoration: none;
     font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+    text-align: center;
+}
+
+.vp-edit-btn:hover {
+    background-color: #e6e6e6;
+    color: #1f5f26;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Botão cancelar*/
+.cancel-button {
+    background-color: #c0392b;
+    color: white;
     margin-left: 10px;
 }
 
 .cancel-button:hover {
-    background-color: #c0392b;
+    background-color: #922b21;
 }
 
-@media (max-width: 600px) {
-    .desc-container {
-        padding: 15px;
-        max-width: 100%;
+@media (max-width: 700px) {
+    .vp-card {
+        flex-direction: column;
     }
 
-    .desc-container h2 {
-        font-size: 20px;
-    }
-
-    .form-textarea {
-        font-size: 14px;
+    .vp-left,
+    .edit-desc-right {
+        padding: 20px;
     }
 }
 
-
-
-
+.vp-titulo {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000000;
+    text-align: center;
+}
 
 
 
@@ -3790,11 +3894,19 @@ body.cliente-entrega-body {
     color: #007bff;
     text-decoration: none;
     font-size: 16px;
+    top: 10px;
 }
 
 .favoritos-link:hover,
 .produtos-link:hover {
     text-decoration: underline;
+}
+
+.h1-favoritos {
+    text-align: center;
+    font-size: 24px;
+    color: #000000;
+    margin-bottom: 20px;
 }
 
 
@@ -4995,6 +5107,32 @@ footer {
     border-color: #129218;
 }
 
+.btn-favoritos {
+    background-color: #007bff;
+    border: 2px solid #000000;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    padding: 5px 10px;
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.btn-favoritos:hover {
+    background-color: #003d80;
+    text-decoration: underline;
+}
+
+.title-produtos {
+    text-align: center;
+    font-size: 2rem;
+    color: #000000;
+    margin-bottom: 20px;
+}
+
+
+
 
 
 
@@ -5375,130 +5513,115 @@ body.registar {
 
 
 /* ==================== STYLE VER_PERFIL ==================== */
-.profile-body {
-    background-color: #07833f;
+.vp-body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
 }
 
-.profile-header {
+.vp-header {
+    background-color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    padding: 15px 40px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.profile-header h1 {
-    font-size: 24px;
-    color: #333;
+.vp-logo {
+    height: 160px;
 }
 
-.back-link {
-    color: #007bff;
+.vp-nav {
+    display: flex;
+    gap: 25px;
+}
+
+.vp-link {
     text-decoration: none;
-    font-size: 16px;
+    color: #ffffff;
+    font-size: 14px;
 }
 
-.back-link:hover {
-    text-decoration: underline;
+.vp-link:hover {
+    color: #07833f;
 }
 
-.back-link2 {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 16px;
+.vp-container {
+    display: flex;
+    justify-content: center;
+    margin: 40px 20px;
 }
 
-.back-link2:hover {
-    text-decoration: underline;
+.vp-card {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-.profile-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 500px;
-    margin: 20px auto;
+.vp-left {
+    background-color: #fff;
+    flex: 1;
     text-align: center;
+    padding: 40px 20px;
 }
 
-.profile-photo {
-    margin-bottom: 20px;
-}
-
-.profile-photo img {
+.vp-avatar {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #2ecc71;
+    border: 4px solid #28a745;
 }
 
-.profile-container h2 {
-    margin: 10px 0;
+.vp-name {
+    margin-top: 25px;
     font-size: 24px;
+    font-weight: 400;
     color: #333;
 }
 
-.profile-type {
-    color: #666;
-    font-size: 16px;
+.vp-role {
+    font-size: 14px;
+    color: #777;
+    margin-top: 5px;
+}
+
+.vp-right {
+    background-color: #28a745;
+    flex: 1;
+    color: white;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.vp-desc-title {
+    font-size: 20px;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
-.profile-description {
-    margin: 20px 0;
-    text-align: left;
-}
-
-.profile-description label {
-    font-weight: bold;
-    color: #333;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.profile-description p {
-    margin: 0;
-    color: #555;
+.vp-desc-text {
     font-size: 16px;
-    line-height: 1.5;
+    font-weight: 500;
+    margin-bottom: 20px;
 }
 
-.profile-edit-button {
-    display: inline-block;
-    background-color: #2ecc71;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
+.vp-edit-btn {
+    background-color: #ffffff;
+    color: #28a745;
     text-decoration: none;
     font-size: 14px;
-    margin-top: 10px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
 }
 
-.profile-edit-button:hover {
-    background-color: #27ae60;
-}
-
-@media (max-width: 600px) {
-    .profile-container {
-        padding: 15px;
-        max-width: 100%;
-    }
-
-    .profile-photo img {
-        width: 100px;
-        height: 100px;
-    }
-
-    .profile-container h2 {
-        font-size: 20px;
-    }
-
-    .profile-description p {
-        font-size: 14px;
-    }
-
-    .profile-edit-button {
-        font-size: 14px;
-    }
+.vp-edit-btn:hover {
+    background-color: #e6e6e6;
 }

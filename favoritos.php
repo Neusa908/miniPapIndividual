@@ -40,8 +40,8 @@ $result = $stmt->get_result();
     <header class="header-produtos">
         <div class="header-content">
             <div class="title-section">
-                <h1>Meus Favoritos</h1>
-                <p>Seus produtos favoritos estão aqui!</p>
+                <h1 class="h1-favoritos">Meus Favoritos</h1>
+
             </div>
             <a href="produtos.php" class="produtos-link">Voltar aos Produtos</a>
             <button class="login-button" onclick="window.location.href='logout.php'">Logout</button>

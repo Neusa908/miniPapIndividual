@@ -45,34 +45,39 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?> - Mercado Bom Preço</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/verPerfil.css">
 </head>
 
-<body class="profile-body">
-    <div class="container">
-        <header class="profile-header">
-            <h1>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?></h1>
-            <br><a href="index.php" class="back-link">Voltar para o início</a>
+<body class="vp-body">
+    <header class="vp-header">
+        <img src="img/logo.png" alt="Logo do Mercado Bom Preço" class="vp-logo">
+        <h1>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?></h1>
 
+        <nav class="vp-nav">
+            <a href="index.php" class="vp-link">Página Inicial</a>
+            <a href="sobre.php" class="vp-link">Sobre</a>
+            <a href="suporte.php" class="vp-link">Suporte</a>
+        </nav>
+    </header>
 
-        </header>
-
-        <div class="profile-container">
-            <div class="profile-photo">
-                <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de perfil">
+    <main class="vp-container">
+        <section class="vp-card">
+            <div class="vp-left">
+                <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de perfil"
+                    class="vp-avatar">
+                <h2 class="vp-name"><?php echo htmlspecialchars($utilizador['nome']); ?></h2>
+                <p class="vp-role"><?php echo $utilizador['tipo'] === 'admin' ? 'Administrador' : 'Cliente'; ?></p>
             </div>
-            <h2><?php echo htmlspecialchars($utilizador['nome']); ?></h2>
-            <p class="profile-type"><?php echo $utilizador['tipo'] === 'admin' ? 'Administrador' : 'Cliente'; ?></p>
-            <div class="profile-description">
-                <label>Descrição:</label>
-                <p><?php echo htmlspecialchars($utilizador['descricao']); ?></p>
+            <div class="vp-right">
+                <h3 class="vp-desc-title">Descrição:</h3>
+                <p class="vp-desc-text"><?php echo htmlspecialchars($utilizador['descricao']); ?></p>
+                <?php if ($is_own_profile): ?>
+                <a href="desc.php" class="vp-edit-btn">Editar Descrição</a>
+                <?php endif; ?>
             </div>
+        </section>
+    </main>
 
-            <?php if ($is_own_profile): ?>
-            <a href="desc.php" class="profile-edit-button">Editar Descrição</a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <footer class="footer-index">
+        <p>© 2024-2025 Mercado Bom Preço. Todos os direitos reservados.</p>
+    </footer>
 </body>
-
-</html>

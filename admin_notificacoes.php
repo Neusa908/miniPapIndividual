@@ -20,7 +20,7 @@ $stmt_foto->bind_param("i", $utilizador_id);
 $stmt_foto->execute();
 $result_foto = $stmt_foto->get_result();
 $utilizador = $result_foto->fetch_assoc();
-$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
 if (isset($_GET['delete_id'])) {
@@ -41,7 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
     $suporte_id = (int)$_POST['suporte_id'];
     $resposta = trim($_POST['resposta']);
 
-    // Obter o utilizador_id associado ao suporte
     $sql_utilizador = "SELECT utilizador_id FROM suporte WHERE id = ?";
     $stmt_utilizador = $conn->prepare($sql_utilizador);
     $stmt_utilizador->bind_param("i", $suporte_id);
@@ -51,16 +50,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
     $stmt_utilizador->close();
 
     if ($utilizador_id_cliente) {
-        // Atualizar o suporte com a resposta
         $sql_update = "UPDATE suporte SET resposta = ?, status = 'resolvido', data_resposta = NOW() WHERE id = ?";
         $stmt_update = $conn->prepare($sql_update);
         $stmt_update->bind_param("si", $resposta, $suporte_id);
 
         if ($stmt_update->execute()) {
-            // Criar notificação para o cliente
-            $mensagem_notif = "Sua mensagem de suporte (ID $suporte_id) foi respondida em " . date('d/m/Y H:i');
-            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
-            $stmt_notif->bind_param("is", $utilizador_id_cliente, $mensagem_notif);
+            $mensagem_notif = "Sua mensagem de suporte foi respondida no dia " . date('d/m/Y H:i');
+            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0, ?)");
+            $stmt_notif->bind_param("isi", $utilizador_id_cliente, $mensagem_notif, $suporte_id);
             $stmt_notif->execute();
             $stmt_notif->close();
 
@@ -75,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
 }
 
 // Consultar notificações para o admin
-$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida FROM notificacoes WHERE admin_id = ? ORDER BY data_criacao DESC";
+$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida, suporte_id FROM notificacoes WHERE admin_id = ? ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
 $stmt_notificacoes->bind_param("i", $utilizador_id);
 $stmt_notificacoes->execute();
@@ -132,11 +129,8 @@ $result_notificacoes = $stmt_notificacoes->get_result();
                         <span
                             class="notification-date"><?php echo date('d/m/Y H:i', strtotime($notificacao['data_criacao'])); ?></span>
                         <?php if (!$notificacao['lida']): ?>
-                        <?php
-                        preg_match('/\(ID (\d+)\)/', $notificacao['mensagem'], $matches);
-                        $suporte_id = $matches[1] ?? null;
-                        if ($suporte_id): ?>
-                        <a href="admin_suporte.php?suporte_id=<?php echo $suporte_id; ?>"
+                        <?php if (!empty($notificacao['suporte_id'])): ?>
+                        <a href="admin_suporte.php?suporte_id=<?= $notificacao['suporte_id']; ?>"
                             class="notificacao-ver">Ver</a>
                         <?php endif; ?>
                         <a href="admin_marcarLida.php?id=<?php echo $notificacao['id']; ?>"

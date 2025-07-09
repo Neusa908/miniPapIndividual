@@ -57,11 +57,12 @@ $result = $stmt->get_result();
     <header class="header-produtos">
         <div class="header-content">
             <div class="title-section">
-                <h1>Produtos</h1>
-                <p>Preços bons!</p>
+                <h1 class="title-produtos">Produtos</h1>
             </div>
             <?php if (isset($_SESSION['utilizador_id'])): ?>
-            <a href="favoritos.php" class="favoritos-link">Meus Favoritos</a>
+            <form action="favoritos.php" method="get" style="display:inline;">
+                <button type="submit" class="btn-favoritos">Meus Favoritos</button>
+            </form>
             <?php endif; ?>
         </div>
     </header>
@@ -109,7 +110,6 @@ $result = $stmt->get_result();
                     <h3 class="produto-nome"><?php echo htmlspecialchars($produto['nome']); ?></h3>
                     <p class="produto-descricao"><?php echo htmlspecialchars($produto['descricao']); ?></p>
                     <span class="preco">€<?php echo number_format($produto['preco'], 2, ',', '.'); ?></span>
-                    <p class="produto-estoque">Em estoque: <?php echo $produto['quantidade_estoque']; ?> Unidades</p>
 
                     <?php if (isset($_SESSION['utilizador_id'])): ?>
                     <form method="POST" action="carrinho.php" class="produto-form">
@@ -128,20 +128,17 @@ $result = $stmt->get_result();
                         <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
                         <button class="favorito-button" type="submit" name="adicionar_favorito">
                             <?php
-                                            $utilizador_id = $_SESSION['utilizador_id'];
-                                            $produto_id = $produto['id'];
-                                            $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE utilizador_id = ? AND produto_id = ?");
-                                            $stmt_fav->bind_param("ii", $utilizador_id, $produto_id);
-                                            $stmt_fav->execute();
-                                            $is_favorito = $stmt_fav->get_result()->num_rows > 0;
-                                            $stmt_fav->close();
-                                            echo $is_favorito ? '🌟' : '⭐';
-                                        ?>
+                                $utilizador_id = $_SESSION['utilizador_id'];
+                                $produto_id = $produto['id'];
+                                $stmt_fav = $conn->prepare("SELECT id FROM favoritos WHERE utilizador_id = ? AND produto_id = ?");
+                                $stmt_fav->bind_param("ii", $utilizador_id, $produto_id);
+                                $stmt_fav->execute();
+                                $is_favorito = $stmt_fav->get_result()->num_rows > 0;
+                                $stmt_fav->close();
+                                echo $is_favorito ? '🌟' : '⭐';
+                            ?>
                         </button>
                     </form>
-
-                    <a href="comentarios.php?produto_id=<?php echo $produto['id']; ?>" class="btn btn-cancel">Ver
-                        comentários</a>
                     <?php else: ?>
                     <p class="erro">Faça login para adicionar ao carrinho ou favoritar.</p>
                     <?php endif; ?>
