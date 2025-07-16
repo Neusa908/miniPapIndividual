@@ -7,61 +7,77 @@ if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     exit();
 }
 
-// Buscar foto de perfil do administrador
+// Token CSRF
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
+
+// Foto de perfil
 $sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
 $stmt_foto = $conn->prepare($sql_foto);
 $stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
 $stmt_foto->execute();
 $result_foto = $stmt_foto->get_result();
 $utilizador = $result_foto->fetch_assoc();
-$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
 $mensagem = '';
 
-// Atualiza cupões vencidos para inativos
+// Atualiza cupões vencidos
 $conn->query("UPDATE promocoes SET ativa = 0 WHERE data_fim < NOW()");
 
 // Exclusão
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['excluir']) && !empty($_POST['codigo_excluir'])) {
-    $codigo_excluir = $_POST['codigo_excluir'];
-    $stmt = $conn->prepare("DELETE FROM promocoes WHERE codigo = ?");
-    $stmt->bind_param("s", $codigo_excluir);
-    if ($stmt->execute()) {
-        $mensagem = "Cupão '{$codigo_excluir}' excluído com sucesso!";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['excluir'], $_POST['id_excluir'], $_POST['csrf_token'])) {
+    if (hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $id_excluir = intval($_POST['id_excluir']);
+        $stmt = $conn->prepare("DELETE FROM promocoes WHERE id = ?");
+        $stmt->bind_param("i", $id_excluir);
+        if ($stmt->execute()) {
+            $mensagem = "Cupão excluído com sucesso!";
+        } else {
+            $mensagem = "Erro ao excluir cupão.";
+        }
+        $stmt->close();
     } else {
-        $mensagem = "Erro ao excluir cupão.";
+        $mensagem = "Token CSRF inválido.";
     }
-    $stmt->close();
 }
 
 // Criação
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo']) && !isset($_POST['excluir'])) {
-    $codigo = strtoupper(trim($_POST['codigo']));
-    $desconto = floatval($_POST['desconto']);
-    $data_inicio = $_POST['data_inicio'];
-    $data_fim = $_POST['data_fim'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo'], $_POST['csrf_token']) && !isset($_POST['excluir'])) {
+    if (hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $codigo = strtoupper(trim($_POST['codigo']));
+        $desconto = floatval($_POST['desconto']);
+        $data_inicio = $_POST['data_inicio'];
+        $data_fim = $_POST['data_fim'];
 
-    if (empty($codigo) || $desconto <= 0 || empty($data_fim)) {
-        $mensagem = "Preencha todos os campos corretamente.";
-    } else {
-        $stmt = $conn->prepare("SELECT id FROM promocoes WHERE codigo = ?");
-        $stmt->bind_param("s", $codigo);
-        $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows > 0) {
-            $mensagem = "Já existe um cupão com esse código.";
+        if (empty($codigo) || $desconto < 0.01 || empty($data_inicio) || empty($data_fim)) {
+            $mensagem = "Preencha todos os campos corretamente.";
+        } elseif (strtotime($data_fim) <= strtotime($data_inicio)) {
+            $mensagem = "A data de validade deve ser posterior à data de início.";
         } else {
-            $sql = "INSERT INTO promocoes (codigo, desconto, data_inicio, data_fim, ativa) 
-                    VALUES (?, ?, ?, ?, 1)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sdss", $codigo, $desconto, $data_inicio, $data_fim);
+            $stmt = $conn->prepare("SELECT id FROM promocoes WHERE codigo = ?");
+            $stmt->bind_param("s", $codigo);
             $stmt->execute();
-            $mensagem = $stmt->affected_rows > 0 ? "Cupão criado com sucesso!" : "Erro ao criar cupão.";
-        }
+            $stmt->store_result();
 
-        $stmt->close();
+            if ($stmt->num_rows > 0) {
+                $mensagem = "Já existe um cupão com esse código.";
+            } else {
+                $sql = "INSERT INTO promocoes (codigo, desconto, data_inicio, data_fim, ativa) 
+                        VALUES (?, ?, ?, ?, 1)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("sdss", $codigo, $desconto, $data_inicio, $data_fim);
+                $stmt->execute();
+                $mensagem = $stmt->affected_rows > 0 ? "Cupão criado com sucesso!" : "Erro ao criar cupão.";
+            }
+
+            $stmt->close();
+        }
+    } else {
+        $mensagem = "Token CSRF inválido.";
     }
 }
 
@@ -86,15 +102,17 @@ $conn->close();
         <h1 class="admin-cupao-title">Gestão de Cupões</h1>
 
         <?php if ($mensagem): ?>
-        <p class="admin-cupao-msg"><?php echo htmlspecialchars($mensagem); ?></p>
+        <p class="admin-cupao-msg"><?= htmlspecialchars($mensagem) ?></p>
         <?php endif; ?>
 
         <form method="POST" class="admin-cupao-form">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+
             <label for="codigo">Código do Cupão:</label>
             <input type="text" name="codigo" id="codigo" maxlength="20" required>
 
             <label for="desconto">Desconto (€):</label>
-            <input type="number" step="0.01" name="desconto" id="desconto" required>
+            <input type="number" step="0.01" name="desconto" id="desconto" min="0.01" required>
 
             <label for="data_inicio">Data de Início:</label>
             <input type="datetime-local" name="data_inicio" id="data_inicio" required>
@@ -122,19 +140,21 @@ $conn->close();
             <tbody>
                 <?php while ($cupao = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($cupao['codigo']); ?></td>
-                    <td>€<?php echo number_format($cupao['desconto'], 2, ',', '.'); ?></td>
-                    <td><?php echo htmlspecialchars($cupao['data_inicio']); ?></td>
-                    <td><?php echo htmlspecialchars($cupao['data_fim']); ?></td>
-                    <td><?php echo $cupao['ativa'] ? 'Sim' : 'Não'; ?></td>
-                    <td>
-                        <form method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este cupão?');">
-                            <input type="hidden" name="codigo_excluir"
-                                value="<?php echo htmlspecialchars($cupao['codigo']); ?>">
-                            <button type="button" class="admin-cupao-btn-editar"
-                                onclick="window.location.href='admin_editarCupao.php?codigo=<?php echo urlencode($cupao['codigo']); ?>'">Editar</button>
+                    <td><?= htmlspecialchars($cupao['codigo']) ?></td>
+                    <td>€<?= number_format($cupao['desconto'], 2, ',', '.') ?></td>
+                    <td><?= date('d/m/Y H:i', strtotime($cupao['data_inicio'])) ?></td>
+                    <td><?= date('d/m/Y H:i', strtotime($cupao['data_fim'])) ?></td>
+                    <td><?= $cupao['ativa'] ? 'Sim' : 'Não' ?></td>
+                    <td class="admin-cupao-acoes">
+                        <button type="button" class="admin-cupao-btn-editar"
+                            onclick="window.location.href='admin_editarCupao.php?codigo=<?= urlencode($cupao['codigo']) ?>'">
+                            Editar
+                        </button>
+                        <form method="POST" style="display:inline;"
+                            onsubmit="return confirm('Tem certeza que deseja excluir este cupão?');">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                            <input type="hidden" name="id_excluir" value="<?= intval($cupao['id']) ?>">
                             <button type="submit" name="excluir" class="admin-cupao-btn-excluir">Deletar</button>
-
                         </form>
                     </td>
                 </tr>
@@ -142,7 +162,7 @@ $conn->close();
             </tbody>
         </table>
 
-        <a href="admin_panel.php" class="admin-cupao-voltar">← Voltar ao Painel</a>
+        <a href="admin_panel.php" class="admin-cupao-voltar">Voltar ao Painel</a>
     </div>
 </body>
 

@@ -186,7 +186,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações</title>
+    <title>Endereços - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
 
 </head>
@@ -194,7 +194,6 @@ $conn->close();
 <body class="configuracoes-body">
 
     <div class="configuracoes-container">
-        <h1>Configurações da Conta</h1>
         <?php if ($mensagem): ?>
         <p class="mensagem"><?php echo htmlspecialchars($mensagem); ?></p>
         <?php endif; ?>
@@ -235,7 +234,7 @@ $conn->close();
             <form method="POST" style="display:inline;">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <input type="hidden" name="endereco_id" value="<?php echo $endereco['id']; ?>">
-                <button type="submit" name="apagar_endereco" class="apagar-endereco-btn"
+                <button type="submit" name="apagar_endereco" class="btn-cancelar"
                     onclick="return confirm('Tem certeza que deseja apagar este endereço?');">Apagar</button>
             </form>
         </div>
@@ -266,7 +265,7 @@ $conn->close();
             <button type="reset" class="btn-cancelar">Cancelar</button>
         </form>
 
-        <a href="perfil.php" class="btn-voltar">Ir para o perfil</a>
+        <a href="perfil.php" class="btn-voltar">Ir para as configurações da conta</a>
         <a href="index.php" class="btn-voltar">Ir para o início</a>
     </div>
 </body>

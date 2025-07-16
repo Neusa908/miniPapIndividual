@@ -3,10 +3,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+
+if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
+    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    exit();
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require 'conexao.php'; // Inclui a conexão com o banco de dados
+require 'conexao.php';
 
 if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para enviar um suporte.";
@@ -49,18 +55,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("iss", $utilizador_id, $email, $mensagem);
 
         if ($stmt->execute()) {
-            // Inserir notificação para o cliente sem ID
+            // Notificação para clientes
             $mensagem_notif_cliente = "Sua mensagem de suporte foi enviada em " . date('d/m/Y H:i');
             $stmt_notif_cliente = $conn->prepare("INSERT INTO notificacoes (mensagem, utilizador_id) VALUES (?, ?)");
             $stmt_notif_cliente->bind_param("si", $mensagem_notif_cliente, $utilizador_id);
             $stmt_notif_cliente->execute();
             $stmt_notif_cliente->close();
 
-            // Inserir notificação para todos os administradores
-            $mensagem_notif_admin = "Nova mensagem de suporte de $nome (ID $utilizador_id) recebida em " . date('d/m/Y H:i');
+            // Notificação para administradores
+            $mensagem_notif_admin = "Nova mensagem de suporte de $nome recebida em " . date('d/m/Y H:i');
             $sql_admins = "SELECT id FROM utilizadores WHERE tipo = 'admin'";
             $result_admins = $conn->query($sql_admins);
-            
+
             if ($result_admins->num_rows > 0) {
                 $stmt_notif_admin = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
                 while ($admin = $result_admins->fetch_assoc()) {
@@ -93,7 +99,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulário de Suporte</title>
+    <title>Suporte</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 
@@ -103,7 +109,7 @@ $conn->close();
         <form class="support-form" method="POST" action="suporte.php">
             <label for="nome">NOME</label>
             <input type="text" id="nome" name="nome" placeholder="Digite o seu nome de utilizador"
-                value="<?php echo isset($_SESSION['utilizador_nome']) ? htmlspecialchars($_SESSION['utilizador_nome']) : htmlspecialchars($nome_usuario); ?>"
+                value="<?php echo isset($_SESSION['utilizador_nome']) ? htmlspecialchars($_SESSION['utilizador_nome']) : htmlspecialchars($nome_utilizador); ?>"
                 required>
 
             <label for="email">EMAIL</label>

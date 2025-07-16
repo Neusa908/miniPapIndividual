@@ -136,14 +136,14 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - Mercado Bom Preço</title>
+    <title>Configurações - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/perfil.css">
 </head>
 
 <body class="client-perfil-body">
     <div class="client-perfil-container">
-        <h1 class="client-perfil-title">Meu Perfil</h1>
+        <h1 class="client-perfil-title">Configurações</h1>
 
         <?php if ($mensagem): ?>
         <p class="client-perfil-message"><?php echo htmlspecialchars($mensagem); ?></p>

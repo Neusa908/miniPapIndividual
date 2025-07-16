@@ -56,9 +56,9 @@ if (isset($_GET['delete_suporte'])) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $suporte_id);
     if ($stmt->execute()) {
-        echo "<script>alert('Mensagem de suporte excluída com sucesso!'); window.location.href='admin_suporte.php';</script>";
+        echo "<script>alert('Mensagem de suporte deletada com sucesso!'); window.location.href='admin_suporte.php';</script>";
     } else {
-        echo "<script>alert('Erro ao excluir a mensagem de suporte. Tente novamente.');</script>";
+        echo "<script>alert('Erro ao deletar a mensagem de suporte. Tente novamente.');</script>";
     }
     $stmt->close();
 }
@@ -116,7 +116,7 @@ if ($result === false) {
                 <?php endif; ?>
                 <div class="suporte-actions">
                     <a href="admin_suporte.php?delete_suporte=<?php echo $row['id']; ?>"
-                        onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">Excluir</a>
+                        onclick="return confirm('Tem certeza que deseja deletar esta mensagem?');">Deletar</a>
                 </div>
             </div>
             <?php endwhile; ?>

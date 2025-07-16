@@ -1295,6 +1295,36 @@ a {
     background-color: #1b4332;
 }
 
+/* Estilo do filtro de categoria */
+.filtro-categoria-form {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.filtro-categoria-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.filtro-categoria-select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.filtro-categoria-select:hover,
+.filtro-categoria-select:focus {
+    border-color: #007BFF;
+    outline: none;
+}
+
 
 
 
@@ -2004,7 +2034,6 @@ a {
 
 
 /* ==================== STYLE ADMIN_PRODUTOS ==================== */
-/* Estilos gerais */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -2093,16 +2122,18 @@ body {
     background-color: #11354d;
 }
 
-/* Rodapé */
-.footer {
-    text-align: center;
-    padding: 1px;
-    background-color: #000000;
-    color: #fff;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
+
+
+.form-textarea-desc {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    resize: vertical;
+    min-height: 100px;
 }
+
 
 
 
@@ -5262,6 +5293,12 @@ footer {
 
 
 
+
+
+
+
+
+
 /* ==================== STYLE REGISTAR ==================== */
 .form-container {
     background-color: rgba(0, 0, 0, 0.4);
@@ -5384,6 +5421,23 @@ body.registar {
     }
 }
 
+.checkbox-termos {
+    margin: 15px 0;
+    font-size: 0.95em;
+}
+
+.checkbox-termos label a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.checkbox-termos label a:hover {
+    text-decoration: underline;
+}
+
+
+
+
 
 
 
@@ -5505,8 +5559,87 @@ body.registar {
 
 
 
+/* ==================== STYLE TERMOS ==================== */
 
+.termos-body {
+    font-family: Arial, sans-serif;
+    background-color: darkgreen;
+    margin: 0;
+    padding: 40px 20px;
 
+}
+
+.termos-wrapper {
+    max-width: 800px;
+    margin: auto;
+}
+
+.termos-card {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.termos-titulo {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #000000;
+}
+
+.termos-intro {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #000000
+}
+
+.termos-lista {
+    list-style: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+    color: #000000
+}
+
+.termos-lista li {
+    margin-bottom: 10px;
+}
+
+.termos-footer {
+    font-size: 0.95em;
+    color: #000000;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.button-termos {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.button-termos {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+.button-termos:hover {
+    background-color: #0056b3;
+}
+
+.button-termos.voltar {
+    background-color: #6c757d;
+}
+
+.button-termos.voltar:hover {
+    background-color: #5a6268;
+}
 
 
 

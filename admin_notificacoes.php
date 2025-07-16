@@ -11,8 +11,6 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
 
 $utilizador_id = $_SESSION['utilizador_id'];
 
-error_log("Admin logado com ID: $utilizador_id");
-
 // Buscar foto de perfil do administrador
 $sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
 $stmt_foto = $conn->prepare($sql_foto);
@@ -23,6 +21,7 @@ $utilizador = $result_foto->fetch_assoc();
 $foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
+// Deletar notificação
 if (isset($_GET['delete_id'])) {
     $delete_id = (int)$_GET['delete_id'];
     $sql = "DELETE FROM notificacoes WHERE id = ? AND admin_id = ?";
@@ -31,12 +30,11 @@ if (isset($_GET['delete_id'])) {
     if ($stmt->execute()) {
         header("Location: admin_notificacoes.php");
         exit;
-    } else {
-        error_log("Erro ao excluir notificação: " . $conn->error);
     }
     $stmt->close();
 }
 
+// Responder suporte
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset($_POST['resposta'])) {
     $suporte_id = (int)$_POST['suporte_id'];
     $resposta = trim($_POST['resposta']);
@@ -55,23 +53,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
         $stmt_update->bind_param("si", $resposta, $suporte_id);
 
         if ($stmt_update->execute()) {
-            $mensagem_notif = "Sua mensagem de suporte foi respondida no dia " . date('d/m/Y H:i');
-            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0, ?)");
+            $mensagem_notif = "Sua mensagem de suporte foi respondida em " . date('d/m/Y H:i');
+            $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida, suporte_id) VALUES (?, ?, NOW(), 0, ?)");
             $stmt_notif->bind_param("isi", $utilizador_id_cliente, $mensagem_notif, $suporte_id);
             $stmt_notif->execute();
             $stmt_notif->close();
 
             echo "<script>alert('Resposta enviada com sucesso!'); window.location.href='admin_notificacoes.php';</script>";
         } else {
-            echo "<script>alert('Erro ao enviar a resposta. Tente novamente.');</script>";
+            echo "<script>alert('Erro ao enviar a resposta.');</script>";
         }
         $stmt_update->close();
     } else {
-        echo "<script>alert('Utilizador não encontrado para este suporte.');</script>";
+        echo "<script>alert('Utilizador não encontrado.');</script>";
     }
 }
 
-// Consultar notificações para o admin
+// Buscar notificações
 $sql_notificacoes = "SELECT id, mensagem, data_criacao, lida, suporte_id FROM notificacoes WHERE admin_id = ? ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
 $stmt_notificacoes->bind_param("i", $utilizador_id);
@@ -109,7 +107,7 @@ $result_notificacoes = $stmt_notificacoes->get_result();
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span> Voltar</a>
+                <a href="admin_panel.php" class="nav-item">Voltar</a>
             </nav>
         </div>
         <div class="main-content">
@@ -124,20 +122,20 @@ $result_notificacoes = $stmt_notificacoes->get_result();
                 <ul class="notifications-list">
                     <?php while ($notificacao = $result_notificacoes->fetch_assoc()): ?>
                     <li
-                        class="notification-item <?php echo $notificacao['lida'] ? 'notification-read' : 'notification-unread'; ?>">
-                        <p class="notification-message"><?php echo htmlspecialchars($notificacao['mensagem']); ?></p>
+                        class="notification-item <?= $notificacao['lida'] ? 'notification-read' : 'notification-unread'; ?>">
+                        <p class="notification-message"><?= htmlspecialchars($notificacao['mensagem']); ?></p>
                         <span
-                            class="notification-date"><?php echo date('d/m/Y H:i', strtotime($notificacao['data_criacao'])); ?></span>
+                            class="notification-date"><?= date('d/m/Y H:i', strtotime($notificacao['data_criacao'])); ?></span>
                         <?php if (!$notificacao['lida']): ?>
                         <?php if (!empty($notificacao['suporte_id'])): ?>
                         <a href="admin_suporte.php?suporte_id=<?= $notificacao['suporte_id']; ?>"
                             class="notificacao-ver">Ver</a>
                         <?php endif; ?>
-                        <a href="admin_marcarLida.php?id=<?php echo $notificacao['id']; ?>"
-                            class="notification-action">Marcar como lida</a>
+                        <a href="admin_marcarLida.php?id=<?= $notificacao['id']; ?>" class="notification-action">Marcar
+                            como lida</a>
                         <?php endif; ?>
-                        <a href="?delete_id=<?php echo $notificacao['id']; ?>" class="notification-action delete"
-                            onclick="return confirm('Tem certeza que deseja excluir esta notificação?');">Excluir</a>
+                        <a href="?delete_id=<?= $notificacao['id']; ?>" class="notification-action delete"
+                            onclick="return confirm('Tem certeza que deseja apagar esta notificação?');">Apagar</a>
                     </li>
                     <?php endwhile; ?>
                 </ul>
@@ -150,6 +148,7 @@ $result_notificacoes = $stmt_notificacoes->get_result();
 </body>
 
 </html>
+
 <?php
 $stmt_notificacoes->close();
 $conn->close();

@@ -11,23 +11,28 @@ if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION
     exit();
 }
 
-// Buscar foto de perfil do administrador
+// busca a foto de perfil do administrador
 $sql_foto = "SELECT foto_perfil FROM utilizadores WHERE id = ?";
 $stmt_foto = $conn->prepare($sql_foto);
 $stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
 $stmt_foto->execute();
 $result_foto = $stmt_foto->get_result();
 $utilizador = $result_foto->fetch_assoc();
-$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
-// Processa a adição de um novo produto
+
+
+//POST
+// Processa o adicionar de um novo produto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_produto'])) {
     $nome = trim($_POST['nome']);
     $preco = floatval($_POST['preco']);
     $quantidade_estoque = intval($_POST['quantidade_estoque']);
-    $estoque = intval($_POST['estoque']);
     $categoria_id = intval($_POST['categoria_id']);
+    $descricao = trim($_POST['descricao']);
+
+    
 
     // Lida com o upload da imagem
     $imagem = '';
@@ -36,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_produto'])) 
         $target_file = $target_dir . basename($_FILES['imagem']['name']);
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        // Verifica se o arquivo é uma imagem
+        // Verifica se o ficheiro é uma imagem
         $check = getimagesize($_FILES['imagem']['tmp_name']);
         if ($check !== false) {
             if (move_uploaded_file($_FILES['imagem']['tmp_name'], $target_file)) {
@@ -49,9 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_produto'])) 
         }
     }
 
-    $sql = "INSERT INTO produtos (nome, preco, quantidade_estoque, estoque, categoria_id, imagem) VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sdiiis", $nome, $preco, $quantidade_estoque, $estoque, $categoria_id, $imagem);
+$sql = "INSERT INTO produtos (nome, preco, quantidade_estoque, categoria_id, imagem, descricao) 
+        VALUES (?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sdiiiss", $nome, $preco, $quantidade_estoque, $categoria_id, $imagem, $descricao);
+
     if ($stmt->execute()) {
         echo "<script>alert('Produto adicionado com sucesso!'); window.location.href='admin_produtos.php';</script>";
     } else {
@@ -82,23 +89,32 @@ $result_categorias = $conn->query($sql_categorias);
             <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
         </div>
 
-        <!-- Formulário de Adição de Produto -->
+        <!-- Formulário para adicionar o produto -->
         <div class="section add-product-section">
-            <h3 class="section-subtitle">Novo Produto</h3>
+
             <form class="product-form" method="POST" action="admin_produtos.php" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="text" name="nome" class="form-input" placeholder="Nome do Produto" required>
                 </div>
+
+                <!-- Preço -->
                 <div class="form-group">
                     <input type="number" name="preco" class="form-input" placeholder="Preço (€)" step="0.01" required>
                 </div>
+
+                <!-- Quantidade em estoque -->
                 <div class="form-group">
                     <input type="number" name="quantidade_estoque" class="form-input"
                         placeholder="Quantidade em Estoque" required>
                 </div>
+
+                <!-- Descrição -->
                 <div class="form-group">
-                    <input type="number" name="estoque" class="form-input" placeholder="Estoque" required>
+                    <textarea name="descricao" class="form-textarea-desc" rows="4" placeholder="Descrição do Produto"
+                        required></textarea>
                 </div>
+
+                <!-- Categoria -->
                 <div class="form-group">
                     <select name="categoria_id" class="form-select" required>
                         <option value="">Selecione uma Categoria</option>
@@ -107,24 +123,27 @@ $result_categorias = $conn->query($sql_categorias);
                         <?php endwhile; ?>
                     </select>
                 </div>
+
+                <!-- Imagem -->
                 <div class="form-group">
                     <input type="file" name="imagem" class="form-input" accept="image/*" required>
                 </div>
+
+                <!-- Botão para Adicionar Produto -->
                 <div class="form-group">
                     <button type="submit" name="adicionar_produto" class="form-button">Adicionar Produto</button>
                 </div>
             </form>
         </div>
 
+        <!-- Links -->
         <div class="nav-links">
             <a href="admin_lista_produtos.php" class="nav-link">Ver Lista de Produtos</a>
             <a href="admin_panel.php" class="nav-link">Voltar para o Painel Administrativo</a>
         </div>
     </div>
 
-    <footer class="footer">
-        <p>© 2025 Mercado Bom Preço. Todos os direitos reservados.</p>
-    </footer>
+
 </body>
 
 </html>

@@ -94,7 +94,7 @@ $conn->close();
         </form>
         <?php endif; ?>
 
-        <a href="admin_cupao.php" class="admin-cupao-voltar">← Voltar ao Painel</a>
+        <a href="admin_cupao.php" class="admin-cupao-voltar">Voltar</a>
     </div>
 </body>
 

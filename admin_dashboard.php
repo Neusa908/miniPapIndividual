@@ -76,7 +76,7 @@ $result_visitas_recentes = $conn->query($sql_visitas_recentes);
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-relatorios"><span class="icon">⬅️</span> Voltar ao Painel</a>
+                <a href="admin_panel.php" class="nav-relatorios">Voltar ao Painel</a>
             </nav>
         </div>
         <div class="main-content">
@@ -141,31 +141,7 @@ $result_visitas_recentes = $conn->query($sql_visitas_recentes);
                     <?php endif; ?>
                 </div>
 
-                <div class="report-section">
-                    <h2>Visitas Recentes em Páginas</h2>
-                    <?php if ($result_visitas_recentes->num_rows > 0): ?>
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>Utilizador</th>
-                                <th>Página</th>
-                                <th>Data</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($row = $result_visitas_recentes->fetch_assoc()): ?>
-                            <tr class="report-row">
-                                <td><?= htmlspecialchars($row['nome'] ?? 'Visitante') ?></td>
-                                <td><?= htmlspecialchars($row['pagina']) ?></td>
-                                <td><?= date('d/m/Y H:i', strtotime($row['data_visita'])) ?></td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                    <?php else: ?>
-                    <p class="no-reports">Nenhuma visita recente encontrada.</p>
-                    <?php endif; ?>
-                </div>
+
 
             </div>
         </div>

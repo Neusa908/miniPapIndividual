@@ -57,9 +57,8 @@ $conn->close();
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin_panel.php" class="nav-item"><span class="icon">⬅️</span>Painel</a>
-                <a href="admin_lista.php" class="nav-item"><span class="icon">⬅️</span>Lista de
-                    Admins</a>
+                <a href="admin_panel.php" class="nav-item">| Painel |</a>
+                <a href="admin_lista.php" class="nav-item">| Admins |</a>
             </nav>
         </div>
 

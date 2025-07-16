@@ -38,7 +38,7 @@ $admin['foto_perfil'] = $admin['foto_perfil'] ?? 'img/default-profile.jpg';
                 <h3>Mercado Bom Preço</h3>
             </div>
             <nav class="sidebar-nav-adminPanel">
-                <a href="index.php" class="nav-item"><span class="icon">⬅️</span> Voltar</a>
+                <a href="index.php" class="nav-item"> Voltar ao Início</a>
             </nav>
         </div>
 

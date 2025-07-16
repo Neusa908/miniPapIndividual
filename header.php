@@ -66,7 +66,7 @@
         </div>
 
         <?php if (!isset($_SESSION['utilizador_id']) || ($_SESSION['tipo'] ?? '') === 'cliente'): ?>
-        <a href="index.php">Home</a>
+        <a href="index.php">Início</a>
         <a href="registar.php">Criar Conta</a>
         <a href="entregas.php">Entregas</a>
         <a href="feedback.php">Feedback</a>
@@ -74,10 +74,12 @@
         <a href="produtos.php">Produtos</a>
         <a href="sobre.php">Sobre</a>
         <a href="suporte.php">Suporte</a>
+        <a href="termos.php">Termos</a>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['utilizador_id']) && $_SESSION['tipo'] === 'admin'): ?>
         <a href="sobre.php">Sobre</a>
+        <a href="termos.php">Termos</a>
         <?php endif; ?>
     </div>
 </nav>

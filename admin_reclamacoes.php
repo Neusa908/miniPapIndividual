@@ -59,7 +59,7 @@ $stmt_foto->close();
         <div class="usuario-foto-container">
             <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
         </div>
-        <h1 class="admin-reclamacao-titulo">Gerenciar Reclamações</h1>
+        <h1 class="admin-reclamacao-titulo">Reclamações</h1>
 
         <?php if ($reclamacoes): ?>
         <?php foreach ($reclamacoes as $reclamacao): ?>

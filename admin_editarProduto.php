@@ -15,7 +15,7 @@ $stmt_foto->bind_param("i", $_SESSION['utilizador_id']);
 $stmt_foto->execute();
 $result_foto = $stmt_foto->get_result();
 $utilizador = $result_foto->fetch_assoc();
-$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg'; // Fallback
+$foto_perfil = $utilizador['foto_perfil'] ?? 'img/perfil/default.jpg';
 $stmt_foto->close();
 
 // Atualizar produto
@@ -25,7 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_produto'])) 
     $nome = trim($_POST['nome']);
     $preco = floatval($_POST['preco']);
     $quantidade_estoque = intval($_POST['quantidade_estoque']);
-    $estoque = intval($_POST['estoque']);
     $categoria_id = intval($_POST['categoria_id']);
 
     // Verifica se imagem nova foi enviada
@@ -37,9 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_produto'])) 
         if (getimagesize($_FILES['imagem']['tmp_name'])) {
             if (move_uploaded_file($_FILES['imagem']['tmp_name'], $target_file)) {
                 $imagem = $target_file;
-                $sql = "UPDATE produtos SET nome=?, preco=?, quantidade_estoque=?, estoque=?, categoria_id=?, imagem=? WHERE id=?";
+                $sql = "UPDATE produtos SET nome=?, preco=?, quantidade_estoque=?, categoria_id=?, imagem=? WHERE id=?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sdiiisi", $nome, $preco, $quantidade_estoque, $estoque, $categoria_id, $imagem, $produto_id);
+                $stmt->bind_param("sdiiisi", $nome, $preco, $quantidade_estoque, $categoria_id, $imagem, $produto_id);
             } else {
                 $mensagem = "Erro ao fazer upload da imagem.";
             }
@@ -48,9 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['atualizar_produto'])) 
         }
     } else {
         // Atualiza sem imagem
-        $sql = "UPDATE produtos SET nome=?, preco=?, quantidade_estoque=?, estoque=?, categoria_id=? WHERE id=?";
+        $sql = "UPDATE produtos SET nome=?, preco=?, quantidade_estoque=?, categoria_id=? WHERE id=?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sdiiii", $nome, $preco, $quantidade_estoque, $estoque, $categoria_id, $produto_id);
+        $stmt->bind_param("sdiii", $nome, $preco, $quantidade_estoque, $categoria_id, $produto_id);
     }
 
     if ($stmt->execute()) {
@@ -100,7 +99,7 @@ $conn->close();
         <?php endif; ?>
 
         <?php if ($produto_selecionado): ?>
-        <!-- Formulário de Edição -->
+        <!-- Formulário para editar -->
         <form method="POST" enctype="multipart/form-data" class="admin-editar-form">
             <input type="hidden" name="produto_id" value="<?php echo $produto_selecionado['id']; ?>">
 
@@ -114,9 +113,6 @@ $conn->close();
             <label>Quantidade em Estoque:</label>
             <input type="number" name="quantidade_estoque"
                 value="<?php echo $produto_selecionado['quantidade_estoque']; ?>" required>
-
-            <label>Estoque:</label>
-            <input type="number" name="estoque" value="<?php echo $produto_selecionado['estoque']; ?>" required>
 
             <label>Categoria:</label>
             <select name="categoria_id" required>

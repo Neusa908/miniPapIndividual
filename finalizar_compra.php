@@ -3,21 +3,11 @@ session_start();
 require_once 'conexao.php';
 
 if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
-    echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
+    echo "<script>alert('Acesso negado! Apenas clientes podem aceder a esta página.'); window.location.href='index.php';</script>";
     exit();
 }
 
 $utilizador_id = $_SESSION['utilizador_id'];
-
-// Saldo (não usado, mas carregado)
-$sql = "SELECT saldo FROM utilizadores WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $utilizador_id);
-$stmt->execute();
-$stmt->bind_result($saldo);
-$stmt->fetch();
-$stmt->close();
-if ($saldo === null) $saldo = 0.00;
 
 // Endereços
 $sql = "SELECT id, nome_endereco, rua, numero, freguesia, cidade, distrito, codigo_postal FROM enderecos WHERE utilizador_id = ?";
@@ -54,31 +44,9 @@ while ($item = $carrinho->fetch_assoc()) {
 }
 $stmt->close();
 
-// Frete
-$frete = 0;
-$cidade_entrega = '';
-if (isset($_POST['endereco_id']) && is_numeric($_POST['endereco_id'])) {
-    $endereco_id = $_POST['endereco_id'];
-    $sql = "SELECT cidade FROM enderecos WHERE id = ? AND utilizador_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $endereco_id, $utilizador_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($endereco = $result->fetch_assoc()) {
-        $cidade_entrega = $endereco['cidade'];
-        $sql = "SELECT custo_entrega FROM entregas_cidades WHERE cidade = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $cidade_entrega);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $frete = $result->fetch_assoc()['custo_entrega'] ?? 10.00;
-    }
-    $stmt->close();
-}
-
 // Cupão de desconto
 $desconto = isset($_SESSION['cupao']) ? $_SESSION['cupao']['desconto'] : 0;
-$total_com_desconto = max(0, $total_carrinho - $desconto + $frete);
+$total_com_desconto = max(0, $total_carrinho - $desconto);
 
 // Finalizar compra
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) && isset($_POST['endereco_id'])) {
@@ -105,20 +73,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
     $conn->begin_transaction();
 
     try {
-        // Gerar numero_pedido (ex.: USR2-001)
+        // Gerar número de pedido
         $sql = "SELECT COUNT(*) as total FROM pedidos WHERE utilizador_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $utilizador_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        $sequencia = str_pad($row['total'] + 1, 3, '0', STR_PAD_LEFT); // Ex.: 001, 002
+        $sequencia = str_pad($row['total'] + 1, 3, '0', STR_PAD_LEFT);
         $numero_pedido = "USR" . $utilizador_id . "-" . $sequencia;
         $stmt->close();
 
-        $sql = "INSERT INTO pedidos (utilizador_id, numero_pedido, status, total, cidade_entrega) VALUES (?, ?, 'pendente', ?, ?)";
+        $sql = "INSERT INTO pedidos (utilizador_id, numero_pedido, status, total) VALUES (?, ?, 'pendente', ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issd", $utilizador_id, $numero_pedido, $total_com_desconto, $cidade_entrega);
+        $stmt->bind_param("isd", $utilizador_id, $numero_pedido, $total_com_desconto);
         $stmt->execute();
         $pedido_id = $conn->insert_id;
         $stmt->close();
@@ -133,14 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_compra']) &
         $stmt->close();
 
         foreach ($itens_carrinho as $item) {
-            $sql = "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) 
-                    VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("iiid", $pedido_id, $item['produto_id'], $item['quantidade'], $item['preco']);
             $stmt->execute();
 
             $nova_quantidade = $item['quantidade_estoque'] - $item['quantidade'];
-            if ($nova_quantidade < 0) throw new Exception("Estoque insuficiente para " . $item['nome']);
+            if ($nova_quantidade < 0) throw new Exception("Stock insuficiente para " . $item['nome']);
 
             $sql = "UPDATE produtos SET quantidade_estoque = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
@@ -187,7 +154,6 @@ $mensagem = $_SESSION['mensagem'] ?? '';
 $mensagem_classe = $_SESSION['mensagem_sucesso'] ?? false ? 'mensagem-sucesso' : 'mensagem';
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="pt-PT">
@@ -242,7 +208,6 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
             <?php if ($desconto > 0): ?>
             <p><strong>Desconto:</strong> -€<?= number_format($desconto, 2, ',', '.') ?></p>
             <?php endif; ?>
-            <p><strong>Frete:</strong> €<?= number_format($frete, 2, ',', '.') ?></p>
             <p><strong>Total:</strong> €<?= number_format($total_com_desconto, 2, ',', '.') ?></p>
         </div>
 
@@ -278,7 +243,6 @@ unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
         <?php else: ?>
         <p>O seu carrinho está vazio. <a href="index.php">Voltar para a loja</a>.</p>
         <?php endif; ?>
-
     </div>
 </body>
 

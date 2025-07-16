@@ -16,6 +16,8 @@ $dados_form = [
     'cidade' => ''
 ];
 
+
+//POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $mensagem_erro = "Erro de validação. Tente novamente.";
@@ -36,10 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $erros = [];
 
+//NOME
         if (empty($nome)) {
             $erros[] = "O nome completo é obrigatório.";
         }
 
+
+//EMAIL
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erros[] = "Por favor, insira um email válido.";
         } else {
@@ -54,6 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
         }
 
+//SENHA
         if (empty($senha)) {
             $erros[] = "A senha é obrigatória.";
         } else {
@@ -77,19 +83,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
+
+//TELEFONE
+        // Verifica se o telefone não está vazio e se é válido
         if (empty($telefone)) {
             $erros[] = "O telefone é obrigatório.";
         } elseif (!preg_match('/^[0-9\s+]+$/', $telefone)) {
             $erros[] = "O telefone deve conter apenas números, espaços ou o símbolo +.";
         }
 
+//MORADA
+        // Verifica se a morada não está vazia
         if (empty($morada)) {
             $erros[] = "A morada é obrigatória.";
         }
-
+        
+//CIDADE
+        // Verifica se a cidade não está vazia
         if (empty($cidade)) {
             $erros[] = "A cidade é obrigatória.";
         }
+
+        // Termos e Condições
+        // Verifica se o checkbox foi marcado
+        if (!isset($_POST['termos'])) {
+    $erros[] = "É necessário aceitar os Termos e Condições para prosseguir.";
+}
+
 
         if (empty($erros)) {
             $conn->begin_transaction();
@@ -222,6 +242,17 @@ $conn->close();
             <label for="cidade">Cidade</label>
             <input type="text" id="cidade" name="cidade" placeholder="Digite a sua cidade"
                 value="<?php echo htmlspecialchars($dados_form['cidade']); ?>">
+
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" name="cidade" placeholder="Digite a sua cidade"
+                value="<?php echo htmlspecialchars($dados_form['cidade']); ?>">
+
+            <!--checkbox -->
+            <div class="checkbox-termos">
+                <input type="checkbox" id="termos" name="termos" required>
+                <label for="termos">Li e aceito os <a href="termos.php" target="_blank">Termos e Condições</a>.</label>
+            </div>
+
 
             <button type="submit" class="registar"><b>Criar Conta</b></button>
 

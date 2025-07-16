@@ -66,7 +66,7 @@ $stmt_foto->close();
         </div>
         <h1 class="reclamacao-titulo">Fazer Reclamação</h1>
         <?php if ($pedido_id): ?>
-        <p class="reclamacao-info">ID do Pedido: <?= htmlspecialchars($pedido_id) ?></p>
+        <p class="reclamacao-info">Número do Pedido: <?= htmlspecialchars($pedido_id) ?></p>
         <form method="POST" class="reclamacao-form">
             <textarea name="descricao" class="reclamacao-textarea" placeholder="Escreva a sua reclamação..."
                 required></textarea>

@@ -44,10 +44,23 @@ if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     exit();
 }
 
-$sql_produtos = "SELECT p.id, p.nome, p.preco, p.estoque, p.categoria_id, p.imagem, c.nome AS categoria_nome 
+// Buscar categorias para o filtro
+$sql_categorias = "SELECT id, nome FROM categorias ORDER BY nome";
+$result_categorias = $conn->query($sql_categorias);
+
+// Receber a categoria filtrada, se houver
+$categoria_filtro = isset($_GET['categoria']) ? intval($_GET['categoria']) : 0;
+
+$sql_produtos = "SELECT p.id, p.nome, p.preco, p.categoria_id, p.quantidade_estoque, p.imagem, c.nome AS categoria_nome 
                  FROM produtos p 
-                 LEFT JOIN categorias c ON p.categoria_id = c.id 
-                 ORDER BY p.id DESC";
+                 LEFT JOIN categorias c ON p.categoria_id = c.id";
+
+if ($categoria_filtro > 0) {
+    $sql_produtos .= " WHERE p.categoria_id = $categoria_filtro";
+}
+
+$sql_produtos .= " ORDER BY p.id DESC";
+
 $result_produtos = $conn->query($sql_produtos);
 ?>
 
@@ -68,6 +81,23 @@ $result_produtos = $conn->query($sql_produtos);
         </div>
         <h2 class="admin-lista-title">Produtos Registados</h2>
 
+
+        <!-- filtro por categoria -->
+        <form method="GET" id="filtroCategoriaForm" class="filtro-categoria-form">
+            <label for="categoria" class="filtro-categoria-label">Filtrar por Categoria:</label>
+            <select name="categoria" id="categoria" class="filtro-categoria-select"
+                onchange="document.getElementById('filtroCategoriaForm').submit()">
+                <option value="0" <?= $categoria_filtro === 0 ? 'selected' : '' ?>>Todas</option>
+                <?php while ($cat = $result_categorias->fetch_assoc()): ?>
+                <option value="<?= $cat['id'] ?>" <?= $categoria_filtro === intval($cat['id']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($cat['nome']) ?>
+                </option>
+                <?php endwhile; ?>
+            </select>
+        </form>
+
+
+
         <?php if ($result_produtos->num_rows > 0): ?>
         <div class="admin-lista-grid">
             <?php while ($row = $result_produtos->fetch_assoc()): ?>
@@ -82,7 +112,7 @@ $result_produtos = $conn->query($sql_produtos);
                 <div class="admin-lista-info">
                     <p><strong>Nome:</strong> <?php echo htmlspecialchars($row['nome']); ?></p>
                     <p><strong>Preço:</strong> €<?php echo number_format($row['preco'], 2, ',', '.'); ?></p>
-                    <p><strong>Estoque:</strong> <?php echo $row['estoque']; ?></p>
+                    <p><strong>Estoque:</strong> <?php echo $row['quantidade_estoque']; ?></p>
                     <p><strong>Categoria:</strong>
                         <?php echo htmlspecialchars($row['categoria_nome'] ?: 'Sem categoria'); ?>
                     </p>
@@ -105,7 +135,7 @@ $result_produtos = $conn->query($sql_produtos);
 
         <div class="admin-lista-links">
             <a href="admin_produtos.php" class="admin-lista-link"> Adicionar Produto</a>
-            <a href="admin_panel.php" class="admin-lista-link voltar">← Voltar ao Painel</a>
+            <a href="admin_panel.php" class="admin-lista-link voltar">Voltar ao Painel</a>
         </div>
     </div>
 
