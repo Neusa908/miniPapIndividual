@@ -69,8 +69,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['suporte_id']) && isset
     }
 }
 
-// Buscar notificações
-$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida, suporte_id FROM notificacoes WHERE admin_id = ? ORDER BY data_criacao DESC";
+// Buscar notificações EXCLUINDO mensagens que começam com 'Novo cadastro:'
+$sql_notificacoes = "SELECT id, mensagem, data_criacao, lida, suporte_id 
+                    FROM notificacoes 
+                    WHERE admin_id = ? AND mensagem NOT LIKE 'Novo cadastro:%' 
+                    ORDER BY data_criacao DESC";
 $stmt_notificacoes = $conn->prepare($sql_notificacoes);
 $stmt_notificacoes->bind_param("i", $utilizador_id);
 $stmt_notificacoes->execute();

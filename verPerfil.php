@@ -14,7 +14,7 @@ $perfil_id = isset($_GET['id']) ? (int)$_GET['id'] : $_SESSION['utilizador_id'];
 $utilizador_id = $_SESSION['utilizador_id'];
 
 // Busca os dados do usuário a ser visualizado
-$sql_utilizador = "SELECT nome, tipo, foto_perfil, descricao FROM utilizadores WHERE id = ?";
+$sql_utilizador = "SELECT nome, apelido, tipo, foto_perfil, descricao FROM utilizadores WHERE id = ?";
 $stmt_utilizador = $conn->prepare($sql_utilizador);
 $stmt_utilizador->bind_param("i", $perfil_id);
 $stmt_utilizador->execute();
@@ -43,7 +43,6 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de <?php echo htmlspecialchars($utilizador['nome']); ?> - Mercado Bom Preço</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -64,7 +63,8 @@ $conn->close();
             <div class="vp-left">
                 <img src="<?php echo htmlspecialchars($utilizador['foto_perfil']); ?>" alt="Foto de perfil"
                     class="vp-avatar">
-                <h2 class="vp-name"><?php echo htmlspecialchars($utilizador['nome']); ?></h2>
+                <h3 class="vp-name"><?php echo htmlspecialchars($utilizador['apelido']); ?></h3>
+
                 <p class="vp-role"><?php echo $utilizador['tipo'] === 'admin' ? 'Administrador' : 'Cliente'; ?></p>
             </div>
             <div class="vp-right">

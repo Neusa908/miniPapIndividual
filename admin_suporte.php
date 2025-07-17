@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['responder'])) {
 
             if ($utilizador_id_cliente) {
                 // Criar notificação para o cliente sem o ID
-                $mensagem_notif = "Sua mensagem de suporte foi respondida em " . date('d/m/Y H:i');
+                $mensagem_notif = "A sua mensagem de suporte foi respondida em " . date('d/m/Y H:i');
                 $stmt_notif = $conn->prepare("INSERT INTO notificacoes (utilizador_id, mensagem, data_criacao, lida) VALUES (?, ?, NOW(), 0)");
                 $stmt_notif->bind_param("is", $utilizador_id_cliente, $mensagem_notif);
                 $stmt_notif->execute();
@@ -56,9 +56,9 @@ if (isset($_GET['delete_suporte'])) {
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $suporte_id);
     if ($stmt->execute()) {
-        echo "<script>alert('Mensagem de suporte deletada com sucesso!'); window.location.href='admin_suporte.php';</script>";
+        echo "<script>alert('Mensagem de suporte apagada com sucesso!'); window.location.href='admin_suporte.php';</script>";
     } else {
-        echo "<script>alert('Erro ao deletar a mensagem de suporte. Tente novamente.');</script>";
+        echo "<script>alert('Erro ao apagar a mensagem de suporte. Tente novamente.');</script>";
     }
     $stmt->close();
 }
@@ -116,7 +116,7 @@ if ($result === false) {
                 <?php endif; ?>
                 <div class="suporte-actions">
                     <a href="admin_suporte.php?delete_suporte=<?php echo $row['id']; ?>"
-                        onclick="return confirm('Tem certeza que deseja deletar esta mensagem?');">Deletar</a>
+                        onclick="return confirm('Tem certeza que deseja apagar esta mensagem?');">Apagar</a>
                 </div>
             </div>
             <?php endwhile; ?>

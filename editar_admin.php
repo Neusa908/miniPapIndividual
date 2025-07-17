@@ -43,15 +43,15 @@ $email_prefix = $email_parts[0] ?? '';
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
     $novo_nome = trim($_POST['nome']);
     $novo_apelido = trim($_POST['apelido']);
-    $email_prefix = trim($_POST['email_prefix']);
+    $email_prefix_post = trim($_POST['email_prefix']);
     $novo_telefone = trim($_POST['telefone']);
     $nova_senha = $_POST['senha'];
-    $novo_email = $email_prefix . '@mercadobompreco.com';
+    $novo_email = $email_prefix_post . '@mercadobompreco.com';
 
     // Validações
     if (empty($novo_nome)) {
         echo "<script>alert('O nome não pode estar vazio!');</script>";
-    } elseif (empty($email_prefix)) {
+    } elseif (empty($email_prefix_post)) {
         echo "<script>alert('A parte inicial do email não pode estar vazia!');</script>";
     } elseif (!preg_match('/^[0-9\s+]+$/', $novo_telefone)) {
         echo "<script>alert('O telefone deve conter apenas números, espaços ou o símbolo +!');</script>";
@@ -66,28 +66,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editar_admin'])) {
         $stmt->store_result();
         if ($stmt->num_rows > 0) {
             echo "<script>alert('Este email já está registrado por outro usuário!');</script>";
+            $stmt->close();
         } else {
-            // Atualiza os dados no banco
-            if (!empty($nova_senha)) {
-                // Se uma nova senha foi fornecida, faz o hash
-                $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
-                $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $senha_hash, $admin_id);
-            } else {
-                // Se não houver nova senha, atualiza apenas os outros campos
-                $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ? WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $admin_id);
-            }
+            $stmt->close();
 
-            if ($stmt->execute()) {
-                echo "<script>alert('Administrador atualizado com sucesso!'); window.location.href='add_admin.php';</script>";
+            // Verifica se telefone já existe para outro utilizador
+            $sql_tel = "SELECT id FROM utilizadores WHERE telefone = ? AND id != ?";
+            $stmt_tel = $conn->prepare($sql_tel);
+            $stmt_tel->bind_param("si", $novo_telefone, $admin_id);
+            $stmt_tel->execute();
+            $stmt_tel->store_result();
+            if ($stmt_tel->num_rows > 0) {
+                echo "<script>alert('Este número de telefone já está registrado por outro usuário!');</script>";
+                $stmt_tel->close();
             } else {
-                echo "<script>alert('Erro ao atualizar administrador. Tente novamente.');</script>";
+                $stmt_tel->close();
+
+                // Atualiza os dados no banco
+                if (!empty($nova_senha)) {
+                    // Se uma nova senha foi fornecida, faz o hash
+                    $senha_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
+                    $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ?, senha = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("sssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $senha_hash, $admin_id);
+                } else {
+                    // Se não houver nova senha, atualiza apenas os outros campos
+                    $sql = "UPDATE utilizadores SET nome = ?, apelido = ?, email = ?, telefone = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ssssi", $novo_nome, $novo_apelido, $novo_email, $novo_telefone, $admin_id);
+                }
+
+                if ($stmt->execute()) {
+                    echo "<script>alert('Administrador atualizado com sucesso!'); window.location.href='add_admin.php';</script>";
+                } else {
+                    echo "<script>alert('Erro ao atualizar administrador. Tente novamente.');</script>";
+                }
+                $stmt->close();
             }
         }
-        $stmt->close();
     }
 }
 ?>

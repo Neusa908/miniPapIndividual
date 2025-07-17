@@ -34,11 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['excluir'], $_POST['id
         $id_excluir = intval($_POST['id_excluir']);
         $stmt = $conn->prepare("DELETE FROM promocoes WHERE id = ?");
         $stmt->bind_param("i", $id_excluir);
-        if ($stmt->execute()) {
-            $mensagem = "Cupão excluído com sucesso!";
-        } else {
-            $mensagem = "Erro ao excluir cupão.";
-        }
+        $mensagem = $stmt->execute() ? "Cupão excluído com sucesso!" : "Erro ao excluir cupão.";
         $stmt->close();
     } else {
         $mensagem = "Token CSRF inválido.";
@@ -50,10 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo'], $_POST['csr
     if (hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         $codigo = strtoupper(trim($_POST['codigo']));
         $desconto = floatval($_POST['desconto']);
+        $valor_minimo = floatval($_POST['valor_minimo']);
         $data_inicio = $_POST['data_inicio'];
         $data_fim = $_POST['data_fim'];
 
-        if (empty($codigo) || $desconto < 0.01 || empty($data_inicio) || empty($data_fim)) {
+        if (empty($codigo) || $desconto < 0.01 || $valor_minimo < 0 || empty($data_inicio) || empty($data_fim)) {
             $mensagem = "Preencha todos os campos corretamente.";
         } elseif (strtotime($data_fim) <= strtotime($data_inicio)) {
             $mensagem = "A data de validade deve ser posterior à data de início.";
@@ -66,14 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo'], $_POST['csr
             if ($stmt->num_rows > 0) {
                 $mensagem = "Já existe um cupão com esse código.";
             } else {
-                $sql = "INSERT INTO promocoes (codigo, desconto, data_inicio, data_fim, ativa) 
-                        VALUES (?, ?, ?, ?, 1)";
+                $sql = "INSERT INTO promocoes (codigo, desconto, data_inicio, data_fim, ativa, valor_minimo) 
+                        VALUES (?, ?, ?, ?, 1, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sdss", $codigo, $desconto, $data_inicio, $data_fim);
+                $stmt->bind_param("sdssd", $codigo, $desconto, $data_inicio, $data_fim, $valor_minimo);
                 $stmt->execute();
                 $mensagem = $stmt->affected_rows > 0 ? "Cupão criado com sucesso!" : "Erro ao criar cupão.";
             }
-
             $stmt->close();
         }
     } else {
@@ -99,6 +95,7 @@ $conn->close();
         <div class="usuario-foto-container">
             <img src="<?= htmlspecialchars($foto_perfil) ?>" alt="Foto de Perfil" class="usuario-foto">
         </div>
+
         <h1 class="admin-cupao-title">Gestão de Cupões</h1>
 
         <?php if ($mensagem): ?>
@@ -113,6 +110,9 @@ $conn->close();
 
             <label for="desconto">Desconto (€):</label>
             <input type="number" step="0.01" name="desconto" id="desconto" min="0.01" required>
+
+            <label for="valor_minimo">Valor Mínimo de Compra (€):</label>
+            <input type="number" step="0.01" name="valor_minimo" id="valor_minimo" min="0.00" required>
 
             <label for="data_inicio">Data de Início:</label>
             <input type="datetime-local" name="data_inicio" id="data_inicio" required>
@@ -131,6 +131,7 @@ $conn->close();
                 <tr>
                     <th>Código</th>
                     <th>Desconto (€)</th>
+                    <th>Valor Mínimo (€)</th>
                     <th>Início</th>
                     <th>Validade</th>
                     <th>Ativo</th>
@@ -142,6 +143,7 @@ $conn->close();
                 <tr>
                     <td><?= htmlspecialchars($cupao['codigo']) ?></td>
                     <td>€<?= number_format($cupao['desconto'], 2, ',', '.') ?></td>
+                    <td>€<?= number_format($cupao['valor_minimo'], 2, ',', '.') ?></td>
                     <td><?= date('d/m/Y H:i', strtotime($cupao['data_inicio'])) ?></td>
                     <td><?= date('d/m/Y H:i', strtotime($cupao['data_fim'])) ?></td>
                     <td><?= $cupao['ativa'] ? 'Sim' : 'Não' ?></td>

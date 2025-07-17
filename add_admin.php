@@ -46,6 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
         } elseif (!preg_match('/@mercadobompreco\.com$/', $email)) {
             echo "<script>alert('O email deve terminar com @mercadobompreco.com!');</script>";
         } else {
+            // Verifica se email já existe
             $sql = "SELECT id FROM utilizadores WHERE email = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("s", $email);
@@ -53,19 +54,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_admin'])) {
             $stmt->store_result();
             if ($stmt->num_rows > 0) {
                 echo "<script>alert('Este email já está registrado!');</script>";
+                $stmt->close();
             } else {
-                $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+                $stmt->close();
 
-                $sql = "INSERT INTO utilizadores (nome, apelido, email, senha, telefone, tipo) VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $tipo);
-                if ($stmt->execute()) {
-                    echo "<script>alert('Administrador adicionado com sucesso!'); window.location.href='add_admin.php';</script>";
+                // Verifica se telefone já existe
+                $sql_tel = "SELECT id FROM utilizadores WHERE telefone = ?";
+                $stmt_tel = $conn->prepare($sql_tel);
+                $stmt_tel->bind_param("s", $telefone);
+                $stmt_tel->execute();
+                $stmt_tel->store_result();
+                if ($stmt_tel->num_rows > 0) {
+                    echo "<script>alert('Este número de telefone já está registrado!');</script>";
+                    $stmt_tel->close();
                 } else {
-                    echo "<script>alert('Erro ao adicionar administrador. Tente novamente.');</script>";
+                    $stmt_tel->close();
+
+                    $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+
+                    $sql = "INSERT INTO utilizadores (nome, apelido, email, senha, telefone, tipo) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ssssss", $nome, $apelido, $email, $senha_hash, $telefone, $tipo);
+                    if ($stmt->execute()) {
+                        echo "<script>alert('Administrador adicionado com sucesso!'); window.location.href='add_admin.php';</script>";
+                    } else {
+                        echo "<script>alert('Erro ao adicionar administrador. Tente novamente.');</script>";
+                    }
+                    $stmt->close();
                 }
             }
-            $stmt->close();
         }
     }
 }
@@ -74,7 +91,7 @@ if (isset($_GET['delete_admin'])) {
     $admin_id = $_GET['delete_admin'];
 
     if ($admin_id == $utilizador_id) {
-        echo "<script>alert('Você não pode excluir sua própria conta!'); window.location.href='add_admin.php';</script>";
+        echo "<script>alert('Não pode apagar a sua própria conta!'); window.location.href='add_admin.php';</script>";
     } else {
         // Deletar notificações associadas ao administrador
         $sql_notificacoes = "DELETE FROM notificacoes WHERE admin_id = ?";
@@ -88,12 +105,12 @@ if (isset($_GET['delete_admin'])) {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $admin_id);
         if ($stmt->execute()) {
-            echo "<script>alert('Administrador excluído com sucesso!'); window.location.href='add_admin.php';</script>";
+            echo "<script>alert('Administrador deletado com sucesso!'); window.location.href='add_admin.php';</script>";
         } else {
-            echo "<script>alert('Erro ao excluir administrador. Tente novamente.');</script>";
+            echo "<script>alert('Erro ao deletar administrador. Tente novamente.');</script>";
         }
         $stmt->close();
-    }
+   }
 }
 
 $sql_admins = "SELECT id, nome, apelido, email FROM utilizadores WHERE tipo = 'admin' ORDER BY nome";
@@ -109,11 +126,7 @@ $result_admins = $conn->query($sql_admins);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Administradores - Mercado Bom Preço</title>
     <link rel="stylesheet" href="./css/style.css">
-
 </head>
-
-
-<!--Menu na foto de perfil-->
 
 <body class="support-body">
     <div class="add-admin-container">
@@ -181,6 +194,7 @@ $result_admins = $conn->query($sql_admins);
 </body>
 
 </html>
+
 <?php
 $conn->close();
 ?>

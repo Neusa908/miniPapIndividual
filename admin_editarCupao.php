@@ -7,7 +7,6 @@ if (!isset($_SESSION['utilizador_id']) || $_SESSION['tipo'] !== 'admin') {
     exit();
 }
 
-// Redireciona se não houver código definido
 if (!isset($_GET['codigo'])) {
     header('Location: admin_cupao.php');
     exit();
@@ -16,7 +15,7 @@ if (!isset($_GET['codigo'])) {
 $codigo = $_GET['codigo'];
 $mensagem = '';
 
-// Busca cupão atual
+// Buscar o cupão atual
 $stmt = $conn->prepare("SELECT * FROM promocoes WHERE codigo = ?");
 $stmt->bind_param("s", $codigo);
 $stmt->execute();
@@ -29,23 +28,30 @@ if (!$cupao) {
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $novo_codigo = strtoupper(trim($_POST['codigo']));
     $desconto = floatval($_POST['desconto']);
+    $valor_minimo = floatval($_POST['valor_minimo']);
     $data_inicio = $_POST['data_inicio'];
     $data_fim = $_POST['data_fim'];
     $ativa = isset($_POST['ativa']) ? 1 : 0;
 
-    if (empty($novo_codigo) || $desconto <= 0 || empty($data_fim)) {
+    if (empty($novo_codigo) || $desconto <= 0 || $valor_minimo < 0 || empty($data_fim)) {
         $mensagem = "Preencha todos os campos corretamente.";
+    } elseif ($ativa === 1 && strtotime($data_fim) < time()) {
+        $mensagem = "Não é possível ativar um cupão com data de validade expirada.";
     } else {
-        $stmt = $conn->prepare("UPDATE promocoes SET codigo = ?, desconto = ?, data_inicio = ?, data_fim = ?, ativa = ? WHERE id = ?");
-        $stmt->bind_param("sdssii", $novo_codigo, $desconto, $data_inicio, $data_fim, $ativa, $cupao['id']);
+        $stmt = $conn->prepare("UPDATE promocoes 
+            SET codigo = ?, desconto = ?, valor_minimo = ?, data_inicio = ?, data_fim = ?, ativa = ? 
+            WHERE id = ?");
+        $stmt->bind_param("sddssii", $novo_codigo, $desconto, $valor_minimo, $data_inicio, $data_fim, $ativa, $cupao['id']);
+        
         if ($stmt->execute()) {
-            $mensagem = "Cupão atualizado com sucesso!";
+            $stmt->close();
+            $conn->close();
             header("Location: admin_cupao.php");
             exit();
         } else {
             $mensagem = "Erro ao atualizar cupão.";
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 $conn->close();
@@ -71,23 +77,26 @@ $conn->close();
         <?php if ($cupao): ?>
         <form method="POST" class="admin-cupao-form">
             <label for="codigo">Código do Cupão:</label>
-            <input type="text" name="codigo" id="codigo" value="<?php echo htmlspecialchars($cupao['codigo']); ?>"
-                required>
+            <input type="text" name="codigo" id="codigo" value="<?= htmlspecialchars($cupao['codigo']); ?>" required>
 
             <label for="desconto">Desconto (€):</label>
             <input type="number" step="0.01" name="desconto" id="desconto"
-                value="<?php echo htmlspecialchars($cupao['desconto']); ?>" required>
+                value="<?= htmlspecialchars($cupao['desconto']); ?>" required>
+
+            <label for="valor_minimo">Valor Mínimo de Compra (€):</label>
+            <input type="number" step="0.01" name="valor_minimo" id="valor_minimo"
+                value="<?= htmlspecialchars($cupao['valor_minimo']); ?>" required>
 
             <label for="data_inicio">Data de Início:</label>
             <input type="datetime-local" name="data_inicio" id="data_inicio"
-                value="<?php echo str_replace(' ', 'T', $cupao['data_inicio']); ?>" required>
+                value="<?= str_replace(' ', 'T', $cupao['data_inicio']); ?>" required>
 
             <label for="data_fim">Data de Validade:</label>
             <input type="datetime-local" name="data_fim" id="data_fim"
-                value="<?php echo str_replace(' ', 'T', $cupao['data_fim']); ?>" required>
+                value="<?= str_replace(' ', 'T', $cupao['data_fim']); ?>" required>
 
             <label for="ativa">
-                <input type="checkbox" name="ativa" id="ativa" <?php echo $cupao['ativa'] ? 'checked' : ''; ?>> Ativo
+                <input type="checkbox" name="ativa" id="ativa" <?= $cupao['ativa'] ? 'checked' : ''; ?>> Ativo
             </label>
 
             <button type="submit" class="admin-cupao-btn">Salvar Alterações</button>

@@ -250,8 +250,8 @@ $conn->close();
             <input type="text" name="nome_endereco" id="nome_endereco" placeholder="Ex.: Casa, Trabalho" required>
             <label for="rua">Rua:</label>
             <input type="text" name="rua" id="rua" placeholder="Digite a rua" required>
-            <label for="numero">Número:</label>
-            <input type="text" name="numero" id="numero" placeholder="Digite o número">
+            <label for="numero">Número da Porta:</label>
+            <input type="text" name="numero" id="numero" placeholder="Digite o número da porta" required>
             <label for="freguesia">Freguesia:</label>
             <input type="text" name="freguesia" id="freguesia" placeholder="Digite a freguesia">
             <label for="cidade_endereco">Cidade:</label>

@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['adicionar_produto'])) 
 $sql = "INSERT INTO produtos (nome, preco, quantidade_estoque, categoria_id, imagem, descricao) 
         VALUES (?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sdiiiss", $nome, $preco, $quantidade_estoque, $categoria_id, $imagem, $descricao);
+$stmt->bind_param("sdiiss", $nome, $preco, $quantidade_estoque, $categoria_id, $imagem, $descricao);
 
     if ($stmt->execute()) {
         echo "<script>alert('Produto adicionado com sucesso!'); window.location.href='admin_produtos.php';</script>";

@@ -3,16 +3,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Inicia a sessão se ainda não estiver iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'conexao.php';
 
 if (!isset($_SESSION['utilizador_id']) || !isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'cliente') {
     echo "<script>alert('Acesso negado! Apenas clientes podem acessar esta página.'); window.location.href='index.php';</script>";
     exit();
 }
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require 'conexao.php';
 
 if (!isset($_SESSION['utilizador_id'])) {
     $_SESSION['mensagem'] = "É necessário estar registado para enviar um suporte.";
@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 error_log("Nenhum administrador encontrado para notificar.");
             }
 
-            echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='index.php';</script>";
+            echo "<script>alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); window.location.href='suporte.php';</script>";
         } else {
             echo "<script>alert('Erro ao enviar a mensagem. Tente novamente.');</script>";
         }

@@ -16,6 +16,18 @@ $dados_form = [
     'cidade' => ''
 ];
 
+// Verificar se é um pedido AJAX para verificar telefone
+if (isset($_GET['check_telefone']) && !empty($_GET['check_telefone'])) {
+    $telefone_check = trim(filter_var($_GET['check_telefone'], FILTER_SANITIZE_STRING));
+    $stmt = $conn->prepare("SELECT id FROM utilizadores WHERE telefone = ?");
+    $stmt->bind_param("s", $telefone_check);
+    $stmt->execute();
+    $stmt->store_result();
+    $existe = $stmt->num_rows > 0 ? 'true' : 'false';
+    $stmt->close();
+    echo $existe;
+    exit;
+}
 
 //POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -38,13 +50,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $erros = [];
 
-//NOME
+        //NOME
         if (empty($nome)) {
             $erros[] = "O nome completo é obrigatório.";
         }
 
-
-//EMAIL
+        //EMAIL
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erros[] = "Por favor, insira um email válido.";
         } else {
@@ -59,64 +70,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
         }
 
-//SENHA
+        //SENHA
         if (empty($senha)) {
-            $erros[] = "A senha é obrigatória.";
+            $erros[] = "A palavra-passe é obrigatória.";
         } else {
             if (strlen($senha) < 8) {
-                $erros[] = "A senha deve ter pelo menos 8 caracteres.";
+                $erros[] = "A palavra-passe deve ter pelo menos 8 caracteres.";
             }
             if (!preg_match("/[A-Z]/", $senha)) {
-                $erros[] = "A senha deve conter pelo menos uma letra maiúscula.";
+                $erros[] = "A palavra-passe deve conter pelo menos uma letra maiúscula.";
             }
             if (!preg_match("/[a-z]/", $senha)) {
-                $erros[] = "A senha deve conter pelo menos uma letra minúscula.";
+                $erros[] = "A palavra-passe deve conter pelo menos uma letra minúscula.";
             }
             if (!preg_match("/[0-9]/", $senha)) {
-                $erros[] = "A senha deve conter pelo menos um número.";
+                $erros[] = "A palavra-passe deve conter pelo menos um número.";
             }
             if (!preg_match("/[!@#$%^&*(),.?\":{}|<>]/", $senha)) {
-                $erros[] = "A senha deve conter pelo menos um caractere especial (ex.: !@#$%).";
+                $erros[] = "A palavra-passe deve conter pelo menos um caractere especial (ex.: !@#$%).";
             }
             if ($senha !== $confirmar_senha) {
-                $erros[] = "As senhas não coincidem.";
+                $erros[] = "As palavras-passe não coincidem.";
             }
         }
 
-
-//TELEFONE
-        // Verifica se o telefone não está vazio e se é válido
+        //TELEFONE
         if (empty($telefone)) {
-            $erros[] = "O telefone é obrigatório.";
+            $erros[] = "O número de telefone é obrigatório.";
         } elseif (!preg_match('/^[0-9\s+]+$/', $telefone)) {
-            $erros[] = "O telefone deve conter apenas números, espaços ou o símbolo +.";
+            $erros[] = "O número de telefone deve conter apenas números, espaços ou o símbolo +.";
+        } else {
+            // Verificar se telefone já existe
+            $stmt = $conn->prepare("SELECT id FROM utilizadores WHERE telefone = ?");
+            $stmt->bind_param("s", $telefone);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $erros[] = "Este número de telefone já está registado.";
+            }
+            $stmt->close();
         }
 
-//MORADA
-        // Verifica se a morada não está vazia
+        //MORADA
         if (empty($morada)) {
             $erros[] = "A morada é obrigatória.";
         }
-        
-//CIDADE
-        // Verifica se a cidade não está vazia
+
+        //CIDADE
         if (empty($cidade)) {
             $erros[] = "A cidade é obrigatória.";
         }
 
         // Termos e Condições
-        // Verifica se o checkbox foi marcado
         if (!isset($_POST['termos'])) {
-    $erros[] = "É necessário aceitar os Termos e Condições para prosseguir.";
-}
-
+            $erros[] = "É necessário aceitar os Termos e Condições para prosseguir.";
+        }
 
         if (empty($erros)) {
             $conn->begin_transaction();
             try {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-                // Gerar apelido automático baseado no primeiro nome
                 $apelido_base = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode(' ', $nome)[0]));
                 $apelido = $apelido_base;
                 $suffix = 1;
@@ -135,7 +149,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 $stmt_check->close();
 
-                // Inserir utilizador com apelido
                 $sql = "INSERT INTO utilizadores (nome, apelido, email, senha, telefone, morada, cidade, tipo, saldo) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, 'cliente', 300.00)";
                 $stmt = $conn->prepare($sql);
@@ -143,7 +156,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->execute();
                 $novo_utilizador_id = $conn->insert_id;
 
-                // Endereço padrão
                 $nome_endereco = 'Principal';
                 $rua = $morada;
                 $distrito = '';
@@ -158,7 +170,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     throw new Exception("Erro ao inserir endereço: " . $conn->error);
                 }
 
-                // Log
                 $acao = "Novo utilizador registrado";
                 $detalhes = "Utilizador $apelido ($email) foi registrado.";
                 $sql_log = "INSERT INTO logs (utilizador_id, acao, detalhes, data_log) VALUES (?, ?, ?, NOW())";
@@ -167,20 +178,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_log->execute();
                 $stmt_log->close();
 
-                // Notificações para admins
-                $mensagem_notif = "Novo cadastro: Utilizador $apelido (ID $novo_utilizador_id) registrado em " . date('d/m/Y H:i');
-                $sql_admins = "SELECT id FROM utilizadores WHERE tipo = 'admin'";
-                $result_admins = $conn->query($sql_admins);
-
-                if ($result_admins->num_rows > 0) {
-                    $stmt_notif = $conn->prepare("INSERT INTO notificacoes (mensagem, admin_id) VALUES (?, ?)");
-                    while ($admin = $result_admins->fetch_assoc()) {
-                        $admin_id = $admin['id'];
-                        $stmt_notif->bind_param("si", $mensagem_notif, $admin_id);
-                        $stmt_notif->execute();
-                    }
-                    $stmt_notif->close();
-                }
+                // REMOVIDA a parte que cria notificações para novos cadastros
 
                 $conn->commit();
                 echo "<script>alert('Registo concluído com sucesso!'); window.location.href='login.php';</script>";
@@ -205,6 +203,28 @@ $conn->close();
     <meta charset="UTF-8">
     <title>Registo</title>
     <link rel="stylesheet" href="./css/style.css">
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const telefoneInput = document.getElementById('telefone');
+        telefoneInput.addEventListener('blur', function() {
+            const telefone = telefoneInput.value.trim();
+            if (telefone.length === 0) return;
+
+            fetch('registar.php?check_telefone=' + encodeURIComponent(telefone))
+                .then(response => response.text())
+                .then(data => {
+                    if (data === 'true') {
+                        alert('Este número de telefone já está registado.');
+                        telefoneInput.focus();
+                    }
+                })
+                .catch(err => {
+                    console.error('Erro na verificação do telefone:', err);
+                });
+        });
+    });
+    </script>
 </head>
 
 <body class="registar">
@@ -243,16 +263,10 @@ $conn->close();
             <input type="text" id="cidade" name="cidade" placeholder="Digite a sua cidade"
                 value="<?php echo htmlspecialchars($dados_form['cidade']); ?>">
 
-            <label for="cidade">Cidade</label>
-            <input type="text" id="cidade" name="cidade" placeholder="Digite a sua cidade"
-                value="<?php echo htmlspecialchars($dados_form['cidade']); ?>">
-
-            <!--checkbox -->
             <div class="checkbox-termos">
                 <input type="checkbox" id="termos" name="termos" required>
                 <label for="termos">Li e aceito os <a href="termos.php" target="_blank">Termos e Condições</a>.</label>
             </div>
-
 
             <button type="submit" class="registar"><b>Criar Conta</b></button>
 

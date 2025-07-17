@@ -120,6 +120,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['salvar_perfil'])) {
 
             $_SESSION['utilizador_apelido'] = $utilizador['apelido'] ?? '';
             $_SESSION['utilizador_nome'] = $utilizador['nome'] ?? '';
+$_SESSION['utilizador_nome_visivel'] = !empty($utilizador['apelido']) ? $utilizador['apelido'] : $utilizador['nome'];
+
         } else {
             $mensagem = implode("<br>", $erros);
         }

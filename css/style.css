@@ -4311,149 +4311,6 @@ footer {
 
 
 
-
-
-
-
-
-
-/* ==================== STYLE HISTORICO_SUPORTE ==================== */
-.no-messages-box {
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    text-align: center;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.no-messages-box p {
-    color: #000000;
-    font-size: 16px;
-    margin: 0;
-}
-
-.support-history-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    text-align: center;
-}
-
-.support-history-container h2 {
-    color: #000000;
-    margin-bottom: 20px;
-    font-size: 24px;
-}
-
-.support-item {
-    flex: 1 1 300px;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-    min-height: 200px;
-}
-
-.support-item .status-pendente {
-    color: #e74c3c;
-    font-weight: bold;
-}
-
-.support-item .status-resolvido {
-    color: #2ecc71;
-    font-weight: bold;
-}
-
-.support-item p {
-    margin: 5px 0;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.support-items-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.support-links {
-    margin-top: 20px;
-}
-
-.support-links a {
-    color: #2ecc71;
-    text-decoration: none;
-    font-size: 14px;
-    margin: 0 10px;
-    display: inline-block;
-}
-
-.support-links a:hover {
-    text-decoration: underline;
-}
-
-body.support-history {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: url('../img/mercado.png') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-@media (max-width: 600px) {
-    .no-messages-box {
-        padding: 15px;
-    }
-
-    .no-messages-box p {
-        font-size: 14px;
-    }
-
-    .support-history-container {
-        margin: 10px;
-        padding: 15px;
-    }
-
-    .support-history-container h2 {
-        font-size: 20px;
-    }
-
-    .support-item {
-        flex: 1 1 100%;
-        padding: 10px;
-        min-height: auto;
-    }
-
-    .support-item p {
-        font-size: 12px;
-    }
-
-    .support-items-container {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .support-links a {
-        font-size: 12px;
-        margin: 5px 0;
-        display: block;
-    }
-}
-
-
-
-
 /* ==================== STYLE INDEX ==================== */
 body.index {
     font-family: Arial, sans-serif;
@@ -5434,6 +5291,147 @@ body.registar {
 .checkbox-termos label a:hover {
     text-decoration: underline;
 }
+
+
+
+
+
+
+/* ==================== STYLE RESPOSTA SUPORTE ==================== */
+
+.no-messages-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.no-messages-box p {
+    color: #000000;
+    font-size: 16px;
+    margin: 0;
+}
+
+.support-history-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.support-history-container h2 {
+    color: #000000;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.support-item {
+    flex: 1 1 300px;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    min-height: 200px;
+}
+
+.support-item .status-pendente {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.support-item .status-resolvido {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.support-item p {
+    margin: 5px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.support-items-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.support-links {
+    margin-top: 20px;
+}
+
+.support-links a {
+    color: #2ecc71;
+    text-decoration: none;
+    font-size: 14px;
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.support-links a:hover {
+    text-decoration: underline;
+}
+
+body.support-history {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('../img/mercado.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .no-messages-box {
+        padding: 15px;
+    }
+
+    .no-messages-box p {
+        font-size: 14px;
+    }
+
+    .support-history-container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .support-history-container h2 {
+        font-size: 20px;
+    }
+
+    .support-item {
+        flex: 1 1 100%;
+        padding: 10px;
+        min-height: auto;
+    }
+
+    .support-item p {
+        font-size: 12px;
+    }
+
+    .support-items-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .support-links a {
+        font-size: 12px;
+        margin: 5px 0;
+        display: block;
+    }
+}
+
 
 
 

@@ -13,6 +13,7 @@ $utilizador_id = $_SESSION['utilizador_id'];
 
 $mensagem = isset($_SESSION['mensagem']) ? $_SESSION['mensagem'] : '';
 $mensagem_classe = isset($_SESSION['mensagem_sucesso']) ? 'mensagem-sucesso' : 'mensagem-erro';
+
 unset($_SESSION['mensagem'], $_SESSION['mensagem_sucesso']);
 
 $desconto = 0;
@@ -43,7 +44,8 @@ if (isset($_GET['limpar_carrinho'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupao'])) {
     $codigo = trim($_POST['promo_code']);
 
-    $sql = "SELECT desconto FROM promocoes WHERE codigo = ? AND ativa = 1 AND data_inicio <= NOW() AND data_fim >= NOW()";
+    // Buscar cupom com valor_minimo para validação
+    $sql = "SELECT desconto, valor_minimo FROM promocoes WHERE codigo = ? AND ativa = 1 AND data_inicio <= NOW() AND data_fim >= NOW()";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $codigo);
     $stmt->execute();
@@ -51,16 +53,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aplicar_cupao'])) {
 
     if ($result->num_rows > 0) {
         $promocao = $result->fetch_assoc();
-        $_SESSION['cupao'] = [
-            'codigo' => $codigo,
-            'desconto' => $promocao['desconto']
-        ];
-        $desconto = $promocao['desconto'];
-        $cupao_mensagem = "Cupao aplicado com sucesso! Desconto de €" . number_format($desconto, 2, ',', '.');
-        $cupao_mensagem_classe = 'mensagem-sucesso';
+
+        // Pega total do carrinho
+        $sqlTotal = "SELECT SUM(p.preco * c.quantidade) AS total FROM carrinho c JOIN produtos p ON c.produto_id = p.id WHERE c.utilizador_id = ?";
+        $stmtTotal = $conn->prepare($sqlTotal);
+        $stmtTotal->bind_param("i", $utilizador_id);
+        $stmtTotal->execute();
+        $resultadoTotal = $stmtTotal->get_result()->fetch_assoc();
+        $total_carrinho = floatval($resultadoTotal['total']);
+
+        // Verifica se total do carrinho é maior ou igual ao valor mínimo
+        if ($total_carrinho >= floatval($promocao['valor_minimo'])) {
+            $_SESSION['cupao'] = [
+                'codigo' => $codigo,
+                'desconto' => $promocao['desconto']
+            ];
+            $desconto = $promocao['desconto'];
+            $cupao_mensagem = "Cupão aplicado com sucesso! Desconto de €" . number_format($desconto, 2, ',', '.');
+            $cupao_mensagem_classe = 'mensagem-sucesso';
+        } else {
+            unset($_SESSION['cupao']);
+            $cupao_mensagem = "Este cupão só pode ser aplicado em compras a partir de €" . number_format($promocao['valor_minimo'], 2, ',', '.');
+            $cupao_mensagem_classe = 'mensagem-erro';
+        }
     } else {
         unset($_SESSION['cupao']);
-        $cupao_mensagem = "Cupao inválido ou expirado.";
+        $cupao_mensagem = "Cupão inválido ou expirado.";
         $cupao_mensagem_classe = 'mensagem-erro';
     }
     header("Location: carrinho.php");
@@ -167,7 +185,7 @@ if ($conn) {
     $cupao_mensagem_classe = 'mensagem-erro';
 }
 
-// Calcula o total com desconto
+// Calcula o total com desconto, garante que não fica negativo
 $total_com_desconto = $total_carrinho - $desconto;
 if ($total_com_desconto < 0) {
     $total_com_desconto = 0;
@@ -295,9 +313,11 @@ if ($total_com_desconto < 0) {
     function atualizarQuantidade(itemId, produtoId, currentQuantidade, acao) {
         const novaQuantidade = acao === 'aumentar' ? currentQuantidade + 1 : currentQuantidade - 1;
         if (novaQuantidade < 1) return;
+
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'atualizar_carrinho.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -312,13 +332,17 @@ if ($total_com_desconto < 0) {
 
                     if (response.sucesso) {
                         const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+
+                        // Atualiza o input de quantidade na linha
                         const quantityDisplay = row.querySelector('.quantity-display');
                         quantityDisplay.value = response.nova_quantidade;
 
+                        // Atualiza o subtotal da linha
                         const subtotalCell = row.querySelector('.subtotal-cell');
                         subtotalCell.textContent = `€${response.subtotal_linha.toFixed(2).replace('.', ',')}`;
                         subtotalCell.dataset.subtotal = response.subtotal_linha;
 
+                        // Atualiza totais no rodapé do carrinho
                         const subtotalValue = document.querySelector('.subtotal-value');
                         const totalValue = document.querySelector('.total-value');
                         subtotalValue.dataset.totalCarrinho = response.total_carrinho;
@@ -327,6 +351,7 @@ if ($total_com_desconto < 0) {
                         totalValue.innerHTML =
                             `<b>€${response.total_com_desconto.toFixed(2).replace('.', ',')}</b>`;
 
+                        // Atualiza os handlers dos botões com a nova quantidade
                         const minusBtn = row.querySelector('.quantity-btn.minus');
                         const plusBtn = row.querySelector('.quantity-btn.plus');
                         minusBtn.setAttribute('onclick',
@@ -343,9 +368,12 @@ if ($total_com_desconto < 0) {
                 }
             }
         };
+
         const data = `item_id=${itemId}&produto_id=${produtoId}&current_quantidade=${currentQuantidade}&acao=${acao}`;
         xhr.send(data);
     }
+    </script>
+
     </script>
 
     <?php
